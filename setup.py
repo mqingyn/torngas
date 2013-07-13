@@ -10,4 +10,5 @@ setup(
     package_data={'torngas': ['resources/*.*']},
     author_email = "maingyn@gmail.com",
     requires=['Tornado'],
+    scripts=["scripts/create_torngas.py"],
     )
