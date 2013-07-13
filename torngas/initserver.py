@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 #coding=utf-8
-import os
-import logging
+import warnings
+import logging,os
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -18,7 +18,8 @@ settings_module = lazyimport('torngas.helpers.settings_helper')
 logger_module = lazyimport('torngas.helpers.logger_helper')
 
 define("port", default=8000, help="run server on it", type=int)
-define("config", default='devel', help="if run as online ,use online,settings type:online, test, dev", type=str)
+define("setting", default='settings_devel', help="""config used to set the configuration file type,\n
+settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""", type=str)
 define("address", default='localhost', help='listen host,default:localhost', type=str)
 
 
@@ -38,7 +39,10 @@ class Server(object):
         logging.getLogger().handlers = []
         enable_pretty_logging(None, logging.getLogger('tornado'))
         #加载本地化配置
-        tornado.locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
+        try:
+            tornado.locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
+        except:
+            warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
         #初始化app
         if not self.application:
             self.application = application_module.AppApplication(handlers=self.urls,
@@ -82,6 +86,7 @@ class Server(object):
 
         print 'tornado version: %s' % tornado.version
         print 'project path: %s' % self.proj_path
+        print 'setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0]
         print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
         print 'debug open: %s' % self.settings.TORNADO_CONF.debug
         print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
