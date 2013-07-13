@@ -15,6 +15,6 @@ TornGas
  * 配置文件：仿照django的配置文件方式，默认支持三份配置文件，devel，functest和production，根据config参数决定使用哪一个，方便线上线下的配置切换
  * 模板引擎：集成了jinja2和mako，可在配置文件中进行切换，根据喜好选择最合适的模板引擎
 
-# torngas参考和借鉴了django,web.py,flask,mako,tinman,lepture,felinx等项目或作者的开源实现,在此十分感谢。
+ torngas参考和借鉴了django,web.py,flask,mako,tinman,lepture,felinx等项目或作者的开源实现,在此十分感谢。
 
 
