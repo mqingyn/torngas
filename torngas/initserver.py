@@ -39,11 +39,12 @@ class Server(object):
         logging.getLogger().handlers = []
         enable_pretty_logging(None, logging.getLogger('tornado'))
         #加载本地化配置
-        try:
-            tornado.locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
-        except:
-            warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
-        #初始化app
+        if self.settings.TRANSLATIONS:
+            try:
+                tornado.locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
+            except:
+                warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
+            #初始化app
         if not self.application:
             self.application = application_module.AppApplication(handlers=self.urls,
                                                                  settings=self.settings.TORNADO_CONF)
@@ -89,6 +90,7 @@ class Server(object):
         print 'setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0]
         print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
         print 'debug open: %s' % self.settings.TORNADO_CONF.debug
+        print 'locale support: %s' % self.settings.TRANSLATIONS
         print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
         print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
         print 'template engine: %s' % self.settings.TEMPLATE_ENGINE

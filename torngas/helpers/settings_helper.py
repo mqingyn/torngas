@@ -19,7 +19,7 @@ class Settings(object):
                 self.settings_module = import_object('.'.join([settings_env,options.setting]))
             except ImportError:
                 self.settings_module = global_setttings
-                warnings.warn('config file import error. using global settings now.')
+                warnings.warn('settings file import error. using global settings now.')
             self._config = self.settings_module
 
         if hasattr(self._config, name):
@@ -27,7 +27,7 @@ class Settings(object):
         elif hasattr(self._config, name):
             return getattr(self._config, name)
         else:
-            raise ConfigError('config "%s" not exist!' % name)
+            raise ConfigError('settings "%s" not exist!' % name)
 
     def __getattr__(self, item):
         setting = self.get_settings(item)

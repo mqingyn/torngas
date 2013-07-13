@@ -1,20 +1,29 @@
-import os,shutil
+import os, shutil
 import torngas
-example=os.path.dirname(torngas.__file__) + '/resource/app'
-target_path=''
-def copyfile(source,target):
 
+example = os.path.dirname(torngas.__file__) + '/resource/app'
+target_path = ''
+
+
+def copyfile(source, target):
     if not os.path.exists(target):
-        print 'create target dir...'
+
         os.makedirs(target)
     for file in os.listdir(source):
-        source_file=os.path.join(source,file)
+        source_file = os.path.join(source, file)
         if os.path.isdir(source_file):
-            print 'create dir:',source_file
-            copyfile(source_file,os.path.join(target,file))
+            todir = os.path.join(target, file)
+            print 'create dir:', todir
+            copyfile(source_file, todir)
         else:
-            print 'create file:',file
-            shutil.copyfile(source_file,os.path.join(target,file))
 
-if __name__=="__main__":
-    copyfile(example,'/Users/mengqingyun/Documents/app')
+            tofile = os.path.join(target, file)
+            # if not tofile.endswith('pyc'):
+            print 'create file:', tofile
+            shutil.copyfile(source_file, tofile)
+
+
+if __name__ == "__main__":
+    print 'create target app...'
+    copyfile(example, os.getcwd())
+    print 'finished...'

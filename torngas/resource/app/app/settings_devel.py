@@ -76,6 +76,7 @@ CACHES = {
 #################
 #本地化翻译文件地址#
 #################
+TRANSLATIONS = False #是否开启国际化
 TRANSLATIONS_CONF = {
     'translations_dir': os.path.join(os.path.dirname(__file__), 'translations'),
     'locale_default': 'zh_CN',
