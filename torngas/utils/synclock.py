@@ -1,7 +1,6 @@
 #-*-coding=utf8-*-
 """
-同步锁，from django
-(Contributed to Django by eugene@lazutkin.com)
+synclock，from django
 """
 
 import contextlib

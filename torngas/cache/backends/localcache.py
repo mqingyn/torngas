@@ -3,7 +3,7 @@
 import time
 
 try:
-    from django.utils.six.moves import cPickle as pickle
+    import cPickle as pickle
 except ImportError:
     import pickle
 
