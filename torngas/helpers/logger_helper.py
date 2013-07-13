@@ -5,7 +5,7 @@ from tornado.options import options
 from tornado.log import LogFormatter
 from datetime import datetime
 
-NAME_PREFIX = 'torngas'
+_NAME_PREFIX = 'torngas'
 
 
 class logger():
@@ -18,11 +18,11 @@ class logger():
     def get_dirpath(self):
         return os.path.join(os.path.abspath(self.config["path"]), str(datetime.now().date()))
 
-    def get_abspath(self, file_prefix=NAME_PREFIX):
+    def get_abspath(self, file_prefix=_NAME_PREFIX):
         return os.path.join(self.dirpath, '{0}_port[{1}].log'.format(file_prefix, options.port))
 
     @property
-    def getlogger(self, name_prefix=NAME_PREFIX):
+    def getlogger(self, name_prefix=_NAME_PREFIX):
         rootlogger = logging.getLogger(name_prefix)
         fn, lno, func = rootlogger.findCaller()
         if fn.endswith('.py'):
@@ -47,7 +47,7 @@ class logger():
 
     def set_handler(self, logger=None, file_path=None):
         if not logger:
-            logger = logging.getLogger(NAME_PREFIX)
+            logger = logging.getLogger(_NAME_PREFIX)
         if not file_path:
             file_path = self.get_abspath()
         logging.getLogger().handlers = []
