@@ -140,7 +140,6 @@ class LocMemCache(BaseCache):
 
 
     def clear_expires(self, **kwargs):
-        import sys
 
         for key in self._cache.keys():
             with self._lock.writer():

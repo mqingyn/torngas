@@ -118,7 +118,6 @@ class WebHandler(UncaughtExceptionMixin, CommonHandler, FlashMessageMixIn):
             raise exception.ConfigError('config {0} section no exist!'.format(templdir_settings))
         if len(templdir_settings):
             apptmpl_dir = templdir_settings.get(self.appname, None)
-            print apptmpl_dir
             return ''.join([self.application.project_path, apptmpl_dir, '/']) if apptmpl_dir else None
         else:
             return None

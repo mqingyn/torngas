@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 #coding=utf-8
 import warnings
-import logging,os
+import logging, os
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -19,7 +19,8 @@ logger_module = lazyimport('torngas.helpers.logger_helper')
 
 define("port", default=8000, help="run server on it", type=int)
 define("setting", default='settings_devel', help="""config used to set the configuration file type,\n
-settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""", type=str)
+settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""",
+       type=str)
 define("address", default='localhost', help='listen host,default:localhost', type=str)
 
 
@@ -29,6 +30,7 @@ class Server(object):
         self.settings = settings
         self.proj_path = project_path
         self.urls = []
+
 
     def load_application(self):
         #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
@@ -44,7 +46,8 @@ class Server(object):
                 tornado.locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
-            #初始化app
+
+        #初始化app
         if not self.application:
             self.application = application_module.AppApplication(handlers=self.urls,
                                                                  settings=self.settings.TORNADO_CONF)
@@ -55,19 +58,17 @@ class Server(object):
 
     def load_urls(self):
         #加载app
-
         if self.settings.INSTALLED_APPS:
             for app in self.settings.INSTALLED_APPS:
                 app_urls = import_object(app + '.urls.urls')
                 self.urls.extend(app_urls)
-
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
-
         return self.urls
 
 
     def server_start(self):
+        print 'server starting...'
         #服务启动
         if self.settings.IPV4_ONLY:
             import socket
@@ -80,20 +81,21 @@ class Server(object):
         self.print_settings_info()
         http_server = tornado.httpserver.HTTPServer(self.application)
         http_server.add_sockets(sockets)
-        tornado.ioloop.IOLoop.instance().start()
         print 'tornado server started. listen port: %s ,host address: %s' % (options.port, options.address)
+        tornado.ioloop.IOLoop.instance().start()
 
     def print_settings_info(self):
 
-        print 'tornado version: %s' % tornado.version
-        print 'project path: %s' % self.proj_path
-        print 'setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0]
-        print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
-        print 'debug open: %s' % self.settings.TORNADO_CONF.debug
-        print 'locale support: %s' % self.settings.TRANSLATIONS
-        print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
-        print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
-        print 'template engine: %s' % self.settings.TEMPLATE_ENGINE
+        if self.settings.TORNADO_CONF.debug:
+            print 'tornado version: %s' % tornado.version
+            print 'project path: %s' % self.proj_path
+            print 'setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0]
+            print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
+            print 'debug open: %s' % self.settings.TORNADO_CONF.debug
+            print 'locale support: %s' % self.settings.TRANSLATIONS
+            print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
+            print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
+            print 'template engine: %s' % self.settings.TEMPLATE_ENGINE
 
 
 

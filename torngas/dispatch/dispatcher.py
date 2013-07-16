@@ -94,7 +94,6 @@ class Signal(object):
             if argspec:
                 assert argspec[2] is not None, \
                     "Signal receivers must accept keyword arguments (**kwargs)."
-
         if dispatch_uid:
             lookup_key = (dispatch_uid, _make_id(sender))
         else:
@@ -170,6 +169,7 @@ class Signal(object):
             return responses
 
         for receiver in self._live_receivers(_make_id(sender)):
+
             response = receiver(signal=self, sender=sender, **named)
             responses.append((receiver, response))
         return responses

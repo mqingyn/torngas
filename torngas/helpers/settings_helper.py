@@ -15,7 +15,8 @@ class Settings(object):
         if not hasattr(self, '._setting'):
             global_setttings = import_object('torngas.global_settings')
             try:
-                settings_env = os.environ["TORNGAS_PROJECT_NAME"]
+                settings_env = os.environ.get("TORNGAS_PROJECT_NAME",'')
+                # self.settings_module = global_setttings
                 self.settings_module = import_object('.'.join([settings_env,options.setting]))
             except ImportError:
                 self.settings_module = global_setttings
@@ -32,6 +33,8 @@ class Settings(object):
     def __getattr__(self, item):
         setting = self.get_settings(item)
         return storage(setting) if type(setting) is dict else setting
+
+
 
 
 settings = Settings()

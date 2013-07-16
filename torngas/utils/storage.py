@@ -5,7 +5,7 @@ except NameError:
     from sets import Set as set
 from torngas.utils.strtools import safeunicode
 import warnings
-import sys
+import sys,copy
 
 PY3 = (sys.version_info >= (3,))
 

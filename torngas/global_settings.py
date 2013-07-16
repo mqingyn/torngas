@@ -151,3 +151,46 @@ TEMPLATE_CONFIG = {
 }
 
 
+# 数据库连接字符串，
+# 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
+DATABASE_CONNECTION = {
+
+    'aquis': {
+        'kwargs': {'pool_recycle': 3600},
+        'connections': [{
+                            'ROLE': 'master',
+                            'DRIVER': 'mysql+mysqldb',
+                            'UID': 'root',
+                            'PASSWD': 'root',
+                            'HOST': '127.0.0.1',
+                            'PORT': 3306,
+                            'DATABASE': 'your database',
+                            'QUERY': {"charset": "utf8"}
+
+                        },
+                        {
+                            'ROLE': 'slave',
+                            'DRIVER': 'mysql+mysqldb',
+                            'UID': 'root',
+                            'PASSWD': 'root',
+                            'HOST': '127.0.0.1',
+                            'PORT': 3306,
+                            'DATABASE': 'your database',
+                            'QUERY': {"charset": "utf8"}
+
+                        }]
+    }
+}
+
+
+
+
+
+# sqlalchemy配置，列出部分，可自行根据文档增加配置项
+# 该配置项对所有连接全局共享
+SQLALCHEMY_CONFIGURATION = {
+    'echo': True,
+    'max_overflow': 10,
+    'echo_pool': True,
+    'pool_timeout': 1
+}
