@@ -14,7 +14,7 @@ TornGas
  * 中间件支持：默认自带一个session中间件，可自行编写和扩展中间件，只要继承实现middleware下的BaseMiddleware类即可
  * 配置文件：仿照django的配置文件方式，默认支持三份配置文件，devel，functest和production，根据config参数决定使用哪一个，方便线上线下的配置切换
  * 模板引擎：集成了jinja2和mako，可在配置文件中进行切换，根据喜好选择最合适的模板引擎
-
+ * SQLAlchemy:集成了ORM组件，支持master/slave模式
  通过create_torngas.py 命令可以建立一个最基础的torngas应用"app"
   * app下有一个子应用Main，可建立多个子应用
   * 子应用配置在配置文件中的INSTALLED_APPS配置节中(应用名区分大小写）,模板加载目录配置为APPS_TEMPLATES_DIR
