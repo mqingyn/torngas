@@ -82,7 +82,7 @@ class SqlConnection(object):
             return self._conn
 
 
-SqlConnection = SqlConnection()
+sql_connection = SqlConnection()
 
 
 class SQLAlchemy(object):
