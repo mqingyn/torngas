@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 #coding=utf-8
 import warnings
-import logging, os
+import logging, os,sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -11,8 +11,8 @@ from tornado.log import enable_pretty_logging
 from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError
-
-
+reload(sys)
+sys.setdefaultencoding('utf-8')
 application_module = lazyimport('torngas.application')
 settings_module = lazyimport('torngas.helpers.settings_helper')
 logger_module = lazyimport('torngas.helpers.logger_helper')

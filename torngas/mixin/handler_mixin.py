@@ -18,11 +18,11 @@ class UncaughtExceptionMixin(object):
                 with open(fp) as f:
                     all_lines = [line for line in f]
 
-                    return u''.join(all_lines[target_line - half_lines:target_line + half_lines])
+                    return ''.join(all_lines[target_line - half_lines:target_line + half_lines])
             except Exception, ex:
                 self.logger.error(ex)
 
-                return u''
+                return ''
 
         if self.application.settings.get('debug', False) is False:
             full_message = kwargs.get('exception', None)
