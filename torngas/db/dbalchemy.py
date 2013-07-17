@@ -46,7 +46,7 @@ class SqlConnection(object):
     @property
     def get_connetion(self):
         if hasattr(self, '_conn'):
-            conn = self._conn
+            return self._conn
         else:
             with self._conn_lock:
                 connection_pool = storage()
@@ -78,9 +78,8 @@ class SqlConnection(object):
                     connection_pool[connection_name] = SQLAlchemy(config, master_url=master[0], slaves_url=slaves,
                                                                   **kwargs)
 
-                conn = connection_pool
-                self._conn = conn
-        return conn
+                self._conn = connection_pool
+            return self._conn
 
 
 SqlConnection = SqlConnection()
