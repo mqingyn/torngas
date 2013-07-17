@@ -24,6 +24,7 @@ from torngas.helpers import settings_helper
 from backends.base import (
     InvalidCacheBackendError, CacheKeyWarning, BaseCache)
 from tornado.util import import_object
+from tornado.ioloop import PeriodicCallback
 from torngas.dispatch import signals
 
 __all__ = [
@@ -108,7 +109,9 @@ def get_cache(backend, **kwargs):
     if hasattr(cache, 'close'):
         signals.call_finished.connect(cache.close)
     if hasattr(cache, 'clear_expires'):
-        signals.call_finished.connect(cache.clear_expires)
+        # signals.call_finished.connect(cache.clear_expires)
+        #every half an hour,clear expires cache items
+        PeriodicCallback(cache.clear_expires, 1000 * 1800).start()
     return cache
 
 
