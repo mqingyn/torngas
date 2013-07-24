@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 #coding=utf-8
 import warnings
-import logging, os,sys
+import logging, os, sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -11,6 +11,7 @@ from tornado.log import enable_pretty_logging
 from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 application_module = lazyimport('torngas.application')
@@ -32,7 +33,7 @@ class Server(object):
         self.urls = []
 
 
-    def load_application(self):
+    def load_application(self, default_host='', transforms=None, wsgi=False):
         #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
         logger_module.logger.load_config()
         tornado.options.parse_command_line()
@@ -49,8 +50,10 @@ class Server(object):
 
         #初始化app
         if not self.application:
-            self.application = application_module.AppApplication(handlers=self.urls,
-                                                                 settings=self.settings.TORNADO_CONF)
+            self.application = application_module.AppApplication(handlers=self.urls, default_host=default_host,
+                                                                 transforms=transforms, wsgi=wsgi,
+                                                                  **self.settings.get_settings('TORNADO_CONF'))
+
 
         self.application.project_path = self.proj_path if self.proj_path.endswith('/') else self.proj_path + '/'
         self.application.tmpl = import_object(self.settings.TEMPLATE_ENGINE) if self.settings.TEMPLATE_ENGINE else None
