@@ -4,6 +4,7 @@ from tornado.util import import_object
 from tornado.options import options
 from torngas.exception import ConfigError
 from torngas.utils.storage import storage
+from torngas import global_settings
 import warnings
 
 
@@ -13,13 +14,12 @@ class Settings(object):
 
     def get_settings(self, name):
         if not hasattr(self, '._setting'):
-            global_setttings = import_object('torngas.global_settings')
             try:
-                settings_env = os.environ.get("TORNGAS_PROJECT_NAME",'')
+                settings_env = os.environ.get("TORNGAS_PROJECT_NAME", '')
                 # self.settings_module = global_setttings
-                self.settings_module = import_object('.'.join([settings_env,options.setting]))
+                self.settings_module = import_object('.'.join([settings_env, options.setting]))
             except ImportError:
-                self.settings_module = global_setttings
+                self.settings_module = global_settings
                 warnings.warn('settings file import error. using global settings now.')
             self._config = self.settings_module
 
@@ -33,8 +33,6 @@ class Settings(object):
     def __getattr__(self, item):
         setting = self.get_settings(item)
         return storage(setting) if type(setting) is dict else setting
-
-
 
 
 settings = Settings()
