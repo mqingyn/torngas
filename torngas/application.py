@@ -12,7 +12,7 @@ logger_module = lazyimport('torngas.helpers.logger_helper')
 
 class AppApplication(web.Application):
     def __init__(self, handlers=None, default_host="", transforms=None,
-                 wsgi=False, settings=dict()):
+                 wsgi=False, **settings):
 
         web.Application.__init__(self,
                                  handlers=handlers,

@@ -13,14 +13,14 @@ class RouteLoader(object):
     app_name:设置为子应用的模块名，大小写必须相同，根据此设置来找模版位置，必填
     """
 
-    def __init__(self, path_prefix, path=None, app_name=None):
+    def __init__(self, path_prefix, path=None, app_folder=None):
         if not path:
             raise exception.UrlError('path arg not found!')
-        if not app_name:
+        if not app_folder:
             raise exception.UrlError('app_name arg not found!')
         self.path_prefix = path_prefix
         self.path = path if path != '/' else ''
-        self.app_name = app_name
+        self.app_name = app_folder
 
     def urlhelper(self, *urllist):
         """
