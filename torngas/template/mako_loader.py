@@ -32,7 +32,7 @@ class MakoTemplateLoader(Loader):
             else:
                 _lookup.directories = [self.path]
 
-            template = _lookup.get_template(name)
+                template = _lookup.get_template(name)
         template.generate = template.render
 
         return template
