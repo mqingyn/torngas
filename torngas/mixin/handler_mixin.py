@@ -2,8 +2,6 @@
 import httplib
 import os
 from tornado.escape import json_encode, json_decode
-from tornado.util import import_object
-from torngas.template import Jinja2TemplateLoader
 
 
 class UncaughtExceptionMixin(object):
@@ -42,7 +40,9 @@ class UncaughtExceptionMixin(object):
 
             if loader is None or int(status_code) == 404:
                 tmpl_file = '/resource/exception.html'
-            elif loader is Jinja2TemplateLoader:
+            from torngas.template.jinja2_loader import Jinja2TemplateLoader
+
+            if loader is Jinja2TemplateLoader:
                 tmpl_file = '/resource/exception.j2'
             else:
                 tmpl_file = '/resource/exception.mako'

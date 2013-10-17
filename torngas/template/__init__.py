@@ -1,2 +1,0 @@
-from mako_loader import MakoTemplateLoader
-from jinja2_loader import Jinja2TemplateLoader

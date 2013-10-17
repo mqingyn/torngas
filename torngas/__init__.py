@@ -1,5 +1,5 @@
 __author__ = 'mengqingyun'
-__version__ = '0.0.9'
+__version__ = '0.1.0'
 
 version = tuple(map(int, __version__.split('.')))
 
