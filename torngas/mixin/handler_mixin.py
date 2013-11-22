@@ -37,15 +37,28 @@ class UncaughtExceptionMixin(object):
             exception = kwargs.get('exception', None)
             resource = os.path.split(os.path.dirname(__file__))[0]
             loader = self.application.tmpl
+            try:
+                from torngas.template.jinja2_loader import Jinja2TemplateLoader
 
-            if loader is None or int(status_code) == 404:
-                tmpl_file = '/resource/exception.html'
-            from torngas.template.jinja2_loader import Jinja2TemplateLoader
+                jinja = Jinja2TemplateLoader
+            except ImportError:
+                jinja = None
 
-            if loader is Jinja2TemplateLoader:
+            try:
+                from torngas.template.mako_loader import MakoTemplateLoader
+
+                mako = MakoTemplateLoader
+            except ImportError:
+                mako = None
+
+            if loader is jinja:
                 tmpl_file = '/resource/exception.j2'
-            else:
+            elif loader is mako:
                 tmpl_file = '/resource/exception.mako'
+            else:
+                tmpl_file = '/resource/exception.html'
+            if not loader or int(status_code) == 404:
+                tmpl_file = '/resource/exception.html'
             import traceback
             import sys
             import tornado

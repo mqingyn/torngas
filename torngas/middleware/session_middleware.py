@@ -43,12 +43,12 @@ class SessionMiddleware(BaseMiddleware):
     def process_exception(self, ex_object, exception):
         self.session = Null()
         logger.getlogger.error("session middleware error:{0}".format(exception.message))
-        pass
 
 
     def process_response(self, handler):
-        handler.session.save()
-        del handler.session
+        if hasattr(handler, "session"):
+            handler.session.save()
+            del handler.session
 
     def process_endcall(self, handler):
         pass
