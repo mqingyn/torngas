@@ -12,7 +12,7 @@ setup(
                               'resource/app/translations',
                               'resource/app/Main/*.*',
                               'resource/app/Main/models/*.*',
-                              'resource/app/templates/*.*',
+                              'resource/app/Main/templates/*.*',
                               'resource/app/Main/views/*.*',
                               'resource/*.*']},
     author_email = "maingyn@gmail.com",
