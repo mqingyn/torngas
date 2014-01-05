@@ -11,7 +11,7 @@ from tornado.log import enable_pretty_logging
 from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError
-
+from tornado import web
 reload(sys)
 sys.setdefaultencoding('utf-8')
 application_module = lazyimport('torngas.application')

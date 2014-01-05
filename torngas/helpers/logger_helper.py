@@ -13,13 +13,13 @@ class logger():
     def __init__(self):
 
         self.config = settings_helper.settings.LOG_CONFIG
-        self.dirpath = self.get_dirpath()
+        self.dirpath = self.get_log_dirpath()
         self.load_config()
 
-    def get_dirpath(self):
+    def get_log_dirpath(self):
         return os.path.join(os.path.abspath(self.config["path"]), str(datetime.now().date()))
 
-    def get_abspath(self, file_prefix=_NAME_PREFIX):
+    def get_log_abspath(self, file_prefix=_NAME_PREFIX):
         return os.path.join(self.dirpath, '{0}_port[{1}].log'.format(file_prefix, options.port))
 
     @property
@@ -30,14 +30,14 @@ class logger():
             file_prefix = os.path.splitext(os.path.split(fn)[1])[0]
         else:
             file_prefix = os.path.split(fn)[1]
-        file_path = self.get_abspath(file_prefix)
+        file_path = self.get_log_abspath(file_prefix)
         logger = logging.getLogger(name_prefix + '.' + file_prefix)
-        if os.path.exists(self.dirpath) and self.get_dirpath() == self.dirpath and \
+        if os.path.exists(self.dirpath) and self.get_log_dirpath() == self.dirpath and \
                 os.path.isfile(file_path):
             return logger
 
         else:
-            new_dirpath = self.get_dirpath()
+            new_dirpath = self.get_log_dirpath()
             if not os.path.exists(new_dirpath):
                 os.makedirs(new_dirpath)
             self.dirpath = new_dirpath
@@ -50,7 +50,7 @@ class logger():
         if not logger:
             logger = logging.getLogger(_NAME_PREFIX)
         if not file_path:
-            file_path = self.get_abspath()
+            file_path = self.get_log_abspath()
         logging.getLogger().handlers = []
         logger.setLevel(getattr(logging, options.logging.upper()))
         logger.handlers = []
@@ -75,7 +75,7 @@ class logger():
     def load_config(self):
         if not os.path.exists(self.dirpath):
             os.makedirs(self.dirpath)
-        options.log_file_prefix = self.get_abspath()
+        options.log_file_prefix = self.get_log_abspath()
         options.logging = self.config["level"]
         options.log_to_stderr = self.config["log_to_stderr"]
         options.log_file_max_size = self.config["filesize"]
