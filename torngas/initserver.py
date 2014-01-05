@@ -40,7 +40,6 @@ class Server(object):
 
     def load_application(self, default_host='', transforms=None, wsgi=False, urls=None):
         #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
-        if not urls: urls = []
         #加载本地化配置
         if self.settings.TRANSLATIONS:
             try:
@@ -50,15 +49,15 @@ class Server(object):
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
-        #初始化app
+        # 初始化app
         if not self.application:
-            self.application = application_module.AppApplication(handlers=urls, default_host=default_host,
+            self.application = application_module.AppApplication(handlers=urls or self.urls, default_host=default_host,
                                                                  transforms=transforms, wsgi=wsgi,
                                                                  **self.settings.TORNADO_CONF)
 
         self.application.project_path = self.proj_path if self.proj_path.endswith('/') else self.proj_path + '/'
         self.application.tmpl = import_object(self.settings.TEMPLATE_ENGINE) if self.settings.TEMPLATE_ENGINE else None
-        return self.application
+        return self
 
     def load_urls(self):
         #加载app
@@ -69,7 +68,8 @@ class Server(object):
                 urls.extend(app_urls)
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
-        return urls
+        self.urls = urls
+        return self
 
 
     def server_start(self):
