@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
 from jinja2 import Environment, FileSystemLoader, FileSystemBytecodeCache
 from tornado.template import Loader

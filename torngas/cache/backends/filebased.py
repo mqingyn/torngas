@@ -1,4 +1,6 @@
-"File-based cache backend"
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""File-based cache backend"""
 
 import hashlib
 import os

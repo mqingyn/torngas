@@ -1,4 +1,5 @@
-#-*-coding=utf8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
 from tornado.util import import_object
 from tornado.options import options
@@ -15,12 +16,10 @@ class Settings(object):
     def get_settings(self, name):
         if not hasattr(self, '._setting'):
             try:
-                settings_env = os.environ.get("TORNGAS_PROJECT_NAME", '')
-                # self.settings_module = global_setttings
-                self.settings_module = import_object('.'.join([settings_env, options.setting]))
+                self.settings_module = import_object('.'.join(["settings", options.setting]))
             except ImportError:
                 self.settings_module = global_settings
-                warnings.warn('settings file import error. using global settings now.')
+                warnings.warn('settings file import error. using global settings now. you need create "settings" module')
             self._config = self.settings_module
 
         if hasattr(self._config, name):

@@ -1,4 +1,5 @@
-#coding=utf8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os, logging
 from torngas.helpers import settings_helper
 from tornado.options import options

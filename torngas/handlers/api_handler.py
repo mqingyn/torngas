@@ -1,4 +1,5 @@
-#-*-coding=utf8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import json
 from torngas.exception import APIError
 from common_handler import CommonHandler

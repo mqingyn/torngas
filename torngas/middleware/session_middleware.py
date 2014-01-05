@@ -1,7 +1,7 @@
-#-*-coding=utf-8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 session中间件,支持disk，进程内缓存cache,memcache
-
 """
 import os, time
 

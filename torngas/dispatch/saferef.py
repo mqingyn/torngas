@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 torngas saferef from django
 "Safe weakrefs", originally from pyDispatcher.

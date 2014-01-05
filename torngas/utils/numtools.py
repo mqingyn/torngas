@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 def intget(integer, default=None):
     """
     Returns `integer` as an int or `default` if it can't.

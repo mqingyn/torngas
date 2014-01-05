@@ -1,4 +1,5 @@
-#-*-coding=utf8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from torngas import exception
 from tornado.web import url as urlspec
 from tornado.util import import_object

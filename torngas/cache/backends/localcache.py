@@ -1,4 +1,6 @@
-"Thread-safe in-memory cache backend."
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Thread-safe in-memory cache backend."""
 
 import time
 

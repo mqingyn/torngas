@@ -1,5 +1,5 @@
-#!/usr/local/bin/python
-#coding=utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import warnings
 import logging, os, sys
 import tornado.httpserver
@@ -26,34 +26,35 @@ define("address", default='localhost', help='listen host,default:localhost', typ
 
 
 class Server(object):
-    def __init__(self, project_path=None, settings=settings_module.settings, application=None):
+    def __init__(self, project_path=None, application=None):
         self.application = application
-        self.settings = settings
+        self.settings = settings_module.settings
         self.proj_path = project_path
-        self.urls = []
-
-
-    def load_application(self, default_host='', transforms=None, wsgi=False):
-        #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
         logger_module.logger.load_config()
         tornado.options.parse_command_line()
         #tornado把默认的根logger加了handler
         #把根logger的handler去除，然后重新绑定在tornado的logger下
         logging.getLogger().handlers = []
         enable_pretty_logging(None, logging.getLogger('tornado'))
+
+
+    def load_application(self, default_host='', transforms=None, wsgi=False, urls=None):
+        #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
+        if not urls: urls = []
         #加载本地化配置
         if self.settings.TRANSLATIONS:
             try:
-                tornado.locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
+                from tornado import locale
+
+                locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
         #初始化app
         if not self.application:
-            self.application = application_module.AppApplication(handlers=self.urls, default_host=default_host,
+            self.application = application_module.AppApplication(handlers=urls, default_host=default_host,
                                                                  transforms=transforms, wsgi=wsgi,
-                                                                  **self.settings.get_settings('TORNADO_CONF'))
-
+                                                                 **self.settings.TORNADO_CONF)
 
         self.application.project_path = self.proj_path if self.proj_path.endswith('/') else self.proj_path + '/'
         self.application.tmpl = import_object(self.settings.TEMPLATE_ENGINE) if self.settings.TEMPLATE_ENGINE else None
@@ -61,21 +62,24 @@ class Server(object):
 
     def load_urls(self):
         #加载app
+        urls = []
         if self.settings.INSTALLED_APPS:
             for app in self.settings.INSTALLED_APPS:
                 app_urls = import_object(app + '.urls.urls')
-                self.urls.extend(app_urls)
+                urls.extend(app_urls)
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
-        return self.urls
+        return urls
 
 
     def server_start(self):
         print 'server starting...'
         #服务启动
+
+        from tornado.netutil import bind_sockets
+
         if self.settings.IPV4_ONLY:
             import socket
-            from tornado.netutil import bind_sockets
 
             sockets = bind_sockets(options.port, options.address, family=socket.AF_INET)
         else:

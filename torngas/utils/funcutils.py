@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from torngas.utils.iterutils import dictincr
 import traceback
 

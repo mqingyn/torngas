@@ -1,4 +1,5 @@
-#-*-coding=utf8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
     utils提供以下工具集
  "Storage", "storage", "storify",

@@ -1,4 +1,5 @@
-#coding-utf8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import httplib
 import os
 from tornado.escape import json_encode, json_decode

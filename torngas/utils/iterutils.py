@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import sys ,traceback ,time
 from torngas.utils.storage import storage
 

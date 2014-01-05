@@ -1,13 +1,14 @@
-#-*-coding=utf-8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import base64
 import hmac
 import hashlib
 import time
 import threading
 import re
+import tornado
 from urllib import unquote
 from tornado.escape import utf8
-import tornado
 from torngas import exception
 from torngas.mixin.handler_mixin import UncaughtExceptionMixin, FlashMessageMixIn
 from torngas.helpers import settings_helper, logger_helper

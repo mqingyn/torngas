@@ -1,4 +1,6 @@
-"Memcached cache backend"
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""Memcached cache backend"""
 
 import time
 from threading import local

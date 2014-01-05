@@ -1,4 +1,5 @@
-#-*-coding=utf8-*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.helpers.logger_helper import logger
