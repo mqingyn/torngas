@@ -36,6 +36,11 @@ class Server(object):
         #把根logger的handler去除，然后重新绑定在tornado的logger下
         logging.getLogger().handlers = []
         enable_pretty_logging(None, logging.getLogger('tornado'))
+        self.init()
+
+
+    def init(self):
+        pass
 
 
     def load_application(self, default_host='', transforms=None, wsgi=False, urls=None):
