@@ -48,7 +48,7 @@ class AppApplication(web.Application):
             log_method = access_log.error
         request_time = 1000.0 * handler.request.request_time()
 
-        if request_time > 50.0 or options.debug or status >= 400:
+        if request_time > 50.0 or self.settings['debug'] or status >= 400:
             log_method("%d %s %.2fms", handler.get_status(),
                        handler._request_summary(), request_time)
 

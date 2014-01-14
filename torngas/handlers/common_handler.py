@@ -21,17 +21,15 @@ class CommonHandler(tornado.web.RequestHandler):
         self._is_threaded = False
         self._is_torngas_finished = False
 
-
     def initialize(self, **kwargs):
-        self.appname = kwargs.get('app_name', None)
-
+        self.current_appname = kwargs.get('app_name', None)
 
     def prepare(self):
         signals.handler_started.send(sender=self.__class__)
         self.application.middleware_manager.run_request_hooks(self)
 
     def reverse_url(self, name, *args):
-        return super(CommonHandler, self).reverse_url(self.appname + '-' + name, *args)
+        return super(CommonHandler, self).reverse_url(self.current_appname + '-' + name, *args)
 
     def create_post_token(self):
         """返回一个当前时间戳的16进制哈希码，用来做post 请求的验证token"""
@@ -39,15 +37,6 @@ class CommonHandler(tornado.web.RequestHandler):
         value = base64.b64encode(utf8(timestamp))
         hashtxt = hmac.new(utf8(value), digestmod=hashlib.sha1)
         return utf8(hashtxt.hexdigest())
-
-
-    @property
-    def logger(self):
-        return logger_helper.logger.getlogger
-
-    @property
-    def cache(self):
-        return self.application.cache
 
     def finish(self, chunk=None):
 
@@ -65,7 +54,7 @@ class CommonHandler(tornado.web.RequestHandler):
     def threaded_finish_callback(self):
         """
         如果使用多线程回调装饰器，此方法将起作用
-        :return:
+        :return:None
         """
         if self.application.settings.get('debug', False):
             print "In the finish callback thread is ", str(threading.currentThread())
@@ -84,7 +73,10 @@ class CommonHandler(tornado.web.RequestHandler):
 
         return params
 
-    def get_argument(self, name, default=[], strip=True):
+    def get_arguments(self, name, default=None, strip=True):
+        if not default:
+            default = []
+
         value = super(CommonHandler, self).get_argument(name, default, strip)
         if value == default:
             return value
@@ -98,7 +90,7 @@ class CommonHandler(tornado.web.RequestHandler):
 
         return tornado.locale.get(settings_helper.settings.TRANSLATIONS_CONF.locale_default)
 
-    def _cleanup_param(self, val, strip=True):
+    def cleanup_param(self, val, strip=True):
         # Get rid of any weird control chars
         value = re.sub(r"[\x00-\x08\x0e-\x1f]", " ", val)
         value = tornado.web._unicode(value)
@@ -113,32 +105,17 @@ class CommonHandler(tornado.web.RequestHandler):
 
 
 class WebHandler(UncaughtExceptionMixin, CommonHandler, FlashMessageMixIn):
-    def get_template_path(self):
-        templdir_settings = settings_helper.settings.APPS_TEMPLATES_DIR
-        if not templdir_settings:
-            raise exception.ConfigError('config {0} section no exist!'.format(templdir_settings))
-        if len(templdir_settings):
-            apptmpl_dir = templdir_settings.get(self.appname, None)
-            return ''.join([self.application.project_path, apptmpl_dir, '/']) if apptmpl_dir else None
-        else:
-            return None
-
-
     def create_template_loader(self, template_path):
 
         loader = self.application.tmpl
         if loader is None:
             return super(CommonHandler, self).create_template_loader(template_path)
         else:
-            app_name = self.appname
-            return loader(template_path, app_name=app_name)
+            current_appname = self.current_appname
+            return loader(template_path, app_name='')
 
 
 class ErrorHandler(CommonHandler, UncaughtExceptionMixin):
-    """raise 404 error if url is not found.
-    fixed tornado.web.RequestHandler HTTPError bug.
-    """
-
     def prepare(self):
         super(ErrorHandler, self).prepare()
         self.set_status(404)

@@ -7,21 +7,19 @@ from tornado.util import import_object
 
 class RouteLoader(object):
     """
-    路由加载器，将路由加载进tornado的路由系统中，
-    path_prefix:为模块前缀，这样路由可以省去写前缀
+    路由加载器，将路由加载进tornado的路由系统中
     path:由于设计为子应用形式，路由最终路径为 /path/你的路由，比如blog应用下的/index,会被解析为/blog/index,
         如果不希望在路由前加/path，则为单个路由设置path='/'，path为必填参数
     app_name:设置为子应用的模块名，大小写必须相同，根据此设置来找模版位置，必填
     """
 
-    def __init__(self, path_prefix, path=None, app_folder=None):
+    def __init__(self, path=None, app_name=None):
         if not path:
             raise exception.UrlError('path arg not found!')
-        if not app_folder:
+        if not app_name:
             raise exception.UrlError('app_name arg not found!')
-        self.path_prefix = path_prefix
         self.path = path if path != '/' else ''
-        self.app_name = app_folder
+        self.app_name = app_name
 
     def urlhelper(self, *urllist):
         """
@@ -29,7 +27,7 @@ class RouteLoader(object):
         """
         urls = []
         for u in urllist:
-            handler_path = '.'.join([self.path_prefix, u.get('handler_path')])
+            handler_path = u.get('handler_path')
             pattern = u.get('pattern')
             if pattern.endswith('/'):
                 pattern += '?'
@@ -61,13 +59,13 @@ class url(object):
 
     def __call__(self, name=None, pattern=None, process_setting='', kwargs=None):
         p_list = process_setting.split(',')
-        setting = dict()
+        setting = {}
 
-        def p_list2dict(p):
+        def _(p):
             tmp = p.split('=')
             setting[tmp[0]] = tmp[1]
 
-        [p_list2dict(p) for p in p_list]
+        [_(p) for p in p_list]
 
         view = setting.get('view')
         handler = setting.get('handler')

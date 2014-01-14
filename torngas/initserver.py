@@ -12,6 +12,7 @@ from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError
 from tornado import web
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 application_module = lazyimport('torngas.application')
@@ -49,19 +50,23 @@ class Server(object):
         if self.settings.TRANSLATIONS:
             try:
                 from tornado import locale
-
                 locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
         # 初始化app
         if not self.application:
-            self.application = application_module.AppApplication(handlers=urls or self.urls, default_host=default_host,
+            self.application = application_module.AppApplication(handlers=urls or self.urls,
+                                                                 default_host=default_host,
                                                                  transforms=transforms, wsgi=wsgi,
                                                                  **self.settings.TORNADO_CONF)
 
-        self.application.project_path = self.proj_path if self.proj_path.endswith('/') else self.proj_path + '/'
-        self.application.tmpl = import_object(self.settings.TEMPLATE_ENGINE) if self.settings.TEMPLATE_ENGINE else None
+        self.application.project_path = self.proj_path \
+            if self.proj_path.endswith('/') else self.proj_path + '/'
+
+        self.application.tmpl = import_object(self.settings.TEMPLATE_ENGINE) \
+            if self.settings.TEMPLATE_ENGINE else None
+
         return self
 
     def load_urls(self):

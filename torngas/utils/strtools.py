@@ -87,7 +87,7 @@ def strips(text, remove):
 
 
 def safeunicode(obj, encoding='utf-8'):
-    r"""
+    """
     Converts any given object to unicode string.
 
         >>> safeunicode('hello')

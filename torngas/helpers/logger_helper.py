@@ -23,15 +23,15 @@ class logger():
         return os.path.join(self.dirpath, '{0}_port[{1}].log'.format(file_prefix, options.port))
 
     @property
-    def getlogger(self, name_prefix=_NAME_PREFIX):
-        rootlogger = logging.getLogger(name_prefix)
+    def getlogger(self):
+        rootlogger = logging.getLogger(_NAME_PREFIX)
         fn, lno, func = rootlogger.findCaller()
         if fn.endswith('.py'):
             file_prefix = os.path.splitext(os.path.split(fn)[1])[0]
         else:
             file_prefix = os.path.split(fn)[1]
         file_path = self.get_log_abspath(file_prefix)
-        logger = logging.getLogger(name_prefix + '.' + file_prefix)
+        logger = logging.getLogger(_NAME_PREFIX + '.' + file_prefix)
         if os.path.exists(self.dirpath) and self.get_log_dirpath() == self.dirpath and \
                 os.path.isfile(file_path):
             return logger

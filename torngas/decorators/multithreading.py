@@ -90,9 +90,9 @@ class ThreadPool():
         """Wait for completion of all the tasks in the queue"""
         self.tasks.join()
 
-    '''
+    """
         Returns the global threadpool.  Use this in almost all cases.
-    '''
+    """
     _instance_lock = threading.Lock()
 
     @classmethod
