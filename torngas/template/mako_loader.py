@@ -16,13 +16,12 @@ _lookup = TemplateLookup(input_encoding='utf-8',
 
 
 class MakoTemplateLoader(Loader):
-    def __init__(self, root_directory, app_name, **kwargs):
+    def __init__(self, root_directory, **kwargs):
         super(MakoTemplateLoader, self).__init__(root_directory, **kwargs)
         self.path = os.path.abspath(root_directory)
-        self.module_directory = os.path.abspath(
-            os.path.join(settings.TEMPLATE_CONFIG.cache_directory, app_name))
+        self.module_directory = os.path.abspath(settings.TEMPLATE_CONFIG.cache_directory)
 
-    def load(self, name):
+    def load(self, name,parent_path=None):
         with self.lock:
             _lookup.module_directory = self.module_directory
             _lookup.template_args['module_directory'] = self.module_directory

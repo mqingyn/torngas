@@ -10,16 +10,16 @@ class RouteLoader(object):
     路由加载器，将路由加载进tornado的路由系统中
     path:由于设计为子应用形式，路由最终路径为 /path/你的路由，比如blog应用下的/index,会被解析为/blog/index,
         如果不希望在路由前加/path，则为单个路由设置path='/'，path为必填参数
-    app_name:设置为子应用的模块名，大小写必须相同，根据此设置来找模版位置，必填
+    app_name:设置为子应用的模块名，大小写必须相同，必填
     """
 
-    def __init__(self, path=None, app_name=None):
+    def __init__(self, path=None, subapp_name=None):
         if not path:
             raise exception.UrlError('path arg not found!')
-        if not app_name:
+        if not subapp_name:
             raise exception.UrlError('app_name arg not found!')
         self.path = path if path != '/' else ''
-        self.app_name = app_name
+        self.subapp_name = subapp_name
 
     def urlhelper(self, *urllist):
         """
@@ -40,8 +40,8 @@ class RouteLoader(object):
             else:
                 pattern = self.path + pattern
             kw = dict(u.get('kwargs', {}))
-            kw['app_name'] = self.app_name
-            url_name = self.app_name + '-' + u.get('name')
+            kw['subapp_name'] = self.subapp_name
+            url_name = self.subapp_name + '-' + u.get('name')
             urls.append(urlspec(pattern, import_object(handler_path), kwargs=kw, name=url_name))
 
         return urls

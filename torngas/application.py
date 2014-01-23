@@ -3,9 +3,7 @@
 
 import logging
 import tornado.web as web
-from tornado.options import options
 from torngas.utils import lazyimport
-from torngas.helpers.logger_helper import logger
 
 access_log = logging.getLogger("tornado.access")
 signals_module = lazyimport('torngas.dispatch')
@@ -35,7 +33,7 @@ class AppApplication(web.Application):
             signals_module.signals.call_finished.send(sender=self.__class__)
 
         except Exception, e:
-            logger.getlogger.error(e)
+            logger_module.logger.getlogger.error(e)
             raise
 
     def log_request(self, handler):

@@ -2,6 +2,17 @@
 # -*- coding: utf-8 -*-
 """
 session中间件,支持disk，进程内缓存cache,memcache
+sessioin过期策略分为三种情形：
+1.固定时间过期，例如10天内没有访问则过期，timeout=xxx
+    *cookie策略：每次访问时设置cookie为过期时间
+    *缓存策略：每次访问设置缓存失效时间为固定过期时间
+2.会话过期，关闭浏览器即过期timeout=0
+    *cookie策略：岁浏览器关闭而过期
+    *缓存策略：设置缓存失效期为1天，每次访问更新失效期，如果浏览器关闭，则一天后被清除
+
+3.永不过期(记住我)
+    *cookie策略：timeout1年
+    *缓存策略：1年
 """
 import os, time
 
@@ -20,23 +31,12 @@ except ImportError:
 import hmac, re
 from torngas.utils.storage import storage
 from torngas.utils.strtools import safestr
-from torngas.helpers.logger_helper import logger
 from torngas.utils import lazyimport
 from middleware_manager import BaseMiddleware
 from torngas import Null
-"""
-sessioin过期策略分为三种情形：
-1.固定时间过期，例如10天内没有访问则过期，timeout=xxx
-    *cookie策略：每次访问时设置cookie为过期时间
-    *缓存策略：每次访问设置缓存失效时间为固定过期时间
-2.会话过期，关闭浏览器即过期timeout=0
-    *cookie策略：岁浏览器关闭而过期
-    *缓存策略：设置缓存失效期为1天，每次访问更新失效期，如果浏览器关闭，则一天后被清除
 
-3.永不过期(记住我)
-    *cookie策略：timeout1年
-    *缓存策略：1年
-"""
+logger_module = lazyimport('torngas.helpers.logger_helper')
+
 settings_module = lazyimport('torngas.helpers.settings_helper')
 cache_module = lazyimport('torngas.cache')
 rx = re.compile('^[0-9a-fA-F]+$')
@@ -55,7 +55,7 @@ class SessionMiddleware(BaseMiddleware):
 
     def process_exception(self, ex_object, exception):
         self.session = Null()
-        logger.getlogger.error("session middleware error:{0}".format(exception.message))
+        logger_module.getlogger.error("session middleware error:{0}".format(exception.message))
 
 
     def process_response(self, handler):

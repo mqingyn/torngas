@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 from tornado.util import import_object
 from torngas.utils import lazyimport
-from torngas.helpers.logger_helper import logger
 
 settings_module = lazyimport('torngas.helpers.settings_helper')
-
+logger_module = lazyimport('torngas.helpers.logger_helper')
 
 class MiddlewareManager():
     def __init__(self):
@@ -66,12 +65,12 @@ class MiddlewareManager():
                 try:
                     cls = import_object(mclass)
                 except ImportError, ex:
-                    logger.getlogger.error('middleware error. module __import__ failed,msg:', ex)
+                    logger_module.logger.getlogger.error('middleware error. module __import__ failed,msg:', ex)
 
                 try:
                     inst = cls()
                 except Exception, ex:
-                    logger.getlogger.error('middleware error. cant instantiate cls(),msg:', ex)
+                    logger_module.logger.getlogger.error('middleware error. cant instantiate cls(),msg:', ex)
 
                 if hasattr(inst, 'process_init'):
                     self.init_middleware.append(inst)

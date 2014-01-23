@@ -10,11 +10,12 @@ import tornado
 from urllib import unquote
 from tornado.escape import utf8
 from torngas import exception
+from torngas.utils import lazyimport
 from torngas.mixin.handler_mixin import UncaughtExceptionMixin, FlashMessageMixIn
-from torngas.helpers import settings_helper, logger_helper
 from torngas.dispatch import signals
 
-
+signals_module = lazyimport('torngas.dispatch')
+settings_module = lazyimport('torngas.helpers.settings_helper')
 class CommonHandler(tornado.web.RequestHandler):
     def __init__(self, application, request, **kwargs):
         super(CommonHandler, self).__init__(application, request, **kwargs)
@@ -22,10 +23,10 @@ class CommonHandler(tornado.web.RequestHandler):
         self._is_torngas_finished = False
 
     def initialize(self, **kwargs):
-        self.current_appname = kwargs.get('app_name', None)
+        self.current_appname = kwargs.get('subapp_name', None)
 
     def prepare(self):
-        signals.handler_started.send(sender=self.__class__)
+        signals_module.signals.handler_started.send(sender=self.__class__)
         self.application.middleware_manager.run_request_hooks(self)
 
     def reverse_url(self, name, *args):
@@ -40,7 +41,7 @@ class CommonHandler(tornado.web.RequestHandler):
 
     def finish(self, chunk=None):
 
-        signals.handler_finished.send(sender=self.__class__)
+        signals_module.signals.handler_finished.send(sender=self.__class__)
         self._is_torngas_finished = True
         self.application.middleware_manager.run_response_hooks(self)
         if self._is_threaded:
@@ -85,10 +86,10 @@ class CommonHandler(tornado.web.RequestHandler):
 
     def get_user_locale(self):
 
-        if settings_helper.settings.TRANSLATIONS_CONF.use_accept_language:
+        if settings_module.settings_helper.settings.TRANSLATIONS_CONF.use_accept_language:
             return None
 
-        return tornado.locale.get(settings_helper.settings.TRANSLATIONS_CONF.locale_default)
+        return tornado.locale.get(settings_module.settings_helper.settings.TRANSLATIONS_CONF.locale_default)
 
     def cleanup_param(self, val, strip=True):
         # Get rid of any weird control chars
@@ -107,12 +108,14 @@ class CommonHandler(tornado.web.RequestHandler):
 class WebHandler(UncaughtExceptionMixin, CommonHandler, FlashMessageMixIn):
     def create_template_loader(self, template_path):
 
+        if self.get_status() >= 400:
+            return super(CommonHandler, self).create_template_loader(template_path)
+
         loader = self.application.tmpl
         if loader is None:
             return super(CommonHandler, self).create_template_loader(template_path)
         else:
-            current_appname = self.current_appname
-            return loader(template_path, app_name='')
+            return loader(template_path)
 
 
 class ErrorHandler(CommonHandler, UncaughtExceptionMixin):

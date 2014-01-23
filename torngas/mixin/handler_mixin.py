@@ -3,6 +3,8 @@
 import httplib
 import os
 from tornado.escape import json_encode, json_decode
+from tornado.web import RequestHandler
+from tornado import template
 
 
 class UncaughtExceptionMixin(object):
@@ -37,29 +39,7 @@ class UncaughtExceptionMixin(object):
         else:
             exception = kwargs.get('exception', None)
             resource = os.path.split(os.path.dirname(__file__))[0]
-            loader = self.application.tmpl
-            try:
-                from torngas.template.jinja2_loader import Jinja2TemplateLoader
-
-                jinja = Jinja2TemplateLoader
-            except ImportError:
-                jinja = None
-
-            try:
-                from torngas.template.mako_loader import MakoTemplateLoader
-
-                mako = MakoTemplateLoader
-            except ImportError:
-                mako = None
-
-            if loader is jinja:
-                tmpl_file = '/resource/exception.j2'
-            elif loader is mako:
-                tmpl_file = '/resource/exception.mako'
-            else:
-                tmpl_file = '/resource/exception.html'
-            if not loader or int(status_code) == 404:
-                tmpl_file = '/resource/exception.html'
+            tmpl_file = '/resource/exception.html'
             import traceback
             import sys
             import tornado
@@ -73,8 +53,8 @@ class UncaughtExceptionMixin(object):
         if 'exc_info' in kwargs:
             exc_info = kwargs.pop('exc_info')
             kwargs['exception'] = exc_info[1]
-        self.finish(self.get_error_html(status_code, **kwargs))
-        return
+
+        return self.finish(self.get_error_html(status_code, **kwargs))
 
 
 class FlashMessageMixIn(object):

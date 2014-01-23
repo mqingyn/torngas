@@ -15,19 +15,18 @@ _JINJA_ENV = Environment(bytecode_cache=_CACHE,
 
 
 class Jinja2TemplateLoader(Loader):
-    def __init__(self, root_directory='', app_name='', **kwargs):
+    def __init__(self, root_directory='', **kwargs):
         super(Jinja2TemplateLoader, self).__init__(root_directory, **kwargs)
         path = os.path.abspath(root_directory)
         _JINJA_ENV.loader.searchpath = [path]
 
-        cache_dir = os.path.abspath(
-            os.path.join(settings.TEMPLATE_CONFIG.cache_directory, app_name))
+        cache_dir = os.path.abspath(settings.TEMPLATE_CONFIG.cache_directory)
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
         _CACHE.directory = cache_dir
 
 
-    def load(self, name):
+    def load(self, name, parent_path=None):
         with self.lock:
             if os.path.isabs(name):
                 path, file = os.path.split(name)

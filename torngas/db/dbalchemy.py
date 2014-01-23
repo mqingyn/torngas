@@ -2,17 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import random, threading
+from tornado.ioloop import PeriodicCallback
+from torngas.helpers.settings_helper import settings
+from torngas.exception import ConfigError
+from torngas.utils.storage import storage
+from torngas.dispatch import signals
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from tornado.ioloop import PeriodicCallback
-from torngas.helpers.settings_helper import settings
-from torngas.exception import ConfigError
-from torngas.utils.storage import storage
 from sqlalchemy.engine import url
-from torngas.dispatch import signals
+
 
 _CONNECTION_TYPE = (
     'master',
