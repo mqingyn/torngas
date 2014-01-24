@@ -49,6 +49,7 @@ class Server(object):
         if self.settings.TRANSLATIONS:
             try:
                 from tornado import locale
+
                 locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
@@ -63,8 +64,8 @@ class Server(object):
         self.application.project_path = self.proj_path \
             if self.proj_path.endswith('/') else self.proj_path + '/'
 
-        self.application.tmpl = import_object(self.settings.TEMPLATE_ENGINE) \
-            if self.settings.TEMPLATE_ENGINE else None
+        tmpl = self.settings.TEMPLATE_CONFIG.template_engine
+        self.application.tmpl = import_object(tmpl) if tmpl else None
 
         return self
 
@@ -111,7 +112,7 @@ class Server(object):
             print 'locale support: %s' % self.settings.TRANSLATIONS
             print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
             print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
-            print 'template engine: %s' % self.settings.TEMPLATE_ENGINE
+            print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
 
 
 

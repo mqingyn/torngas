@@ -27,7 +27,7 @@ class RouteLoader(object):
         """
         urls = []
         for u in urllist:
-            handler_path = u.get('handler_path')
+            handler_module = '.'.join([self.subapp_name,u.get('handler_module','')])
             pattern = u.get('pattern')
             if pattern.endswith('/'):
                 pattern += '?'
@@ -42,7 +42,7 @@ class RouteLoader(object):
             kw = dict(u.get('kwargs', {}))
             kw['subapp_name'] = self.subapp_name
             url_name = self.subapp_name + '-' + u.get('name')
-            urls.append(urlspec(pattern, import_object(handler_path), kwargs=kw, name=url_name))
+            urls.append(urlspec(pattern, import_object(handler_module), kwargs=kw, name=url_name))
 
         return urls
 
@@ -74,10 +74,10 @@ class url(object):
         if not pattern or not view or not handler or not name:
             raise exception.ArgumentError('url argument error!')
 
-        handler_path = '.'.join([view, handler])
+        handler_module = '.'.join([view, handler])
         return dict(
             pattern=pattern,
-            handler_path=handler_path,
+            handler_module=handler_module,
             name=name,
             path=path,
             kwargs=kwargs or {}

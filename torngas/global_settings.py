@@ -16,15 +16,6 @@ INSTALLED_APPS = (
 
 )
 
-
-############
-#应用的html模板路径
-###########
-APPS_TEMPLATES_DIR = {
-    'Main': 'Main/templates'
-
-}
-
 ###########
 # 缓存配置 #
 ###########
@@ -137,19 +128,19 @@ SESSION = {
 #若使用自带的请给予None
 #支持mako和jinja2
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
-TEMPLATE_ENGINE = 'torngas.template.jinja2_loader.Jinja2TemplateLoader'
-
 TEMPLATE_CONFIG = {
+    'template_engine': 'torngas.template.mako_loader.MakoTemplateLoader',
     ########### mako 配置项 使用mako时生效###########
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
     'filesystem_checks': False, #通用选项
-    'cache_directory': '/tmp/_tmpl_cache', #模版编译文件目录,通用选项
+    'cache_directory': '../_tmpl_cache', #模版编译文件目录,通用选项
     'collection_size': 50, #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
     'cache_size': 0, #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
     'format_exceptions': True, #格式化异常输出，mako专用
     'autoescape': False #默认转义设定，jinja2专用
     ###########      end        ##################
 }
+
 
 
 # 数据库连接字符串，
