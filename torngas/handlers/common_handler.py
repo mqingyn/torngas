@@ -16,6 +16,8 @@ from torngas.dispatch import signals
 
 signals_module = lazyimport('torngas.dispatch')
 settings_module = lazyimport('torngas.helpers.settings_helper')
+
+
 class CommonHandler(tornado.web.RequestHandler):
     def __init__(self, application, request, **kwargs):
         super(CommonHandler, self).__init__(application, request, **kwargs)
@@ -86,10 +88,10 @@ class CommonHandler(tornado.web.RequestHandler):
 
     def get_user_locale(self):
 
-        if settings_module.settings_helper.settings.TRANSLATIONS_CONF.use_accept_language:
+        if settings_module.settings.TRANSLATIONS_CONF.use_accept_language:
             return None
 
-        return tornado.locale.get(settings_module.settings_helper.settings.TRANSLATIONS_CONF.locale_default)
+        return tornado.locale.get(settings_module.settings.TRANSLATIONS_CONF.locale_default)
 
     def cleanup_param(self, val, strip=True):
         # Get rid of any weird control chars

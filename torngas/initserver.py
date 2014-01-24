@@ -54,7 +54,6 @@ class Server(object):
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
-        # 初始化app
         if not self.application:
             self.application = application_module.AppApplication(handlers=urls or self.urls,
                                                                  default_host=default_host,

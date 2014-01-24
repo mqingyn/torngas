@@ -27,22 +27,23 @@ class RouteLoader(object):
         """
         urls = []
         for u in urllist:
-            handler_module = '.'.join([self.subapp_name,u.get('handler_module','')])
+            handler_module = '.'.join([self.subapp_name, u.get('handler_module', '')])
             pattern = u.get('pattern')
-            if pattern.endswith('/'):
-                pattern += '?'
-            else:
-                pattern += '/?'
+            pattern += '?' if pattern.endswith('/') else '/?'
             path = u.get('path', None)
+
             if path:
                 if path != '/':
                     pattern = path + pattern
             else:
                 pattern = self.path + pattern
+
             kw = dict(u.get('kwargs', {}))
             kw['subapp_name'] = self.subapp_name
-            url_name = self.subapp_name + '-' + u.get('name')
-            urls.append(urlspec(pattern, import_object(handler_module), kwargs=kw, name=url_name))
+            url_name = ''.join([self.subapp_name, '-', u.get('name')])
+
+            url=urlspec(pattern, import_object(handler_module), kwargs=kw, name=url_name)
+            urls.append(url)
 
         return urls
 
@@ -57,30 +58,15 @@ class url(object):
     :return:dict，路由字典
     """
 
-    def __call__(self, name=None, pattern=None, process_setting='', kwargs=None):
-        p_list = process_setting.split(',')
-        setting = {}
-
-        def _(p):
-            tmp = p.split('=')
-            setting[tmp[0]] = tmp[1]
-
-        [_(p) for p in p_list]
-
-        view = setting.get('view')
-        handler = setting.get('handler')
-        path = setting.get('path', None)
-
-        if not pattern or not view or not handler or not name:
-            raise exception.ArgumentError('url argument error!')
-
-        handler_module = '.'.join([view, handler])
+    def __call__(self, name=None, pattern=None, handler_module='', path=None, kwargs=None):
+        if not kwargs:
+            kwargs = {}
         return dict(
             pattern=pattern,
             handler_module=handler_module,
             name=name,
             path=path,
-            kwargs=kwargs or {}
+            kwargs=kwargs
         )
 
 
