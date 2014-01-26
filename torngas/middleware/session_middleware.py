@@ -33,7 +33,7 @@ from torngas.utils.storage import storage
 from torngas.utils.strtools import safestr
 from torngas.utils import lazyimport
 from middleware_manager import BaseMiddleware
-from torngas import Null
+from torngas.utils import Null
 
 logger_module = lazyimport('torngas.helpers.logger_helper')
 

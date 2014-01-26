@@ -109,10 +109,6 @@ class CommonHandler(tornado.web.RequestHandler):
 
 class WebHandler(UncaughtExceptionMixin, CommonHandler, FlashMessageMixIn):
     def create_template_loader(self, template_path):
-
-        if self.get_status() >= 400:
-            return super(CommonHandler, self).create_template_loader(template_path)
-
         loader = self.application.tmpl
         if loader is None:
             return super(CommonHandler, self).create_template_loader(template_path)

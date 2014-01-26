@@ -44,9 +44,28 @@ class UncaughtExceptionMixin(object):
             import sys
             import tornado
 
-            return self.render_string(resource + tmpl_file, get_snippet=get_snippet,
-                                      exception=exception, traceback=traceback, sys=sys, tornado=tornado,
-                                      status_code=status_code, os=os, kwargs=kwargs)
+            def render_string(template_name, **kw):
+                template_path = self.get_template_path()
+                if not template_path:
+                    frame = sys._getframe(0)
+                    web_file = frame.f_code.co_filename
+                    while frame.f_code.co_filename == web_file:
+                        frame = frame.f_back
+                    template_path = os.path.dirname(frame.f_code.co_filename)
+                with RequestHandler._template_loader_lock:
+                    settings = self.application.settings
+                    kwarg = {}
+                    if "autoescape" in settings:
+                        kwarg["autoescape"] = settings["autoescape"]
+                    loader = template.Loader(template_path, **kwarg)
+                t = loader.load(template_name)
+                namespace = self.get_template_namespace()
+                namespace.update(kw)
+                return t.generate(**namespace)
+
+            return render_string(resource + tmpl_file, get_snippet=get_snippet,
+                                 exception=exception, traceback=traceback, sys=sys, tornado=tornado,
+                                 status_code=status_code, os=os, kwargs=kwargs)
 
     def write_error(self, status_code, **kwargs):
 
