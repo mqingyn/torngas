@@ -55,6 +55,7 @@ class UncaughtExceptionMixin(object):
                 with RequestHandler._template_loader_lock:
                     settings = self.application.settings
                     kwarg = {}
+
                     if "autoescape" in settings:
                         kwarg["autoescape"] = settings["autoescape"]
                     loader = template.Loader(template_path, **kwarg)
