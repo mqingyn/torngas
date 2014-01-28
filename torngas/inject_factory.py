@@ -29,7 +29,7 @@ SINGLETON, TRANSIENT, POOLED, THREAD = 0, 1, 2, 3
 LIFECYCLE_TYPE = (SINGLETON, TRANSIENT, POOLED, THREAD)
 
 
-class Factory(object):
+class InjectFactory(object):
     def register(self, alias_name, module, lifecycle_type=POOLED):
 
         assert inspect.isclass(module), 'register must be a class object'
@@ -73,6 +73,6 @@ class Factory(object):
         return self.resolve(alias_name, *args, **kwargs)
 
 
-factory = Factory()
+factory = InjectFactory()
 if __name__ == '__main__':
     pass
