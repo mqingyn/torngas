@@ -64,7 +64,7 @@ class UncaughtExceptionMixin(object):
                 namespace.update(kw)
                 return t.generate(**namespace)
 
-            return render_string(resource + tmpl_file, get_snippet=get_snippet,
+            return render_string("%s%s" % (resource, tmpl_file), get_snippet=get_snippet,
                                  exception=exception, traceback=traceback, sys=sys, tornado=tornado,
                                  status_code=status_code, os=os, kwargs=kwargs)
 
