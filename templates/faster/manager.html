@@ -1,0 +1,71 @@
+<%inherit file="../layout/master.html"/>
+<%block name="top_script">
+    <link href="${static_url('css/main.css')}" rel="stylesheet"/>
+    <script type="text/javascript">
+        window.current_groupid = '${group_id}'
+    </script>
+</%block>
+
+<%block name="title">
+    ${parent.title()}
+</%block>
+<%block name="bottom_script">
+    <script src="${static_url('js/agl.main.js')}"></script>
+    <script src="${static_url('js/agl.controller.js')}"></script>
+    <script src="${static_url('js/agl.service.js')}"></script>
+    <script src="${static_url('js/agl.directive.js')}"></script>
+</%block>
+
+<div class="row row-offcanvas row-offcanvas-right">
+    <div class="col-xs-6 col-sm-3 " id="sidebar" role="navigation">
+        <div class="list-group">
+            % for group in groups:
+                <a href="/panel/${group['g_id']}"
+                   class="list-group-item ${'active' if str(group['g_id'])==str(group_id) else ''}"><b>${group['g_name']}</b></a>
+            % endfor
+
+
+        </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-9">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading"><b>发布列表</b></div>
+
+            <table class="table" ng-controller="DeployController">
+                <thead>
+                <tr>
+                    <th>项目名称</th>
+                    <th>项目状态</th>
+                    <th>消息</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr ng-repeat="proj in projects">
+                    <td><a target="_blank" href="http://{{proj.ip}}:{{proj.port}}">{{proj.desc}}</a></td>
+                    <td><span name="s_{{proj.name}}" class="label"
+                              ng-class="{'label-default':proj.na,'label-success': proj.succ,'label-danger':proj.failure,'label-primary':proj.ing}">{{proj.status}}</span>
+                    </td>
+                    <td>{{proj.msg}}</td>
+                    <td>
+                        <button name="b_{{proj.name}}" type="button" class="btn btn-primary btn-xs"
+                                is-disabled="isDisabled"
+                                ng-click="proj.dclick()">发布
+                        </button>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+

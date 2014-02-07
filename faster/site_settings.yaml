@@ -1,0 +1,27 @@
+static_version: 20140126
+footer:
+    year: 2014
+    desc: mqingyn design
+site_title: FASTER部署平台v0.1
+#项目组：项目名称-项目配置
+projects:
+    - group_name: 测试环境
+      group_id: 1
+      project:
+          - name: lisop
+            desc: 听书运营CMS
+            root_dir: /root/python
+            host: root@192.168.6.52
+            port: 8030
+            ssh_pwd: 123456
+            local: False
+          - name: liscps
+            desc: 听书CPS
+            root_dir: /root/python
+            host: root@192.168.6.52
+            port: 8040
+            ssh_pwd: 123456
+            local: False
+    - group_name: 其他环境
+      group_id: 2
+      project:
