@@ -23,23 +23,19 @@ define("setting", default='settings_devel', help="""config used to set the confi
 settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""",
        type=str)
 define("address", default='localhost', help='listen host,default:localhost', type=str)
+define("log_frefix", default='torngas', help='log file dirname', type=str)
 
 
 class Server(object):
     def __init__(self, project_path=None, application=None):
+        tornado.options.parse_command_line()
         self.application = application
         self.settings = settings_module.settings
         self.proj_path = project_path
-        logger_module.logger.load_config()
-        tornado.options.parse_command_line()
-        #tornado把默认的根logger加了handler
-        #把根logger的handler去除，然后重新绑定在tornado的logger下
-        logging.getLogger().handlers = []
-        enable_pretty_logging(None, logging.getLogger('tornado'))
-        self.init()
+        self.initializ()
 
 
-    def init(self):
+    def initializ(self):
         pass
 
 
@@ -82,7 +78,14 @@ class Server(object):
 
 
     def server_start(self):
-        print 'server starting...'
+
+        logging.info('server starting...')
+        logger_module.logger.load_config()
+        #tornado把默认的根logger加了handler
+        #把根logger的handler去除，然后重新绑定在tornado的logger下
+        logging.getLogger().handlers = []
+        enable_pretty_logging(None, logging.getLogger('tornado'))
+
         #服务启动
 
         from tornado.netutil import bind_sockets
@@ -97,21 +100,22 @@ class Server(object):
         self.print_settings_info()
         http_server = tornado.httpserver.HTTPServer(self.application)
         http_server.add_sockets(sockets)
-        print 'tornado server started. listen port: %s ,host address: %s' % (options.port, options.address)
+        logging.info('tornado server started. listen port: %s ,host address: %s' % (options.port, options.address))
         tornado.ioloop.IOLoop.instance().start()
 
     def print_settings_info(self):
 
         if self.settings.TORNADO_CONF.debug:
-            print 'tornado version: %s' % tornado.version
-            print 'project path: %s' % self.proj_path
-            print 'setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0]
-            print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
-            print 'debug open: %s' % self.settings.TORNADO_CONF.debug
-            print 'locale support: %s' % self.settings.TRANSLATIONS
-            print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
-            print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
-            print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
+            logging.info('tornado version: %s' % tornado.version)
+            logging.info('project path: %s' % self.proj_path)
+            logging.info('setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0])
+            logging.info('load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__())
+            logging.info('debug open: %s' % self.settings.TORNADO_CONF.debug)
+            logging.info('locale support: %s' % self.settings.TRANSLATIONS)
+            logging.info('load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__())
+            logging.info('IPV4_Only: %s' % self.settings.IPV4_ONLY)
+            logging.info('template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine)
+            logging.info('log file path: %s' % logger_module.logger.get_log_abspath())
 
 
 

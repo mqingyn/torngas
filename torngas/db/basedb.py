@@ -11,45 +11,51 @@ __all__ = [
     "SQLQuery", "SQLParam", "sqlparam",
     "SQLLiteral", "sqlliteral",
     "database", 'DB',
-    ]
+]
 
 import time
 import os
 import urllib
 import itertools
 import sys
+
 try:
     import datetime
 except ImportError:
     datetime = None
 
 from torngas.utils.iterutils import IterBetter
-from torngas.utils.strtools import safeunicode,safestr
-from torngas.utils.storage import Storage
-try: set
+from torngas.utils.strtools import safeunicode, safestr
+from torngas.utils.storage import Storage, ThreadedDict
+
+try:
+    set
 except NameError:
     from sets import Set as set
-
 
 from threading import local as threadlocal
 
 debug = sys.stderr
 
-
 iters = [list, tuple]
 import __builtin__
+
 if hasattr(__builtin__, 'set'):
     iters.append(set)
 if hasattr(__builtin__, 'frozenset'):
     iters.append(set)
-if sys.version_info < (2,6): # sets module deprecated in 2.6
+if sys.version_info < (2, 6): # sets module deprecated in 2.6
     try:
         from sets import Set
+
         iters.append(Set)
     except ImportError:
         pass
 
+
 class _hack(tuple): pass
+
+
 iters = _hack(iters)
 iters.__doc__ = """
 A list of iterable items (like lists, but not strings). Includes whichever
@@ -59,123 +65,29 @@ of lists, tuples, sets, and Sets are available in this version of Python.
 iterbetter = IterBetter
 # for backward-compatibility
 utf8 = safestr
-storage=Storage
+storage = Storage
 config = Storage()
-
-class ThreadedDict(threadlocal):
-    """
-    Thread local storage.
-
-        >>> d = ThreadedDict()
-        >>> d.x = 1
-        >>> d.x
-        1
-        >>> import threading
-        >>> def f(): d.x = 2
-        ...
-        >>> t = threading.Thread(target=f)
-        >>> t.start()
-        >>> t.join()
-        >>> d.x
-        1
-    """
-    _instances = set()
-
-    def __init__(self):
-        ThreadedDict._instances.add(self)
-
-    def __del__(self):
-        ThreadedDict._instances.remove(self)
-
-    def __hash__(self):
-        return id(self)
-
-    def clear_all():
-        """Clears all ThreadedDict instances.
-        """
-        for t in list(ThreadedDict._instances):
-            t.clear()
-    clear_all = staticmethod(clear_all)
-
-    # Define all these methods to more or less fully emulate dict -- attribute access
-    # is built into threading.local.
-
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
-
-    def __delitem__(self, key):
-        del self.__dict__[key]
-
-    def __contains__(self, key):
-        return key in self.__dict__
-
-    has_key = __contains__
-
-    def clear(self):
-        self.__dict__.clear()
-
-    def copy(self):
-        return self.__dict__.copy()
-
-    def get(self, key, default=None):
-        return self.__dict__.get(key, default)
-
-    def items(self):
-        return self.__dict__.items()
-
-    def iteritems(self):
-        return self.__dict__.iteritems()
-
-    def keys(self):
-        return self.__dict__.keys()
-
-    def iterkeys(self):
-        return self.__dict__.iterkeys()
-
-    iter = iterkeys
-
-    def values(self):
-        return self.__dict__.values()
-
-    def itervalues(self):
-        return self.__dict__.itervalues()
-
-    def pop(self, key, *args):
-        return self.__dict__.pop(key, *args)
-
-    def popitem(self):
-        return self.__dict__.popitem()
-
-    def setdefault(self, key, default=None):
-        return self.__dict__.setdefault(key, default)
-
-    def update(self, *args, **kwargs):
-        self.__dict__.update(*args, **kwargs)
-
-    def __repr__(self):
-        return '<ThreadedDict %r>' % self.__dict__
-
-    __str__ = __repr__
-
 threadeddict = ThreadedDict
+
 
 class UnknownDB(Exception):
     """raised for unsupported dbms"""
     pass
+
 
 class _ItplError(ValueError):
     def __init__(self, text, pos):
         ValueError.__init__(self)
         self.text = text
         self.pos = pos
+
     def __str__(self):
         return "unfinished expression in %s at char %d" % (
             repr(self.text), self.pos)
 
+
 class TransactionError(Exception): pass
+
 
 class UnknownParamstyle(Exception):
     """
@@ -184,6 +96,7 @@ class UnknownParamstyle(Exception):
     (currently supported: qmark, numeric, format, pyformat)
     """
     pass
+
 
 class SQLParam(object):
     """
@@ -226,7 +139,9 @@ class SQLParam(object):
     def __repr__(self):
         return '<param: %s>' % repr(self.value)
 
-sqlparam =  SQLParam
+
+sqlparam = SQLParam
+
 
 class SQLQuery(object):
     """
@@ -385,6 +300,7 @@ class SQLQuery(object):
     def __repr__(self):
         return '<sql: %s>' % repr(str(self))
 
+
 class SQLLiteral:
     """
     Protects a string from `sqlquote`.
@@ -394,13 +310,16 @@ class SQLLiteral:
         >>> sqlquote(SQLLiteral('NOW()'))
         <sql: 'NOW()'>
     """
+
     def __init__(self, v):
         self.v = v
 
     def __repr__(self):
         return self.v
 
+
 sqlliteral = SQLLiteral
+
 
 def _sqllist(values):
     """
@@ -415,6 +334,7 @@ def _sqllist(values):
         items.append(sqlparam(v))
     items.append(')')
     return SQLQuery(items)
+
 
 def reparam(string_, dictionary):
     """
@@ -437,6 +357,7 @@ def reparam(string_, dictionary):
         else:
             result.append(chunk)
     return SQLQuery.join(result, '')
+
 
 def sqlify(obj):
     """
@@ -464,6 +385,7 @@ def sqlify(obj):
         if isinstance(obj, unicode): obj = obj.encode('utf8')
         return repr(obj)
 
+
 def sqllist(lst):
     """
     Converts the arguments for use in something like a WHERE clause.
@@ -479,6 +401,7 @@ def sqllist(lst):
         return lst
     else:
         return ', '.join(lst)
+
 
 def sqlors(left, lst):
     """
@@ -512,6 +435,7 @@ def sqlors(left, lst):
     else:
         return left + sqlparam(lst)
 
+
 def sqlwhere(dictionary, grouping=' AND '):
     """
     Converts a `dictionary` to an SQL WHERE clause `SQLQuery`.
@@ -524,6 +448,7 @@ def sqlwhere(dictionary, grouping=' AND '):
         'a = %s AND b = %s'
     """
     return SQLQuery.join([k + ' = ' + sqlparam(v) for k, v in dictionary.items()], grouping)
+
 
 def sqlquote(a):
     """
@@ -539,14 +464,17 @@ def sqlquote(a):
     else:
         return sqlparam(a).sqlquery()
 
+
 class Transaction:
     """Database transaction."""
+
     def __init__(self, ctx):
         self.ctx = ctx
         self.transaction_count = transaction_count = len(ctx.transactions)
 
         class transaction_engine:
             """Transaction Engine used in top level transactions."""
+
             def do_transact(self):
                 ctx.commit(unload=False)
 
@@ -558,6 +486,7 @@ class Transaction:
 
         class subtransaction_engine:
             """Transaction Engine used in sub transactions."""
+
             def query(self, q):
                 db_cursor = ctx.db.cursor()
                 ctx.db_execute(db_cursor, SQLQuery(q % transaction_count))
@@ -607,8 +536,10 @@ class Transaction:
             self.engine.do_rollback()
             self.ctx.transactions = self.ctx.transactions[:self.transaction_count]
 
+
 class DB:
     """Database"""
+
     def __init__(self, db_module, keywords):
         """Creates a database.
         """
@@ -638,6 +569,7 @@ class DB:
         if not self._ctx.get('db'):
             self._load_context(self._ctx)
         return self._ctx
+
     ctx = property(_getctx)
 
     def _load_context(self, ctx):
@@ -728,7 +660,7 @@ class DB:
             raise
 
         if self.printing:
-            print >> debug, '%s (%s): %s' % (round(b-a, 2), self.ctx.dbq_count, str(sql_query))
+            print >> debug, '%s (%s): %s' % (round(b - a, 2), self.ctx.dbq_count, str(sql_query))
         return out
 
     def _process_query(self, sql_query):
@@ -777,14 +709,16 @@ class DB:
 
         if db_cursor.description:
             names = [x[0] for x in db_cursor.description]
+
             def iterwrapper():
                 row = db_cursor.fetchone()
                 while row:
                     yield storage(dict(zip(names, row)))
                     row = db_cursor.fetchone()
+
             out = iterbetter(iterwrapper())
             out.__len__ = lambda: int(db_cursor.rowcount)
-            out.list = lambda: [storage(dict(zip(names, x)))\
+            out.list = lambda: [storage(dict(zip(names, x))) \
                                 for x in db_cursor.fetchall()]
         else:
             out = db_cursor.rowcount
@@ -836,8 +770,8 @@ class DB:
             where = None
 
         return self.select(table, what=what, order=order,
-            group=group, limit=limit, offset=offset, _test=_test,
-            where=where)
+                           group=group, limit=limit, offset=offset, _test=_test,
+                           where=where)
 
     def sql_clauses(self, what, tables, where, group, order, limit, offset):
         return (
@@ -864,8 +798,10 @@ class DB:
             nout = reparam(val, vars)
 
         def xjoin(a, b):
-            if a and b: return a + ' ' + b
-            else: return a or b
+            if a and b:
+                return a + ' ' + b
+            else:
+                return a or b
 
         return xjoin(sql, nout)
 
@@ -884,7 +820,9 @@ class DB:
             >>> q.values()
             [2, 'bob']
         """
-        def q(x): return "(" + x + ")"
+
+        def q(x):
+            return "(" + x + ")"
 
         if values:
             _keys = SQLQuery.join(values.keys(), ', ')
@@ -975,7 +913,7 @@ class DB:
 
         try:
             out = db_cursor.fetchone()[0]
-            out = range(out-len(values)+1, out+1)
+            out = range(out - len(values) + 1, out + 1)
         except Exception:
             out = None
 
@@ -1047,8 +985,10 @@ class DB:
         """Start a transaction."""
         return Transaction(self.ctx)
 
+
 class PostgresDB(DB):
     """Postgres driver."""
+
     def __init__(self, **keywords):
         if 'pw' in keywords:
             keywords['password'] = keywords.pop('pw')
@@ -1056,6 +996,7 @@ class PostgresDB(DB):
         db_module = import_driver(["psycopg2", "psycopg", "pgdb"], preferred=keywords.pop('driver', None))
         if db_module.__name__ == "psycopg2":
             import psycopg2.extensions
+
             psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
         if db_module.__name__ == "pgdb" and 'port' in keywords:
             keywords["host"] += ":" + str(keywords.pop('port'))
@@ -1103,9 +1044,11 @@ class PostgresDB(DB):
         conn._con._con.set_client_encoding('UTF8')
         return conn
 
+
 class MySQLDB(DB):
     def __init__(self, **keywords):
         import MySQLdb as db
+
         if 'pw' in keywords:
             keywords['passwd'] = keywords['pw']
             del keywords['pw']
@@ -1126,6 +1069,7 @@ class MySQLDB(DB):
     def _get_insert_default_values_query(self, table):
         return "INSERT INTO %s () VALUES()" % table
 
+
 def import_driver(drivers, preferred=None):
     """Import the first available driver or preferred driver.
     """
@@ -1138,6 +1082,7 @@ def import_driver(drivers, preferred=None):
         except ImportError:
             pass
     raise ImportError("Unable to import " + " or ".join(drivers))
+
 
 class SqliteDB(DB):
     def __init__(self, **keywords):
@@ -1165,9 +1110,11 @@ class SqliteDB(DB):
             del out.__len__
         return out
 
+
 class FirebirdDB(DB):
     """Firebird Database.
     """
+
     def __init__(self, **keywords):
         try:
             import kinterbasdb as db
@@ -1184,7 +1131,7 @@ class FirebirdDB(DB):
 
     def delete(self, table, where=None, using=None, vars=None, _test=False):
         # firebird doesn't support using clause
-        using=None
+        using = None
         return DB.delete(self, table, where, using, vars, _test)
 
     def sql_clauses(self, what, tables, where, group, order, limit, offset):
@@ -1197,11 +1144,13 @@ class FirebirdDB(DB):
             ('WHERE', where),
             ('GROUP BY', group),
             ('ORDER BY', order)
-            )
+        )
+
 
 class MSSQLDB(DB):
     def __init__(self, **keywords):
         import pymssql as db
+
         if 'pw' in keywords:
             keywords['password'] = keywords.pop('pw')
         keywords['database'] = keywords.pop('db')
@@ -1242,9 +1191,11 @@ class MSSQLDB(DB):
         """
         pass
 
+
 class OracleDB(DB):
     def __init__(self, **keywords):
         import cx_Oracle as db
+
         if 'pw' in keywords:
             keywords['password'] = keywords.pop('pw')
 
@@ -1264,6 +1215,7 @@ class OracleDB(DB):
             return query
         else:
             return query + "; SELECT %s.currval FROM dual" % seqname
+
 
 def dburl2dict(url):
     """
@@ -1292,7 +1244,10 @@ def dburl2dict(url):
     if port: out['port'] = port
     return out
 
+
 _databases = {}
+
+
 def database(dburl=None, **params):
     """Creates appropriate database using params.
 
@@ -1309,6 +1264,7 @@ def database(dburl=None, **params):
     else:
         raise UnknownDB, dbn
 
+
 def register_database(name, clazz):
     """
     Register a database.
@@ -1322,12 +1278,14 @@ def register_database(name, clazz):
     """
     _databases[name] = clazz
 
+
 register_database('mysql', MySQLDB)
 register_database('postgres', PostgresDB)
 register_database('sqlite', SqliteDB)
 register_database('firebird', FirebirdDB)
 register_database('mssql', MSSQLDB)
 register_database('oracle', OracleDB)
+
 
 def _interpolate(format):
     """
@@ -1345,7 +1303,7 @@ def _interpolate(format):
             raise _ItplError(text, pos)
         return match, match.end()
 
-    namechars = "abcdefghijklmnopqrstuvwxyz"\
+    namechars = "abcdefghijklmnopqrstuvwxyz" \
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
     chunks = []
     pos = 0
@@ -1373,8 +1331,8 @@ def _interpolate(format):
             chunks.append((0, format[pos:dollar]))
             match, pos = matchorfail(format, dollar + 1)
             while pos < len(format):
-                if format[pos] == "." and\
-                   pos + 1 < len(format) and format[pos + 1] in namechars:
+                if format[pos] == "." and \
+                                        pos + 1 < len(format) and format[pos + 1] in namechars:
                     match, pos = matchorfail(format, pos + 1)
                 elif format[pos] in "([":
                     pos, level = pos + 1, 1
@@ -1397,6 +1355,8 @@ def _interpolate(format):
         chunks.append((0, format[pos:]))
     return chunks
 
+
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
