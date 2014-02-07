@@ -1,8 +1,11 @@
-#-*-coding=utf8-*-
+# -*-coding=utf8-*-
 from torngas.helpers.route_helper import url, RouteLoader
-
-route = RouteLoader(path_prefix='Main.views', path='/', app_folder='Main')
+from . import SUBAPP_NAME
+route = RouteLoader(path='/', subapp_name='Main')
 
 urls = route.urlhelper(
-    url('Index', r'/', 'view=main_handler,handler=Main')
+    url('Index', r'/', 'views.main_handler.Main')
 )
+
+if __name__ == '__main__':
+    pass
