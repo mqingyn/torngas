@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<!--
+
+      _ _                     __  __           _             ___   ______
+     | (_)              _    |  \/  |         (_)           |__ \ |____  |
+     | |_ _ __   __ _ _| |_  | \  / |_   _ ___ _  ___  __   __ ) |    / /
+ _   | | | '_ \ / _` |_   _| | |\/| | | | / __| |/ __| \ \ / // /    / /
+| |__| | | | | | (_| | |_|   | |  | | |_| \__ \ | (__   \ V // /_ _ / /
+ \____/|_|_| |_|\__, |       |_|  |_|\__,_|___/_|\___|   \_/|____(_)_/
+                 __/ |
+                |___/
+-->
+<!--  微博：@JingFM，微信：JingFM2012 | JingFM™ Dev Team -->
+<html>
+<head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content="Chrome=1,IE=edge">
+    <title>Jing+ Music</title><!--[if IE 6]><meta http-equiv=refresh content="0;url=/ie6.html"><![endif]-->
+    <noscript>
+        <meta http-equiv=refresh content="0;url=/nojs.html">
+    </noscript>
+    <meta name=keywords content="Jing音乐, Jing, Jing+, Music, Jing+ Music, JingFM, Jing.FM 2.2">
+    <meta name=description content="Jing.fm是一款开创性的音乐应用，它最大的特色就是首创地通过“描述”来找到自己喜欢的音乐。Jing.fm改变用户收听音乐的方式。">
+    <meta property=og:type content=product>
+    <meta property=og:title content="Jing+ Music">
+    <meta property=og:description
+          content="Jing.fm是一款开创性的音乐Web App，它最大的特色就是首创地通过“描述”来找到自己喜欢的音乐。Jing.fm希望有可能改变用户收听音乐的方式。">
+    <meta property=og:image content=http://img.jing.fm/assets/jing/promlogo.jpg>
+    <meta property="rr:appid " content=173723>
+    <meta name="apple-itunes-app" content="app-id=581886398"/>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name=viewport>
+    <meta name=apple-mobile-web-app-capable content=yes>
+    <meta name=apple-mobile-web-app-status-bar-style content=black>
+    <link rel=apple-touch-icon-precomposed sizes=72x72 href=http://img.jing.fm/assets/jing/ipad-precomposed.png>
+    <link rel=apple-touch-icon-precomposed sizes=144x144 href="http://img.jing.fm/assets/jing/ipad-precomposed@2x.png">
+    <link rel=apple-touch-startup-image media="(device-width: 768px) and (orientation: landscape)"
+          href=http://img.jing.fm/assets/jing/startup.png>
+    <link rel=apple-touch-startup-image
+          media="(device-width: 768px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"
+          href="http://img.jing.fm/assets/jing/startup@2x.png">
+    <script charset=utf-8>var assets = new Object();
+    assets.js = new Array("assets/vendor.js", "assets/application.js");
+    assets.css = new Array("assets/application.css", "assets/iebundled.css");
+    assets.version = "c5944bb2a00ba9a22e53caf015a5a4e7036a10bf";
+    document.write("<link rel='stylesheet' href='" + assets.css[0] + "?v=" + assets.version + "'>");
+    document.write("<!--[if IE]><link rel='stylesheet' href='" + assets.css[1] + "?v=" + assets.version + "'><![endif]-->");
+    for (var i = 0; i < assets.js.length; ++i) {
+        document.write("<script type='text\/javascript' src='" + assets.js[i] + "?v=" + assets.version + "'><\/script>");
+    }</script>
+    <script>var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-29714584-2']);
+    _gaq.push(['_trackPageview']);
+    (function () {
+        var ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
+    })();</script>
+</head>
+<body onresize="Core.resize()" class=login>
+<div id=allBd style="float:left; width:100%">
+    <div id=ntrlLngTopCtn class="overlay ntrlLngTopCtn"
+         style="width:0px; float:left; height:100%; overflow:hidden; display:none">
+        <div class=ntrlLngTop></div>
+    </div>
+    <div id=mainBd class=mainBd>
+        <div id=mdCtn class=mdCtn>
+            <div id=bdgCtn class="signUpCtn absCt"><h2 id=ling class="jing hide"></h2>
+
+                <div id=bindCtn class="authOvlCtn bind hztCt hide overlay">
+                    <div class=bindCtn>
+                        <div class=infos>
+                            <div class=infoCtn><h3 id=snsNickName></h3>
+
+                                <p id=snsDesc class=desc></p></div>
+                            <div class=bindAvtCtn><a href="#" class=avtMask></a>
+
+                                <div class=avt style="overflow:hidden;position:relative"><img id=snsAvt width=64px
+                                                                                              height=64px
+                                                                                              src="http://img.jing.fm/assets/jing/defaults/avatar/64.jpg">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="authFormCtn bind">
+                            <div class=flds>
+                                <div class="fld nick hide"><label></label><input id=snsInputNickName name=nick
+                                                                                 class=input value="你的昵称"
+                                                                                 onblur="if(this.value == '')this.value='你的昵称'"
+                                                                                 onfocus="if(this.value == '你的昵称')this.value = ''">
+                                </div>
+                                <div class="fld email"><label></label><input id=snsEmail name=email class=input
+                                                                             value="你的Email"
+                                                                             onblur="if(this.value == '')this.value='你的Email'"
+                                                                             onfocus="if(this.value == '你的Email')this.value = ''">
+                                </div>
+                                <div class="fld pwd" style=position:relative><label></label><input id=snsPwd
+                                                                                                   name=password
+                                                                                                   type=password
+                                                                                                   class=input
+                                                                                                   placeholder="输入你的密码"><a
+                                        id=bindBtn href="#" class=btn><span class=btnLt></span>绑定<span
+                                        class=btnRt></span></a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id=cmpltSignupCtn class="authOvlCtn cmpltSignup bind hztCt hide overlay">
+                    <div class=bindCtn>
+                        <div class=infos>
+                            <div style=position:relative class=infoCtn><input id=uploadify name=file type=file></div>
+                            <div class=bindAvtCtn><a href="#" class=avtMask></a>
+
+                                <div class=avt><img id=localAvt width=64px height=64px
+                                                    src="http://img.jing.fm/assets/jing/defaults/avatar/64.jpg"></div>
+                            </div>
+                        </div>
+                        <div class="authFormCtn bind">
+                            <div class=flds>
+                                <div class="fld nick" style=position:relative><label></label><input id=localNickName
+                                                                                                    value="你的昵称"
+                                                                                                    class=input
+                                                                                                    data-error="昵称不能为空"
+                                                                                                    onblur="if(this.value == '')this.value='你的昵称'"
+                                                                                                    onfocus="if(this.value == '你的昵称')this.value = ''"><a
+                                        id=cmpltBtn href="#" class=btn><span class=btnLt></span>提交<span
+                                        class=btnRt></span></a></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id=mscGnCtn class="mscGnCtn hide">
+                    <div id=bdg1 class=bdgCtn><a class=ulkBdg href="#">研究你的喜好</a></div>
+                    <div id=bdg2 class=bdgCtn><a class=ulkBdg href="#">测试你的基因</a></div>
+                    <div id=bdg3 class=bdgCtn><a class=ulkBdg href="#">告诉我你的秘密</a></div>
+                    <p id=bdgStr class="bdgDesc left">Select One Task For Your Journey</p></div>
+                <div id=invt class="authOvlCtn nolgCtn hztCt overlay rgst hide">
+                    <div class=register>
+                        <div class=intro><h3 class=introTit></h3>
+
+                            <p class=introCtt>快速知道你的好友中还有谁也在使用Jing.fm，看看他们的音乐。</p></div>
+                        <div class=rgstCtn><a id=snsSina href="#" class="rgstBtn wb">使用新浪微博注册</a><a id=snsRenren
+                                                                                                    href="#"
+                                                                                                    class="rgstBtn rr">使用人人网注册</a><a
+                                id=invtBtn href="#" class="rgstBtn email signUpMenuBtn">使用邮箱注册</a></div>
+                    </div>
+                </div>
+                <div id=fgtCtn class="authOvlCtn nolgCtn hztCt overlay hide">
+                    <div class=forgetPwd>
+                        <div class=intro><h3 class=introTit></h3>
+
+                            <p class=introCtt>输入你注册时候使用的邮箱，我们会将密码发送到那里，你在那里查收。</p></div>
+                        <div class=fgtEmail>
+                            <div class=fld><input id=fgtEmail name=email class="input fgt" value="你注册的Email"
+                                                  onblur="if(this.value == '')this.value='你注册的Email'"
+                                                  onfocus="if(this.value == '你注册的Email')this.value = ''"><a id=fgtBtn
+                                                                                                            href="#"
+                                                                                                            class=btn><span
+                                    class=btnLt></span>发送申请<span class=btnRt></span></a></div>
+                        </div>
+                    </div>
+                </div>
+                <div id=resetPwdCtn class="authOvlCtn nolgCtn hztCt overlay hide">
+                    <div class=resetPwd>
+                        <div class=intro><h3 class=introTit></h3>
+
+                            <p class=introCtt>把你的新密码输入到下面的框里面，这次要仔细记牢哦！</p></div>
+                        <div class=fgtEmail>
+                            <div class=fld><img src="http://img.jing.fm/assets/jing/i18n/zh_CN/cnStrP11.gif"
+                                                class=pwdNoIconImg><input id=resetPwd name=password type=password
+                                                                          class="input fgt"><a id=resetPwdBtn href="#"
+                                                                                               class=btn><span
+                                    class=btnLt></span>重新设置<span class=btnRt></span></a></div>
+                        </div>
+                    </div>
+                </div>
+                <div id=fvtAtsCtn class="authOvlCtn fvtAtsCtn hztCt hide"></div>
+            </div>
+        </div>
+        <div id=tbCtn class="tbCtn gnBd"><a id=logo href="#" class="logo v3 overlay"></a><a id=v3
+                                                                                            class="betaV3 link overlay"
+                                                                                            href=#>3.0内测入口</a>
+
+            <div id=mainMenuCtn class="mainMenuCtn hide">
+                <div id=psnRdMainMenu class="psnRdApp hide">
+                    <div class=waveTb></div>
+                </div>
+                <div id=searchMainMenu>
+                    <div id=schBxCtn class=schBxCtn><input id=schFld placeholder="情绪 , 状态 , 艺人 , 风格 , 乐器 ... 随意组合"
+                                                           class=schFld onkeydown="return Search.update(this)"
+                                                           onmouseup="return Search.update(this)"
+                                                           onkeypress="return Search.update(this)"
+                                                           onkeyup="return Search.update(this)"
+                                                           onmousedown="return Search.update(this)"
+                                                           onclick="return Search.update(this)" tabindex=-1><span
+                            class="schHint hide">想听更多点击添加</span><a id=schBtn href="#" class=schBtn></a>
+
+                        <div id=atTipsCtn class="atTipsCtn hide"></div>
+                    </div>
+                </div>
+            </div>
+            <div id=userMenuCtn class="userMenuCtn right hide"><em id=aboutCount
+                                                                   class="num serif tkrs hide overlay">0</em><em
+                    id=aboutNewIcon class="newApp hide overlay"></em><a id=about class="rndBtn apps brdBtnEvt overlay"
+                                                                        href="#about"></a></div>
+            <div id=signUpMenuCtn class="signUpMenuCtn overlay"><a id=signUp class="rndBtn signUp signUpMenuBtn"
+                                                                   href="#account/signup"></a><a id=signIn
+                                                                                                 class="rndBtn signIn signUpMenuBtn"
+                                                                                                 href="#account/login"></a>
+            </div>
+            <a id=fgtPwd class="fgtPwd link right overlay" href="#account/forgot">忘记密码？</a></div>
+        <div id=signUpCtn class="menuOvlCtn auth hide overlay">
+            <div id=signUpFormCtn class="authFormCtn hide">
+                <div class="head clearfix"><h2 class="left signUpTxt">Welcome to Join Us</h2><span class=right><a
+                        id=snsRenren class="rndBtn rr" href="#auth/renren"></a><a id=snsSina class="rndBtn wb"
+                                                                                  href="#auth/weibo"></a><a id=snsDouban
+                                                                                                            class="rndBtn db"
+                                                                                                            href="#auth/weibo"></a><a
+                        id=snsQQ class="rndBtn qq" href="#auth/qq"></a></span></div>
+                <div class=flds>
+                    <div class="fld email"><label></label><input id=signUpEmail data-error="邮箱不能为空" name=email
+                                                                 class=input value="你的Email"
+                                                                 onblur="if(this.value == '')this.value='你的Email'"
+                                                                 onfocus="if(this.value == '你的Email')this.value = ''">
+                    </div>
+                    <div class="fld pwd" style="margin-bottom:25px;position:relative"><label></label><input id=signUpPwd
+                                                                                                            data-error="密码不能为空"
+                                                                                                            name=password
+                                                                                                            type=password
+                                                                                                            class=input
+                                                                                                            placeholder="输入你的密码"><a
+                            id=signUpCmt href="#" class=btn><span class=btnLt></span>注册<span class=btnRt></span></a>
+                    </div>
+                </div>
+            </div>
+            <div id=signInFormCtn class="authFormCtn hide">
+                <div class="head clearfix"><h2 class="left signInTxt">Welcome Back</h2><span class=right><a id=snsRenren
+                                                                                                            class="rndBtn rr"
+                                                                                                            href="#auth/renren"></a><a
+                        id=snsSina class="rndBtn wb" href="#auth/weibo"></a><a id=snsDouban class="rndBtn db"
+                                                                               href="#auth/weibo"></a><a id=snsQQ
+                                                                                                         class="rndBtn qq"
+                                                                                                         href="#auth/qq"></a></span>
+                </div>
+                <div class=flds>
+                    <div class="fld email"><label></label><input id=signInEmail data-error="邮箱不能为空" name=email
+                                                                 class=input value="你的Email"
+                                                                 onblur="if(this.value == '')this.value='你的Email'"
+                                                                 onfocus="if(this.value == '你的Email')this.value = ''">
+                    </div>
+                    <div class="fld pwd" style="margin-bottom:25px;position:relative"><label></label><input id=signInPwd
+                                                                                                            data-error="密码不能为空"
+                                                                                                            name=password
+                                                                                                            type=password
+                                                                                                            class=input
+                                                                                                            placeholder="输入你的密码"><a
+                            id=signInCmt href="#" class=btn><span class=btnLt></span>登录<span class=btnRt></span></a>
+                    </div>
+                </div>
+            </div>
+            <div class=ar></div>
+        </div>
+        <div id=gnsCtn class="gnsCtn hide overlay">
+            <div class=gnsCttCtn>
+                <div class=gnsIcon></div>
+                <div id=gnsCttCt class=gnsCttCt>
+                    <div id=gnsCtt class=gnsCtt></div>
+                </div>
+                <div class=insptIcon></div>
+            </div>
+        </div>
+        <div id=instSchCtn class="instSchCtn absCt hide">
+            <div id=instSchCttCtn style=overflow:hidden></div>
+        </div>
+        <div id=appsCtn class="menuOvlCtn appCt hide overlay">
+            <ul id=appsNav class="brdCrbsCtn hide"></ul>
+            <div id=frdCtNav class="rctCtn tabBarCtn hide"><a id=olFrd class="tabBtn olFrd crt" href="#"></a>
+
+                <div class=tabBtnImg></div>
+                <a id=frds class="tabBtn frdCt" href="#"></a>
+
+                <div class=tabBtnImg><em class="newApp hide overlay" style="left: 20px; top: 0px"></em></div>
+                <a id=ext class="tabBtn ext" href="#"></a>
+
+                <div class=tabBtnImg></div>
+            </div>
+            <div id=appsCttCtn class=menuCtn></div>
+        </div>
+        <div id=leftAr class=ar></div>
+        <div id=rightAr class=ar></div>
+        <div id=guide class="ovlCtn fsapp guide hide">
+            <div id=step1Tip class="gdElmt rgstIcon stepOne"></div>
+            <div id=step1Ds class=gdElmt><h2 class=dscp>欢迎使用Jing 自然语言搜索引擎，下面教教你怎么驾驭它！<br>Welcome Join Jing Natral
+                Languate Search Engine,Now Let Me Show</h2></div>
+            <div id=step1Btn class=gdElmt><a href="#" class=gdBtn>开始旅程</a></div>
+            <div id=step2Tip class="gdElmt rgstIcon stepTwo"></div>
+            <div id=step2Ds class=gdElmt><h2 class=dscp>Jing 是一个集自然语意分析，音乐具象化处理的人工智能程序。<br>所有你需要做的事情就是把Jing当做你的音乐仆人，你想要什么只管用自然语言吩咐。
+            </h2></div>
+            <div id=step2Btn class=gdElmt><a href="#" class=gdBtn>下一步</a></div>
+            <div id=step3Tip class="gdElmt rgstIcon stepThr"></div>
+            <div id=step3Ds class="gdElmt btmTip"><h2 class=dscp>你已经基本了解了Jing的神奇搜索音乐的方式，现在在屏幕正下方的搜索框用这种搜索方式</h2><span
+                    class=schArr></span></div>
+        </div>
+        <div id=appGuide class="ovlCtn fsapp guide hide dspr overlay">
+            <div class="appGdCtn absCt">
+                <div class=appDesc><a id=acptBtn href="#" class=acptBtn></a></div>
+                <div class=appIll><a id=appGuideVcOvr data-type="at,stct" href="#" class="vcOvr absCt"></a></div>
+            </div>
+            <a href="#" class=cls></a>
+
+            <div class="clsInstrc hide"></div>
+        </div>
+        <div id=smlGuide class="ovlCtn fsapp guide hide dspr">
+            <div class=appGdBtnCtn>
+                <div class=smlMscBtn></div>
+                <div class=smlMsc>
+                    <div class=smlMscArr></div>
+                    <div class=appDesc><a id=smlGuideKnow href="#" class=acptBtn>我知道了</a></div>
+                    <a data-type=sml href="#" class=vcOvr></a></div>
+            </div>
+        </div>
+        <div id=psnRdGuide class="ovlCtn fsapp guide hide dspr">
+            <div class=appGdBtnCtn>
+                <div class=psnRdBtn></div>
+                <div class=psnRd>
+                    <div class=psnRdArr></div>
+                    <div class=appDesc><a id=psnRdGuideKnow href="#" class=acptBtn>我知道了</a></div>
+                    <a data-type=psnRd href="#" class=vcOvr></a></div>
+            </div>
+        </div>
+        <div id=rlsNote class="ovlCtn fsapp guide hide dspr"><a href="#" class=cls></a>
+
+            <div class=rlsCtn>
+                <h3 class=rlsTit><p class=rlsVer></p></h3>
+                <ol class=rlsCttCtn></ol>
+                <a href="#" class="cnfmBtn cncl"></a><a href="#" class="cnfmBtn cnfm"></a></div>
+        </div>
+        <div id=shrGuide class="ovlCtn fsapp shrApp hide"><a href="#" class=cls></a>
+
+            <div class="shrBoxCtn absCt">
+                <div class=shrBoxCtt>
+                    <div class=avt><img id=shrAvt src="" width=49 height=49 border=0></div>
+                    <div class=shrBox>
+                        <div class=shrBoxTail></div>
+                        <textarea id=shrTextarea onkeydown="return Guide.update(this)"
+                                  onmouseup="return Guide.update(this)" onkeypress="return Guide.update(this)"
+                                  onkeyup="return Guide.update(this)" onmousedown="return Guide.update(this)"
+                                  onclick="return Guide.update(this)"></textarea></div>
+                    <a href="#" id=shrCncl class="cnfmBtn cncl"></a><a href="#" id=shrCnfm class="cnfmBtn cnfm"></a>
+                </div>
+                <div class=spt></div>
+                <div id=shrBoxFtr class=shrBoxFtr></div>
+            </div>
+        </div>
+        <div id=topApp class="ovlCtn topApp fsapp hide dspr">
+            <div class="slide slideAnmt" style="height:100%; left:0px; position:absolute"></div>
+        </div>
+        <a id=lgtBtn class=lgtBtn href="#"></a><a href="#" id=ntrlLngBtn class="plyrBtns ntrlLngBtn hide"
+                                                  data-tps="最佳搜索"></a>
+
+        <div id=msgTone></div>
+        <div id=ctnLength class=hide></div>
+        <div id=maskUserMenu class="maskUserMenu hide dspr"></div>
+        <iframe name=hidden id=hidden style=display:none></iframe>
+        <div id=cypherH class=cypherH></div>
+        <div id=atSgstCtn class="atSgstCtn hide"></div>
+    </div>
+    <div id=abtCtn style="float:left; height:100%; overflow:hidden; display:none">
+        <div class="abtCtn overlay">
+            <div id=abtMainCtn>
+                <div class=abtShdw></div>
+                <div id=mask style="height:470px; display:none"></div>
+                <div id=cvCtn class=cvCtn><a id=abtBckBtn href="#" class=bckBtn></a><img id=abtCover width=420
+                                                                                         class=cvImg src="">
+
+                    <p id=abtDes class=name></p><input id=uploadCover name=file type=file><a id=atNickPlay class=atPlay
+                                                                                             href="#"></a>
+
+                    <div class=tpsMenuCtn><a data-tps="智能推荐" class="rndBtn psnRd psnRdEvent" href="#"></a><a
+                            data-tps="聊天" class="rndBtn cht offChtNickEvent" href="#"></a><a data-tps="跟听"
+                                                                                             class="rndBtn chtflwLstn flwLstnEvent"
+                                                                                             href="#"></a><a
+                            data-tps="关注Ta" class="rndBtn flwFrd flwFrdEvent" href="#"></a></div>
+                </div>
+                <div id=abtMenu class=abtMenu>
+                    <div class="cclAvt hztCt">
+                        <div class=avtBd></div>
+                        <div class=cclAvtMask></div>
+                        <img id=abtAvt width=78 src=""></div>
+                    <a data-mid=tkrs data-no=0 class="abtBtn tkrs" href="#">动态</a><a data-mid=msc data-no=1
+                                                                                     class="abtBtn msc"
+                                                                                     href="#">音乐</a><a data-mid=frds
+                                                                                                       data-no=2
+                                                                                                       class="abtBtn frds"
+                                                                                                       href="#">好友</a><em
+                        id=frdsChtCount style="left:300px;top:2px" class="num serif tkrs hide overlay">0</em><em
+                        id=frdsTkrsCount style="left:55px;top:2px" class="num serif tkrs hide overlay">0</em><em
+                        id=stgsNewIcon class="newApp hide" style="left:372px;top:2px"></em><a id=aboutStgs data-mid=stgs
+                                                                                              data-no=3
+                                                                                              class="abtBtn stgs"
+                                                                                              href="#">设置</a>
+
+                    <div id=nowCrt class=crt></div>
+                    <div id=willCrt class=crt></div>
+                </div>
+                <div id=abtCttCtn class=abtCttCtn></div>
+                <div id=span style="position: absolute; z-index: -1; height: 48px; width: 48px; left: 186px"></div>
+            </div>
+            <div id=topMainCtn class="chrtLstCtn hide"></div>
+        </div>
+    </div>
+</div>
+<div id=tps class="tps hide">
+    <div class=tpsAr></div>
+    <div class=tpsLbd></div>
+    <div class=tpsCtn>
+        <div class=inspt></div>
+        <p class=ctt></p></div>
+    <div class=tpsRbd></div>
+</div>
+<div id=playerCore></div>
+<script src=http://player.jing.fm/playerCore23.js></script>

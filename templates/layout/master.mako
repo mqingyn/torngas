@@ -9,25 +9,24 @@
 
     <title>
         <%block name="title">${site_settings.site_title}</%block>
-
     </title>
     <link href="${static_url('css/bootstrap.css')}" rel="stylesheet"/>
-    <link href="${static_url('css/bootstrap-theme.css')}" rel="stylesheet"/>
-
     <%block name="top_script"/>
 </head>
-
-<body>
-    ${xsrf_form_html()}
-    <%include file='../include/topbar.html'/>
-
+<body cz-shortcut-listen="true">
 <div class="container">
+    <div class="header">
+
+            <%include file='../include/topbar.mako'/>
+    </div>
+    ${xsrf_form_html()}
     ${next.body()}
+    <footer class="footer">
+        <p>&copy; ${site_settings.footer['desc']} ${site_settings.footer['year']}</p>
+    </footer>
+
 </div>
-<footer class="footer">
-    <hr>
-    <p>&copy; ${site_settings.footer['desc']} ${site_settings.footer['year']}</p>
-</footer>
+
 <script src="${static_url('js/jquery.min.js')}"></script>
 <script src="${static_url('js/bootstrap.js')}"></script>
 <script src="${static_url('js/angular-1.15.min.js')}"></script>

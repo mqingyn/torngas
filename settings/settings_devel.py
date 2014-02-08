@@ -11,8 +11,7 @@ MIDDLEWARE_CLASSES = (
 # 加载的应用 #
 ############
 INSTALLED_APPS = (
-
-    'faster',
+    'gipsy',
 )
 
 
