@@ -22,7 +22,7 @@
             obj.css("-o-transform", "rotate(" + i + "deg)");
             obj.css("-webkit-transform", "rotate(" + i + "deg)");
             obj.css("transform", "rotate(" + i + "deg)");
-            i += 0.5;
+            i += 0.3;
 
 
         }
@@ -34,7 +34,7 @@
     </script>
 </%block>
 <div class="banner-player">
-    <div class="img-rounded bg-banner" style="background-image: url(${static_url('img/banner.png')})">
+    <div class="img-rounded bg-banner" style="background-image: url(${static_url('img/lovely_fingers.jpg')})">
     </div>
     <div class="cdplayer">
 
@@ -51,14 +51,22 @@
 <div class="row marketing">
 
     <div class="col-lg-6">
-        <h4>Subheading</h4>
+        <h1 class="quik-title">“是的ddvip是的疯狂哦哦的哦的偶读都哦都都都哦都都使肌肤 飞 的！”</h1>
 
-        <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
+        <p class="quik-cnt">
+            <form action="/" method="post" enctype="multipart/form-data">
+                ${xsrf_form_html()}
+                <input type="text" name="username">
+                <input type="file" name="file" id="file"/>
+                <input type="submit" value="提交">
+            </form>
+        </p>
 
-        <h4>Subheading</h4>
+            <h1>“是的ddvip是的疯狂哦！”</h1>
 
-        <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet
-            fermentum.</p>
+        <p>如果你的手机已经使用了一年多，或许你已经不再会每天都去挖掘新的应用软件，没准，你好久都没有更新过手机里的那几十个应用了吧？
+
+昨晚花两个小时更新了一下。</p>
 
         <h4>Subheading</h4>
 
@@ -66,18 +74,16 @@
     </div>
 
     <div class="col-lg-6">
-        <h4>Subheading</h4>
+      <h1>“是的ddvip是的疯狂哦！”</h1>
 
-        <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
+        <p>如果你的手机已经使用了一年多，或许你已经不再会每天都去挖掘新的应用软件，没准，你好久都没有更新过手机里的那几十个应用了吧？
 
-        <h4>Subheading</h4>
+昨晚花两个小时更新了一下。</p>
+            <h1>“是的ddvip是的疯狂哦！”</h1>
 
-        <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet
-            fermentum.</p>
+        <p>如果你的手机已经使用了一年多，或许你已经不再会每天都去挖掘新的应用软件，没准，你好久都没有更新过手机里的那几十个应用了吧？
 
-        <h4>Subheading</h4>
-
-        <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+昨晚花两个小时更新了一下。</p>
     </div>
 </div>
 

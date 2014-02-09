@@ -131,7 +131,6 @@ SESSION = {
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
 TEMPLATE_CONFIG = {
     'template_engine': 'torngas.template.mako_loader.MakoTemplateLoader',
-    ########### mako 配置项 使用mako时生效###########
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
     'filesystem_checks': True, #通用选项
     'cache_directory': '../_tmpl_cache', #模版编译文件目录,通用选项
@@ -139,8 +138,53 @@ TEMPLATE_CONFIG = {
     'cache_size': 0, #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
     'format_exceptions': False, #格式化异常输出，mako专用
     'autoescape': False #默认转义设定，jinja2专用
-    ###########      end        ##################
+
 }
 
-SITE_SETTINGS_FILE = "site_settings.yaml"
+SITE_SETTINGS_FILE = "site_settings.yml"
 
+# 数据库连接字符串，
+# 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
+DATABASE_CONNECTION = {
+
+    'gipsy': {
+        'kwargs': {'pool_recycle': 3600},
+        'connections': [{
+                            'ROLE': 'master',
+                            'DRIVER': 'mysql+mysqldb',
+                            'UID': 'root',
+                            'PASSWD': 'root',
+                            'HOST': '127.0.0.1',
+                            'PORT': 3306,
+                            'DATABASE': 'gipsy',
+                            'QUERY': {"charset": "utf8"}
+
+                        },
+                        {
+                            'ROLE': 'slave',
+                            'DRIVER': 'mysql+mysqldb',
+                            'UID': 'root',
+                            'PASSWD': 'root',
+                            'HOST': '127.0.0.1',
+                            'PORT': 3306,
+                            'DATABASE': 'gipsy',
+                            'QUERY': {"charset": "utf8"}
+
+                        }]
+    }
+}
+
+
+# sqlalchemy配置，列出部分，可自行根据文档增加配置项
+# 该配置项对所有连接全局共享
+SQLALCHEMY_CONFIGURATION = {
+    'sqlalchemy.echo': False,
+    'sqlalchemy.max_overflow': 10,
+    'sqlalchemy.echo_pool': True,
+    'sqlalchemy.pool_timeout': 100
+}
+
+QINIU_ACCESSKEY = "Fjt5x01rtUgtvDc-YV1-fyiqDSKUqqTzImIsP4YI"
+QINIU_SECRETKEY = "ehOdqzDtIw1HMVxjgCG2DZC_0CIwvZX0QbwHmjj1"
+QINIU_BUCKET = ['gipsy']
+QINIU_DOMAIN = "youkr-static.qiniudn.com"

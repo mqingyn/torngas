@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright (c) 2013,掌阅科技
-All rights reserved.
-
 摘    要：
 创 建 者：mengqingyun
 创建日期：2014-1-24
@@ -18,6 +15,7 @@ from torngas.decorators.async_execute import async_execute
 from .. import SITE_SETTINGS
 from torngas.inject_factory import factory
 from torngas.helpers.logger_helper import logger
+
 
 class Base(WebHandler):
     def static_url(self, path, include_host=None, **kwargs):
@@ -72,12 +70,21 @@ class Index(Base):
         pass
 
     def get(self, group_id=1):
-
-
+        qiniu = factory.R('qiniu_srv')
+        print qiniu
         kw = locals()
         kw.pop('self')
 
         self.render('gipsy/index.mako', **kw)
+
+    def post(self):
+        qiniu = factory.R('qiniu_srv')
+        username = self.get_argument('username', 'anonymous')
+        img_file = self.request.files['file'][0]
+        sizes = [tuple(i.split('x')) for i in self.site_settings.image_sizes]
+        result = qiniu.upload_imgfile(img_file, sizes).er
+
+
 
 
 if __name__ == '__main__':

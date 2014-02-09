@@ -19,7 +19,7 @@
 
             <%include file='../include/topbar.mako'/>
     </div>
-    ${xsrf_form_html()}
+
     ${next.body()}
     <footer class="footer">
         <p>&copy; ${site_settings.footer['desc']} ${site_settings.footer['year']}</p>

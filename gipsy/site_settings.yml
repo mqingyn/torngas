@@ -1,8 +1,9 @@
 static_version: 20140126
+image_sizes: [320x240,640x480,1024x768]
 footer:
     year: 2014
     desc: mqingyn design
-site_title: FASTER部署平台v0.1
+site_title: Joykr
 #项目组：项目名称-项目配置
 projects:
     - group_name: 测试环境
