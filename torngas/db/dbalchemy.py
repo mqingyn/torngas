@@ -23,7 +23,7 @@ _CONNECTION_TYPE = (
 
 class Model(object):
     query = None
-    __table_name__ = ''
+    __tablename__ = ''
 
     @declared_attr
     def __table_args__(cls):
