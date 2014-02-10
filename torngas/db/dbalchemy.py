@@ -22,8 +22,8 @@ _CONNECTION_TYPE = (
 
 
 class Model(object):
-    id = Column(Integer(10), primary_key=True)  # primary key
     query = None
+    __table_name__ = ''
 
     @declared_attr
     def __table_args__(cls):
