@@ -45,7 +45,7 @@ class SqlConnection(object):
     _conn_lock = threading.Lock()
 
     @property
-    def get_connetion(self):
+    def connetion(self):
         if hasattr(self, '_conn'):
             return self._conn
         else:
@@ -54,13 +54,14 @@ class SqlConnection(object):
                 connections = settings.DATABASE_CONNECTION
 
                 config = settings.SQLALCHEMY_CONFIGURATION
+
                 for connection_name, connection_item in connections.items():
                     master = []
                     slaves = []
                     kwargs = connection_item.get('kwargs', {})
                     connections_str = connection_item['connections']
-                    for conn in connections_str:
 
+                    for conn in connections_str:
                         dburl = url.URL(drivername=conn['DRIVER']
                             , username=conn['UID']
                             , password=conn['PASSWD']
@@ -68,6 +69,7 @@ class SqlConnection(object):
                             , port=conn['PORT']
                             , database=conn['DATABASE']
                             , query=conn['QUERY'])
+
                         if conn['ROLE'] == _CONNECTION_TYPE[0]:
                             master.append(dburl)
                         else:
