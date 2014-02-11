@@ -18,25 +18,26 @@ application_module = lazyimport('torngas.application')
 settings_module = lazyimport('torngas.helpers.settings_helper')
 logger_module = lazyimport('torngas.helpers.logger_helper')
 
-define("port", default=8000, help="run server on it", type=int)
-define("setting", default='settings_devel', help="""config used to set the configuration file type,\n
-settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""",
-       type=str)
-define("address", default='localhost', help='listen host,default:localhost', type=str)
-define("log_frefix", default='torngas', help='log file dirname', type=str)
 
 
 class Server(object):
-    def __init__(self, project_path=None, application=None):
+
+    def init(self,project_path=None, application=None):
+        self.load_define()
         tornado.options.parse_command_line()
         self.application = application
         self.settings = settings_module.settings
         self.proj_path = project_path
-        self.initializ()
+        return self
 
-
-    def initializ(self):
-        pass
+    def load_define(self):
+        define("port", default=8000, help="run server on it", type=int)
+        define("setting", default='setting', help="""config used to set the configuration file type,\n
+        settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""",
+               type=str)
+        define("address", default='localhost', help='listen host,default:localhost', type=str)
+        define("log_prefix", default='torngas', help='log file dirname', type=str)
+        return self
 
 
     def load_application(self, default_host='', transforms=None, wsgi=False, urls=None):
@@ -87,20 +88,23 @@ class Server(object):
         enable_pretty_logging(None, logging.getLogger('tornado'))
 
         #服务启动
-
+        try:
+            addr = options.address
+        except AttributeError:
+            addr = '127.0.0.1'
         from tornado.netutil import bind_sockets
 
         if self.settings.IPV4_ONLY:
             import socket
 
-            sockets = bind_sockets(options.port, options.address, family=socket.AF_INET)
+            sockets = bind_sockets(options.port, addr, family=socket.AF_INET)
         else:
-            sockets = bind_sockets(options.port, options.address)
+            sockets = bind_sockets(options.port, addr)
 
         self.print_settings_info()
         http_server = tornado.httpserver.HTTPServer(self.application)
         http_server.add_sockets(sockets)
-        logging.info('tornado server started. listen port: %s ,host address: %s' % (options.port, options.address))
+        logging.info('tornado server started. listen port: %s ,host address: %s' % (options.port, addr))
         tornado.ioloop.IOLoop.instance().start()
 
     def print_settings_info(self):

@@ -19,10 +19,13 @@ class Settings(object):
             if not hasattr(self, '._setting'):
                 try:
                     self.settings_module = import_object('.'.join(["settings", options.setting]))
+                except AttributeError:
+                    self.settings_module = import_object('.'.join(["settings", "setting"]))
                 except ImportError:
                     self.settings_module = global_settings
                     warnings.warn(
                         'settings file import error. using global settings now. you need create "settings" module')
+
                 self._config = self.settings_module
 
             if hasattr(self._config, name):

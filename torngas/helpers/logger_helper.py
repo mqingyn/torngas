@@ -11,20 +11,18 @@ _NAME_PREFIX = 'torngas'
 
 class Logger():
     def __init__(self):
-
-        self.config = settings_helper.settings.LOG_CONFIG
-        self.dir_path = self.get_log_dirpath()
-        self.load_config()
+        pass
 
     def get_log_dirpath(self):
-        return os.path.join(os.path.abspath(self.config["path"]), str(datetime.now().date()))
+        return os.path.join(os.path.abspath(settings_helper.settings.LOG_CONFIG["path"]), str(datetime.now().date()))
 
     def get_log_abspath(self, file_prefix='web'):
-        return os.path.join(self.dir_path,
-                            '{0}.{1}.{2}.log'.format(options.log_frefix, file_prefix, options.port))
+        return os.path.join(self.get_log_dirpath(),
+                            '{0}.{1}.{2}.log'.format(options.log_prefix, file_prefix, options.port))
 
     @property
     def getlogger(self):
+        self.load_config()
         rootlogger = logging.getLogger(_NAME_PREFIX)
         fn, lno, func = rootlogger.findCaller()
 
@@ -40,7 +38,6 @@ class Logger():
         if not os.path.exists(new_dir_path):
             os.makedirs(new_dir_path)
 
-        self.dir_path = new_dir_path
         self.set_handler(logger, file_path)
         return logger
 
@@ -74,14 +71,15 @@ class Logger():
 
 
     def load_config(self):
-        if not os.path.exists(self.dir_path):
-            os.makedirs(self.dir_path)
-
+        dir_path = self.get_log_dirpath()
+        if not os.path.exists( dir_path):
+            os.makedirs( dir_path)
+        config= settings_helper.settings.LOG_CONFIG
         options.log_file_prefix = self.get_log_abspath()
-        options.logging = self.config["level"]
-        options.log_to_stderr = self.config["log_to_stderr"]
-        options.log_file_max_size = self.config["filesize"]
-        options.log_file_num_backups = self.config["backup_num"]
+        options.logging =  config["level"]
+        options.log_to_stderr =  config["log_to_stderr"]
+        options.log_file_max_size = config["filesize"]
+        options.log_file_num_backups =config["backup_num"]
 
 
 logger = Logger()
