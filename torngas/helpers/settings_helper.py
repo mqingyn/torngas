@@ -18,15 +18,18 @@ class Settings(object):
         def get_settings(name):
             if not hasattr(self, '._setting'):
                 try:
-                    self.settings_module = import_object('.'.join(["settings", options.setting]))
+                    if os.environ.get("SETTINGS_MODULE",None):
+                        settings_module =import_object(os.environ["SETTINGS_MODULE"])
+                    else:
+                        settings_module = import_object('.'.join(["settings", options.setting]))
                 except AttributeError:
-                    self.settings_module = import_object('.'.join(["settings", "setting"]))
+                    settings_module = import_object('.'.join(["settings", "setting"]))
                 except ImportError:
-                    self.settings_module = global_settings
+                    settings_module = global_settings
                     warnings.warn(
                         'settings file import error. using global settings now. you need create "settings" module')
 
-                self._config = self.settings_module
+                self._config = settings_module
 
             if hasattr(self._config, name):
                 return getattr(self._config, name)
