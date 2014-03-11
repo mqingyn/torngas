@@ -112,7 +112,6 @@ class Server(object):
         if self.settings.TORNADO_CONF.debug:
             logging.info('tornado version: %s' % tornado.version)
             logging.info('project path: %s' % self.proj_path)
-            logging.info('setting file version: %s' % os.path.splitext(self.settings.settings_module.__file__)[0])
             logging.info('load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__())
             logging.info('debug open: %s' % self.settings.TORNADO_CONF.debug)
             logging.info('locale support: %s' % self.settings.TRANSLATIONS)
