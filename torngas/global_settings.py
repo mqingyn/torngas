@@ -71,7 +71,7 @@ CACHES = {
 #本地化翻译文件地址#
 #################
 
-TRANSLATIONS = False #是否开启国际化
+TRANSLATIONS = False  #是否开启国际化
 TRANSLATIONS_CONF = {
     'translations_dir': os.path.join(os.path.dirname(__file__), 'translations'),
     'locale_default': 'zh_CN',
@@ -100,22 +100,25 @@ WHITELIST = False
 
 #tornado日志功能配置
 LOG_CONFIG = {
-    'path': '../log', #日志记录路径
-    'level': 'info', #日志级别
-    'filesize': 1000 * 1000 * 1000, #日志文件大小限制
-    'backup_num': 5, #最多保留文件数
+    'level': 'info',  #日志级别
+    'filesize': 1000 * 1000 * 1000,  #日志文件大小限制
+    'backup_num': 5,  #最多保留文件数
     'log_to_stderr': True
 }
-
+#日志logger名，不同的日志名会相应生成不同的日志目录
+# {'日志目录名','logger名'}
+LOG_RELATED_NAME = {
+    'exception_log':'exception'
+    }
 IPV4_ONLY = True
 
 #开启session支持
 SESSION = {
-    'session_cache_alias': 'session_loccache', # 'session_loccache',对应cache配置
+    'session_cache_alias': 'session_loccache',  # 'session_loccache',对应cache配置
     'session_name': '__TORNADOID',
     'cookie_domain': '',
     'cookie_path': '/',
-    'expires': 0, # 24 * 60 * 60, # 24 hours in seconds,0代表浏览器会话过期
+    'expires': 0,  # 24 * 60 * 60, # 24 hours in seconds,0代表浏览器会话过期
     'ignore_change_ip': False,
     'httponly': True,
     'secure': False,
@@ -132,12 +135,12 @@ TEMPLATE_CONFIG = {
     'template_engine': 'torngas.template.mako_loader.MakoTemplateLoader',
     ########### mako 配置项 使用mako时生效###########
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
-    'filesystem_checks': False, #通用选项
-    'cache_directory': '../_tmpl_cache', #模版编译文件目录,通用选项
-    'collection_size': 50, #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
-    'cache_size': 0, #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
-    'format_exceptions': True, #格式化异常输出，mako专用
-    'autoescape': False #默认转义设定，jinja2专用
+    'filesystem_checks': False,  #通用选项
+    'cache_directory': '../_tmpl_cache',  #模版编译文件目录,通用选项
+    'collection_size': 50,  #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
+    'cache_size': 0,  #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
+    'format_exceptions': True,  #格式化异常输出，mako专用
+    'autoescape': False  #默认转义设定，jinja2专用
     ###########      end        ##################
 }
 

@@ -34,9 +34,7 @@ from torngas.utils.strtools import safestr
 from torngas.utils import lazyimport
 from middleware_manager import BaseMiddleware
 from torngas.utils import Null
-
-logger_module = lazyimport('torngas.helpers.logger_helper')
-
+from tornado.log import app_log
 settings_module = lazyimport('torngas.helpers.settings_helper')
 cache_module = lazyimport('torngas.cache')
 rx = re.compile('^[0-9a-fA-F]+$')
@@ -55,7 +53,7 @@ class SessionMiddleware(BaseMiddleware):
 
     def process_exception(self, ex_object, exception):
         self.session = Null()
-        logger_module.getlogger.error("session middleware error:{0}".format(exception.message))
+        app_log.error("session middleware error:{0}".format(exception.message))
 
 
     def process_response(self, handler):

@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import logging
 import tornado.web as web
+from tornado.log import app_log,access_log
 from torngas.utils import lazyimport
 
-access_log = logging.getLogger("tornado.access")
+
 signals_module = lazyimport('torngas.dispatch')
 middleware_module = lazyimport('torngas.middleware')
-logger_module = lazyimport('torngas.helpers.logger_helper')
 
 
 class AppApplication(web.Application):
@@ -33,7 +32,7 @@ class AppApplication(web.Application):
             signals_module.signals.call_finished.send(sender=self.__class__)
 
         except Exception, e:
-            logger_module.logger.getlogger.error(e)
+            access_log.error(e)
             raise
 
     def log_request(self, handler):
@@ -46,7 +45,7 @@ class AppApplication(web.Application):
             log_method = access_log.error
         request_time = 1000.0 * handler.request.request_time()
 
-        if request_time > 50.0 or self.settings['debug'] or status >= 400:
+        if request_time > 50.0 or status >= 400 or self.settings['debug']:
             log_method("%d %s %.2fms", handler.get_status(),
                        handler._request_summary(), request_time)
 
