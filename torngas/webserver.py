@@ -86,20 +86,21 @@ class Server(object):
         #tornado把默认的根logger加了handler
         #把根logger的handler去除，然后重新绑定在tornado的logger下
         logging.getLogger().handlers = []
-        logbase_path = os.path.join(options.log_prefix, 'port_%s.log' % str(options.port))
-        tornado_logpath = os.path.join(logbase_path, 'tornado_access_log')
+        tornado_logpath = os.path.join(options.log_prefix,
+                                       'tornado_access_log')  #os.path.join(options.log_prefix, 'port_%s.log' % str(options.port))
+        # tornado_logpath = os.path.join(logbase_path, 'tornado_access_log')
         if not os.path.exists(tornado_logpath):
             os.makedirs(tornado_logpath)
-        file_name = "%s_access_log.log" % ('tornado',)
+        file_name = "%s_access_log.%s.log" % ('tornado', str(options.port))
         options.log_file_prefix = os.path.join(tornado_logpath, file_name)
         enable_pretty_logging(None, logging.getLogger('tornado'))
         if self.settings.LOG_RELATED_NAME:
-            for k,log in self.settings.LOG_RELATED_NAME.items():
-                path = os.path.join(logbase_path, k)
+            for k, log in self.settings.LOG_RELATED_NAME.items():
+                path = os.path.join(options.log_prefix, k)
                 if not os.path.exists(path):
                     os.makedirs(path)
 
-                options.log_file_prefix = os.path.join(path, "%s_log.log" % (log,))
+                options.log_file_prefix = os.path.join(path, "%s_log.%s.log" % (log, str(options.port)))
                 enable_pretty_logging(None, logging.getLogger(log))
         return self
 
@@ -120,10 +121,10 @@ class Server(object):
         else:
             sockets = bind_sockets(options.port, addr)
 
-        self.print_settings_info()
         http_server = tornado.httpserver.HTTPServer(self.application)
         http_server.add_sockets(sockets)
-        logging.info('tornado server started. listen port: %s ,host address: %s' % (options.port, addr))
+        self.print_settings_info()
+
         tornado.ioloop.IOLoop.instance().start()
 
     def print_settings_info(self):
@@ -137,11 +138,12 @@ class Server(object):
             print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
             print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
             print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
-            print 'log file path: %s' % options.log_prefix
+            print 'log file path: %s' % os.path.abspath(options.log_prefix)
+            print 'tornado server started. listen port: %s ,host address: %s' % (options.port, options.address)
 
 
-    def runserver(self,proj_path,application):
-        self.init(proj_path,application)
+    def runserver(self, proj_path, application):
+        self.init(proj_path, application)
         self.load_urls()
         self.load_application()
         self.load_logger_config()
