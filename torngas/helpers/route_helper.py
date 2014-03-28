@@ -15,13 +15,10 @@ class RouteLoader(object):
     subapp_name:设置为子应用的模块名，大小写必须相同，必填
     """
 
-    def __init__(self, path=None, subapp_name=None):
+    def __init__(self, path=None):
         if not path:
             raise exception.UrlError('path arg not found!')
-        if not subapp_name:
-            raise exception.UrlError('app_name arg not found!')
         self.path = path if path != '/' else ''
-        self.subapp_name = subapp_name
 
     def urlhelper(self, prefix='', *urllist):
         """
@@ -29,9 +26,9 @@ class RouteLoader(object):
         """
         urls = []
         for u in urllist:
-            handler = u.get('handler_module', '')
+            handler = u.get('handler', '')
             if isinstance(handler, basestring):
-                handler_module = '.'.join([prefix, u.get('handler_module', '')])
+                handler_module = '.'.join([prefix, u.get('handler', '')])
                 handler_module = import_object(handler_module)
             else:
                 handler_module = handler
@@ -46,10 +43,8 @@ class RouteLoader(object):
                 pattern = self.path + pattern
 
             kw = dict(u.get('kwargs', {}))
-            kw['subapp_name'] = self.subapp_name
-            url_name = ''.join([self.subapp_name, '-', u.get('name')])
-
-            url = urlspec(pattern, handler_module, kwargs=kw, name=url_name)
+            # url_name = ''.join([self.subapp_name, '-', u.get('name')])
+            url = urlspec(pattern, handler_module, kwargs=kw, name=u.get('name'))
             urls.append(url)
 
         return urls
@@ -80,7 +75,7 @@ class url(object):
 
         return dict(
             pattern=pattern,
-            handler_module=view,
+            handler=view,
             name=name,
             path=path,
             kwargs=kwargs

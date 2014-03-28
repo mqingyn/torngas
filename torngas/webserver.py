@@ -66,9 +66,14 @@ class Server(object):
         #加载app
         urls = []
         if self.settings.INSTALLED_APPS:
-            for app in self.settings.INSTALLED_APPS:
-                app_urls = import_object(app + '.urls.urls')
+            for app_name in self.settings.INSTALLED_APPS:
+                app_urls = import_object(app_name + '.urls.urls')
+
+                for url in app_urls:
+                    url.kwargs['subapp_name'] = app_name
+                    url.name = '%s-%s' % (app_name,url.name,)#.join([app_name, '-', url.name])
                 urls.extend(app_urls)
+                print app_urls
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
         self.urls = urls
