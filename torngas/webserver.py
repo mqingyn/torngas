@@ -71,9 +71,9 @@ class Server(object):
 
                 for url in app_urls:
                     url.kwargs['subapp_name'] = app_name
-                    url.name = '%s-%s' % (app_name,url.name,)#.join([app_name, '-', url.name])
+                    url.name = '%s-%s' % (app_name,url.name,)
                 urls.extend(app_urls)
-                print app_urls
+
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
         self.urls = urls
@@ -92,8 +92,7 @@ class Server(object):
         #把根logger的handler去除，然后重新绑定在tornado的logger下
         logging.getLogger().handlers = []
         tornado_logpath = os.path.join(options.log_prefix,
-                                       'tornado_access_log')  #os.path.join(options.log_prefix, 'port_%s.log' % str(options.port))
-        # tornado_logpath = os.path.join(logbase_path, 'tornado_access_log')
+                                       'tornado_access_log')
         if not os.path.exists(tornado_logpath):
             os.makedirs(tornado_logpath)
         file_name = "%s_access_log.%s.log" % ('tornado', str(options.port))
