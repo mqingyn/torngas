@@ -43,7 +43,7 @@ class Null(object):
 
     def __call__(self, *args, **kwargs): return self
 
-    def __repr__(self): return "Null()"
+    def __repr__(self): return ""
 
     def __nonzero__(self): return False
 
