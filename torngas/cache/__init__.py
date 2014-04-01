@@ -43,7 +43,7 @@ BACKENDS = {
 
 DEFAULT_CACHE_ALIAS = 'default'
 DEFAULT_REDIS_ALIAS = 'default_redis'
-FEFAULT_MEMCACHED_ALIAS = 'default_memcache'
+DEFAULT_MEMCACHED_ALIAS = 'default_memcache'
 if DEFAULT_CACHE_ALIAS not in settings_helper.settings.CACHES:
     raise ConfigError("You must define a '%s' cache" % DEFAULT_CACHE_ALIAS)
 
