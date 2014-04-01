@@ -25,10 +25,6 @@ class Model(object):
     query = None
     __tablename__ = ''
 
-    @declared_attr
-    def __table_args__(cls):
-        return {'mysql_engine': 'InnoDB'}
-
     def __init__(self, **kwargs):
         for k, v in kwargs.iteritems():
             setattr(self, k, v)
