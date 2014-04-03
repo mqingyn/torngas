@@ -1,6 +1,6 @@
 TornGas v0.2.4
 
-基于tornado的框架
+基于tornado的django like框架
 
 增加了以下功能：
  * session支持：默认支持process cache，可使用memcache，redis，file等多种方式的session backend，依赖于cache模块
