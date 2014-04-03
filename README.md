@@ -20,7 +20,8 @@ TornGas v0.2.4
  * 应用的路由配置方式见示例
  * 增加inject_factory,简单的对象绳命周期管理
  
- 
+ 依赖库：futures
+ 可选库：mako，jinja，sqlalchemy，redis/hiredis，python-memcached
 目前框架还在持续迭代开发，还未形成一套比较好的文档，自愧不如。框架可能不够完善，欢迎拍砖，也算为开源
 社区尽点微薄之力。
  torngas参考和借鉴了django,web.py,flask,mako,tinman,lepture,felinx等项目或作者的开源实现,在此十分感谢。
