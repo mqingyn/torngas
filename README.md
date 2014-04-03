@@ -1,7 +1,6 @@
-
 TornGas v0.2.4
 
-基于tornado的django like框架
+基于tornado的框架
 
 增加了以下功能：
  * session支持：默认支持process cache，可使用memcache，redis，file等多种方式的session backend，依赖于cache模块
@@ -22,7 +21,7 @@ TornGas v0.2.4
  * 增加inject_factory,简单的对象绳命周期管理
  
  
-目前框架还在持续迭代开发，框架可能不够完善，欢迎拍砖，也算为开源
+目前框架还在持续迭代开发，还未形成一套比较好的文档，自愧不如。框架可能不够完善，欢迎拍砖，也算为开源
 社区尽点微薄之力。
  torngas参考和借鉴了django,web.py,flask,mako,tinman,lepture,felinx等项目或作者的开源实现,在此十分感谢。
 
