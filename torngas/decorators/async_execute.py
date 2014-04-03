@@ -7,10 +7,10 @@
 这些函数无法正常利用tornado的async特性，此处利用线程池模拟了一个异步方法，可以防止同步耗时操作阻塞进程，
 只要在需要异步的方法上加上@thread_future装饰，并且函数最后一个参数为callback函数，则该函数便可以支持
 @asynchronous或gen.Task的非阻塞方式调用
-被修饰的函数返回一个future对象，可通过调用.result()获取结果
+
 依赖：该方法必须安装futures模块才可以使用
 例子：
-@thread_future
+@async_execute
 def dosomething(a,b,callback):
     # 这里可能耗时很久
     #callback参数不会在这里有任何调用，这个耗时方法并没有异步功能
@@ -26,8 +26,8 @@ class Index(handler):
         b=''
         dosomething(self.callback)
 
-    def callback(self,future):
-        self.finish(future.result())
+    def callback(self,result):
+        self.finish(result)
 
 """
 
