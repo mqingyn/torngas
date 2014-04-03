@@ -3,7 +3,7 @@ from torngas.helpers.route_helper import url, RouteLoader
 
 route = RouteLoader(path='/')
 
-urls = route.urlhelper('views',
+urls = route.urlhelper('Main.views',
     url('Index', r'/', 'main_handler.Main')
 )
 

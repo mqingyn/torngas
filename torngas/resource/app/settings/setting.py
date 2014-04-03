@@ -145,3 +145,10 @@ TEMPLATE_CONFIG = {
 }
 
 
+#日志logger名，不同的日志名会相应生成不同的日志目录
+# {'日志目录名','logger名'}
+#使用时通过logging.getLogger(logger名)可以拿到相应的logger
+LOG_RELATED_NAME = {
+    'exception_log':'exception',
+    'info_log':'info'
+    }
