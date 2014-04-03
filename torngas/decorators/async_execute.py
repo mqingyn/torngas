@@ -13,8 +13,9 @@
 @async_execute
 def dosomething(a,b,callback):
     # 这里可能耗时很久
-    #callback参数不会在这里有任何调用，这个耗时方法并没有异步功能
-    #该装饰器为此方法模拟了异步操作，但注意：这是用线程模拟的！！
+    #callback参数不会在这里有任何调用，这个耗时方法本身并没有异步，
+    #同步的方法无论如何都不会毫无代价的变成异步，
+    #该装饰器为此模拟了异步操作，但注意：这是用线程池模拟的
     # something...
     result='return'
     return result
