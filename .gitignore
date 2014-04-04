@@ -17,8 +17,7 @@ develop-eggs
 .installed.cfg
 lib
 lib64
-runserver.py
-commonlib
+
 # Installer logs
 pip-log.txt
 
