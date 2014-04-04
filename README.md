@@ -1,4 +1,6 @@
- #TornGas v0.2.5
+ Torngas 
+========
+version:v0.2.5
 
 基于tornado的django like框架
 
