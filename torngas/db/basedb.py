@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Database API
-(part of web.py) for torngas
+
+Originally based on web.py http://webpy.org/
 """
 
 __all__ = [

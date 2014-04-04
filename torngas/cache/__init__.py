@@ -13,7 +13,11 @@ get_cache() function made available here. get_cache() takes a backend URI
 cache class.
 
 See docs/topics/cache.txt for information on the public API.
+
+Originally based on django (BSD) https://www.djangoproject.com/
+See license.txt for original license.
 """
+
 try:
     from urllib.parse import parse_qsl
 except ImportError:     # Python 2
