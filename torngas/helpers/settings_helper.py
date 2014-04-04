@@ -10,35 +10,40 @@ import warnings
 
 
 class Settings(object):
-    def __init__(self):
-        pass
+
+    def __contains__(self, item):
+        setting = self._get_settings()
+        return hasattr(setting, item)
 
     def __getattr__(self, item):
+        setting = self._get_settings()
 
-        def get_settings(name):
-            if not hasattr(self, '._setting'):
-                try:
-                    if os.environ.get("SETTINGS_MODULE",None):
-                        settings_module =os.environ["SETTINGS_MODULE"]
-                    else:
-                        settings_module = '.'.join(["settings", options.setting])
-                    self._config = import_object(settings_module)
-                except AttributeError:
-                    self._config = import_object('.'.join(["settings", "setting"]))
-                except ImportError:
-                    self._config = global_settings
-                    warnings.warn(
-                        'settings file import error. using global settings now. you need create "settings" module')
+        if hasattr(setting, item):
+            config = getattr(setting, item)
+        elif hasattr(global_settings, item):
+            config = getattr(global_settings, item)
+        else:
+            raise ConfigError('settings "%s" not exist!' % item)
 
-            if hasattr(self._config, name):
-                return getattr(self._config, name)
-            elif hasattr(self._config, name):
-                return getattr(self._config, name)
-            else:
-                raise ConfigError('settings "%s" not exist!' % name)
+        return storage(config) if type(config) is dict else config
 
-        setting = get_settings(item)
-        return storage(setting) if type(setting) is dict else setting
+    def _get_settings(self):
+        if not hasattr(self, 'setting'):
+            try:
+                if os.environ.get("SETTINGS_MODULE", None):
+                    settings_module = import_object(os.environ["SETTINGS_MODULE"])
+                else:
+                    settings_module = import_object('.'.join(["settings", options.setting]))
+            except AttributeError:
+                settings_module = import_object('.'.join(["settings", "setting"]))
+            except ImportError:
+                settings_module = global_settings
+                warnings.warn(
+                    'settings file import error. using global settings now. you need create "settings" module')
+
+            self._config = settings_module
+
+        return self._config
 
 
 settings = Settings()

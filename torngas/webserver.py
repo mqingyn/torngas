@@ -7,7 +7,7 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 from tornado.options import define, options
-from tornado.log import enable_pretty_logging
+
 from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError
@@ -71,9 +71,8 @@ class Server(object):
 
                 for url in app_urls:
                     url.kwargs['subapp_name'] = app_name
-                    url.name = '%s-%s' % (app_name,url.name,)
+                    url.name = '%s-%s' % (app_name, url.name,)
                 urls.extend(app_urls)
-
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
         self.urls = urls
@@ -83,7 +82,60 @@ class Server(object):
         """
         重定义tornado自带的logger，可重写
         """
+
         config = self.settings.LOG_CONFIG
+        from tornado.log import LogFormatter
+
+        def enable_pretty_logging_path(options=None, logger=None):
+
+            """Turns on formatted logging output as configured.
+
+            This is called automaticaly by `tornado.options.parse_command_line`
+            and `tornado.options.parse_config_file`.
+            """
+
+            if options is None:
+                from tornado.options import options
+            if options.logging == 'none':
+                return
+            if logger is None:
+                logger = logging.getLogger()
+            logger.setLevel(getattr(logging, options.logging.upper()))
+
+            if options.log_file_prefix:
+                channel = None
+                rotating_handler = config['rotating_handler']
+                if hasattr(logging.handlers, rotating_handler):
+
+                    handler = getattr(logging.handlers, rotating_handler)
+                    if rotating_handler == 'RotatingFileHandler':
+                        channel = handler(
+                            filename=options.log_file_prefix,
+                            maxBytes=options.log_file_max_size,
+                            backupCount=options.log_file_num_backups,
+                            delay=config['delay'])
+
+                    elif rotating_handler == 'TimedRotatingFileHandler':
+                        channel = handler(
+                            filename=options.log_file_prefix,
+                            when=config['when'],
+                            interval=config['interval'],
+                            delay=config['delay'],
+                            backupCount=options.log_file_num_backups)
+                        channel.suffix = config['suffix']
+
+                    if channel:
+                        channel.setFormatter(LogFormatter(color=False))
+                        logger.addHandler(channel)
+
+            if (options.log_to_stderr or
+                    (options.log_to_stderr is None and not logger.handlers)):
+                # Set up color if we are in a tty and curses is installed
+                channel = logging.StreamHandler()
+                channel.setFormatter(LogFormatter())
+                logger.addHandler(channel)
+
+
         options.logging = config["level"]
         options.log_to_stderr = config["log_to_stderr"]
         options.log_file_max_size = config["filesize"]
@@ -93,24 +145,27 @@ class Server(object):
         logging.getLogger().handlers = []
         tornado_logpath = os.path.join(options.log_prefix,
                                        'tornado_access_log')
+
         if not os.path.exists(tornado_logpath):
             os.makedirs(tornado_logpath)
+
         file_name = "%s_access_log.%s.log" % ('tornado', str(options.port))
         options.log_file_prefix = os.path.join(tornado_logpath, file_name)
-        enable_pretty_logging(None, logging.getLogger('tornado'))
-        if self.settings.LOG_RELATED_NAME:
+        enable_pretty_logging_path(options, logging.getLogger('tornado'))
+
+        if hasattr(self.settings, 'LOG_RELATED_NAME'):
+
             for k, log in self.settings.LOG_RELATED_NAME.items():
                 path = os.path.join(options.log_prefix, k)
+
                 if not os.path.exists(path):
                     os.makedirs(path)
 
                 options.log_file_prefix = os.path.join(path, "%s_log.%s.log" % (log, str(options.port)))
-                enable_pretty_logging(None, logging.getLogger(log))
+                enable_pretty_logging_path(options, logging.getLogger(log))
         return self
 
     def server_start(self):
-
-        logging.info('server starting...')
         #服务启动
         try:
             addr = options.address
@@ -134,16 +189,18 @@ class Server(object):
     def print_settings_info(self):
 
         if self.settings.TORNADO_CONF.debug:
-            print 'tornado version: %s' % tornado.version
-            print 'project path: %s' % self.proj_path
-            print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
-            print 'debug open: %s' % self.settings.TORNADO_CONF.debug
-            print 'locale support: %s' % self.settings.TRANSLATIONS
-            print 'load subApp:\n %s' % self.settings.INSTALLED_APPS.__str__()
-            print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
-            print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
-            print 'log file path: %s' % os.path.abspath(options.log_prefix)
-            print 'tornado server started. listen port: %s ,host address: %s' % (options.port, options.address)
+            from tornado.log import gen_log
+
+            gen_log.info('tornado version: %s' % tornado.version)
+            gen_log.info('project path: %s' % self.proj_path)
+            gen_log.info('load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__())
+            gen_log.info('debug open: %s' % self.settings.TORNADO_CONF.debug)
+            gen_log.info('locale support: %s' % self.settings.TRANSLATIONS)
+            gen_log.info('load apps:\n %s' % self.settings.INSTALLED_APPS.__str__())
+            gen_log.info('IPV4_Only: %s' % self.settings.IPV4_ONLY)
+            gen_log.info('template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine)
+            gen_log.info('log file path: %s' % os.path.abspath(options.log_prefix))
+            gen_log.info('server started. development server at http://%s:%s/' % ( options.address, options.port))
 
 
     def runserver(self, proj_path, application):

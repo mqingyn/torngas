@@ -12,7 +12,6 @@ MIDDLEWARE_CLASSES = (
 # 加载的应用 #
 ############
 INSTALLED_APPS = (
-    'Main',
 
 )
 
@@ -80,7 +79,7 @@ TRANSLATIONS_CONF = {
 
 #tornado全局配置
 TORNADO_CONF = {
-    "static_path": "/var/www/static",
+    "static_path": "static",
     "xsrf_cookies": True,
     "debug": True,
     "xheaders": True,
@@ -101,16 +100,30 @@ WHITELIST = False
 #tornado日志功能配置
 LOG_CONFIG = {
     'level': 'info',  #日志级别
-    'filesize': 1000 * 1000 * 1000,  #日志文件大小限制
-    'backup_num': 5,  #最多保留文件数
+    'rotating_handler': 'TimedRotatingFileHandler',  #备份类型，目前默认仅支持使用RotatingFileHandler，或TimedRotatingFileHandler
+    'filesize': 1000 * 1000 * 1000,  #日志文件大小限制,针对file方式
+    'backup_num': 10,  #最多保留文件数
+    # params when:
+    # 'S'	Seconds
+    # 'M'	Minutes
+    # 'H'	Hours
+    # 'D'	Days
+    # 'W0'-'W6'	Weekday (0=Monday)
+    # 'midnight'	Roll over at midnight
+    #备份时间类型，默认D
+    'when': 'D',
+    'interval': 1,
+    'delay': True,
+    'suffix': '%Y-%m-%d_%H%M%S',
     'log_to_stderr': True
 }
+IPV4_ONLY = True
+
 #日志logger名，不同的日志名会相应生成不同的日志目录
 # {'日志目录名','logger名'}
 LOG_RELATED_NAME = {
-    'exception_log':'exception'
-    }
-IPV4_ONLY = True
+    'exception_log': 'exception'
+}
 
 #开启session支持
 SESSION = {
@@ -126,6 +139,7 @@ SESSION = {
     'session_version': 'v1'
 }
 
+
 #配置模版引擎
 #引入相应的TemplateLoader即可
 #若使用自带的请给予None
@@ -133,15 +147,14 @@ SESSION = {
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
 TEMPLATE_CONFIG = {
     'template_engine': 'torngas.template.mako_loader.MakoTemplateLoader',
-    ########### mako 配置项 使用mako时生效###########
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
-    'filesystem_checks': False,  #通用选项
+    'filesystem_checks': True,  #通用选项
     'cache_directory': '../_tmpl_cache',  #模版编译文件目录,通用选项
     'collection_size': 50,  #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
     'cache_size': 0,  #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
-    'format_exceptions': True,  #格式化异常输出，mako专用
+    'format_exceptions': False,  #格式化异常输出，mako专用
     'autoescape': False  #默认转义设定，jinja2专用
-    ###########      end        ##################
+
 }
 
 
@@ -150,42 +163,38 @@ TEMPLATE_CONFIG = {
 # 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
 DATABASE_CONNECTION = {
 
-    'aquis': {
+    'default': {
         'kwargs': {'pool_recycle': 3600},
         'connections': [{
                             'ROLE': 'master',
                             'DRIVER': 'mysql+mysqldb',
-                            'UID': 'root',
-                            'PASSWD': 'root',
-                            'HOST': '127.0.0.1',
+                            'UID': '',
+                            'PASSWD': '',
+                            'HOST': '',
                             'PORT': 3306,
-                            'DATABASE': 'your database',
+                            'DATABASE': '',
                             'QUERY': {"charset": "utf8"}
 
                         },
                         {
                             'ROLE': 'slave',
                             'DRIVER': 'mysql+mysqldb',
-                            'UID': 'root',
-                            'PASSWD': 'root',
-                            'HOST': '127.0.0.1',
+                            'UID': '',
+                            'PASSWD': '',
+                            'HOST': '',
                             'PORT': 3306,
-                            'DATABASE': 'your database',
+                            'DATABASE': '',
                             'QUERY': {"charset": "utf8"}
 
                         }]
     }
 }
 
-
-
-
-
-# sqlalchemy配置，列出部分，可自行根据文档增加配置项
+# sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
     'echo': True,
     'max_overflow': 10,
     'echo_pool': True,
-    'pool_timeout': 1
+    'pool_timeout': 10
 }
