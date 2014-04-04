@@ -99,15 +99,34 @@ WHITELIST = False
 #     '127.0.0.1',
 # '127.0.0.2',
 # )
+
 #tornado日志功能配置
 LOG_CONFIG = {
-    'path': '../log', #日志记录路径
-    'level': 'info', #日志级别
-    'filesize': 1000 * 1000 * 1000, #日志文件大小限制
-    'backup_num': 5, #最多保留文件数
+    'level': 'info',  #日志级别
+    'rotating_handler': 'TimedRotatingFileHandler',  #备份类型，目前默认仅支持使用RotatingFileHandler，或TimedRotatingFileHandler
+    'filesize': 1000 * 1000 * 1000,  #日志文件大小限制,针对file方式
+    'backup_num': 5,  #最多保留文件数
+    # params when:
+    # 'S'	Seconds
+    # 'M'	Minutes
+    # 'H'	Hours
+    # 'D'	Days
+    # 'W0'-'W6'	Weekday (0=Monday)
+    # 'midnight'	Roll over at midnight
+    #备份时间类型，默认D
+    'when': 'H',
+    'interval': 1,
+    'delay': True,
+    'suffix': '%Y-%m-%d_%H%M%S',
     'log_to_stderr': True
 }
-
+#日志logger名，不同的日志名会相应生成不同的日志目录
+# {'日志目录名','logger名'}
+#使用时通过logging.getLogger(logger名)可以拿到相应的logger
+LOG_RELATED_NAME = {
+    'exception_log':'exception',
+    'info_log':'info'
+    }
 IPV4_ONLY = True
 
 #开启session支持
@@ -145,10 +164,3 @@ TEMPLATE_CONFIG = {
 }
 
 
-#日志logger名，不同的日志名会相应生成不同的日志目录
-# {'日志目录名','logger名'}
-#使用时通过logging.getLogger(logger名)可以拿到相应的logger
-LOG_RELATED_NAME = {
-    'exception_log':'exception',
-    'info_log':'info'
-    }
