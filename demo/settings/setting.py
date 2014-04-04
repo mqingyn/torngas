@@ -12,7 +12,7 @@ MIDDLEWARE_CLASSES = (
 ############
 INSTALLED_APPS = (
 
-    'Main',
+    'helloworld',
 )
 
 

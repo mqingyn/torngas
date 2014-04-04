@@ -9,5 +9,5 @@ class BaseHandler(WebHandler):
 
 class Main(BaseHandler):
     def get(self):
-        welcome = "hello word!"
+        welcome = "Hello,Torngas!"
         self.render("index.html", welcome=welcome)
