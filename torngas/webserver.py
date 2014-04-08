@@ -10,7 +10,7 @@ from tornado.options import define, options
 
 from tornado.util import import_object
 from torngas.utils import lazyimport
-from torngas.exception import ConfigError
+from torngas.exception import ConfigError, TorngasError
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -19,10 +19,11 @@ settings_module = lazyimport('torngas.helpers.settings_helper')
 
 
 class Server(object):
-    def init(self, project_path=None, application=None):
+    def init(self, project_path=None):
         self.load_define()
+        self.urls = []
+        self.application = None
         tornado.options.parse_command_line()
-        self.application = application
         self.settings = settings_module.settings
         self.proj_path = project_path
         return self
@@ -37,7 +38,7 @@ class Server(object):
         return self
 
 
-    def load_application(self, default_host='', transforms=None, wsgi=False, urls=None):
+    def load_application(self, application=None):
         #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
         #加载本地化配置
         if self.settings.TRANSLATIONS:
@@ -48,11 +49,16 @@ class Server(object):
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
-        if not self.application:
-            self.application = application_module.Application(handlers=urls or self.urls,
-                                                                 default_host=default_host,
-                                                                 transforms=transforms, wsgi=wsgi,
-                                                                 **self.settings.TORNADO_CONF)
+        if not application:
+            if not self.urls:
+                raise TorngasError("urls not found.")
+
+            self.application = application_module.Application(handlers=self.urls,
+                                                              default_host='',
+                                                              transforms=None, wsgi=False,
+                                                              **self.settings.TORNADO_CONF)
+        else:
+            self.application = application
 
         self.application.project_path = self.proj_path \
             if self.proj_path.endswith('/') else self.proj_path + '/'
@@ -62,8 +68,10 @@ class Server(object):
 
         return self
 
-    def load_urls(self):
-        #加载app
+    def load_urls(self, urls=None):
+        if urls:
+            self.urls = urls
+            return self
         urls = []
         if self.settings.INSTALLED_APPS:
             for app_name in self.settings.INSTALLED_APPS:
@@ -203,8 +211,8 @@ class Server(object):
             gen_log.info('server started. development server at http://%s:%s/' % ( options.address, options.port))
 
 
-    def runserver(self, proj_path, application):
-        self.init(proj_path, application)
+    def runserver(self, proj_path):
+        self.init(proj_path)
         self.load_urls()
         self.load_application()
         self.load_logger_config()
