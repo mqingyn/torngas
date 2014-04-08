@@ -58,7 +58,13 @@ class Server(object):
                                                               transforms=None, wsgi=False,
                                                               **self.settings.TORNADO_CONF)
         else:
-            self.application = application
+            if isinstance(application, tornado.web.Application):
+                self.application = application
+            else:
+                self.application = application(handlers=self.urls,
+                                               default_host='',
+                                               transforms=None, wsgi=False,
+                                               **self.settings.TORNADO_CONF)
 
         self.application.project_path = self.proj_path \
             if self.proj_path.endswith('/') else self.proj_path + '/'
@@ -211,10 +217,10 @@ class Server(object):
             gen_log.info('server started. development server at http://%s:%s/' % ( options.address, options.port))
 
 
-    def runserver(self, proj_path):
+    def runserver(self, proj_path,application=None,urls=None):
         self.init(proj_path)
         self.load_urls()
-        self.load_application()
+        self.load_application(application)
         self.load_logger_config()
         self.server_start()
 
