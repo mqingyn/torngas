@@ -10,7 +10,7 @@ signals_module = lazyimport('torngas.dispatch')
 middleware_module = lazyimport('torngas.middleware')
 
 
-class AppApplication(web.Application):
+class Application(web.Application):
     def __init__(self, handlers=None, default_host="", transforms=None,
                  wsgi=False, **settings):
 

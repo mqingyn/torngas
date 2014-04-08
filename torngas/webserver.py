@@ -49,7 +49,7 @@ class Server(object):
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
         if not self.application:
-            self.application = application_module.AppApplication(handlers=urls or self.urls,
+            self.application = application_module.Application(handlers=urls or self.urls,
                                                                  default_host=default_host,
                                                                  transforms=transforms, wsgi=wsgi,
                                                                  **self.settings.TORNADO_CONF)
