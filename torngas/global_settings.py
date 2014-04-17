@@ -145,6 +145,7 @@ SESSION = {
 #若使用自带的请给予None
 #支持mako和jinja2
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
+#初始化参数请参照jinja的Environment或mako的TemplateLookup
 TEMPLATE_CONFIG = {
     'template_engine': 'torngas.template.mako_loader.MakoTemplateLoader',
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下

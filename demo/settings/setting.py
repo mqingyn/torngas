@@ -150,6 +150,7 @@ SESSION = {
 #支持mako和jinja2
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
 #jinj2设置为torngas.template.jinja2_loader.Jinja2TemplateLoader
+#初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
 TEMPLATE_CONFIG = {
     'template_engine': None,
     ########### mako 配置项 使用mako时生效###########
