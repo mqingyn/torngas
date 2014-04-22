@@ -19,10 +19,13 @@ settings_module = lazyimport('torngas.helpers.settings_helper')
 
 
 class Server(object):
+    settings = None
+    urls = []
+    application = None
+    proj_path = None
+
     def init(self, project_path=None):
         self.load_define()
-        self.urls = []
-        self.application = None
         tornado.options.parse_command_line()
         self.settings = settings_module.settings
         self.proj_path = project_path
@@ -36,7 +39,6 @@ class Server(object):
         define("address", default='localhost', help='listen host,default:localhost', type=str)
         define("log_prefix", default='../log', help='log file dirname', type=str)
         return self
-
 
     def load_application(self, application=None):
         #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
@@ -149,7 +151,6 @@ class Server(object):
                 channel.setFormatter(LogFormatter())
                 logger.addHandler(channel)
 
-
         options.logging = config["level"]
         options.log_to_stderr = config["log_to_stderr"]
         options.log_file_max_size = config["filesize"]
@@ -216,8 +217,7 @@ class Server(object):
             gen_log.info('log file path: %s' % os.path.abspath(options.log_prefix))
             gen_log.info('server started. development server at http://%s:%s/' % ( options.address, options.port))
 
-
-    def runserver(self, proj_path,application=None,urls=None):
+    def runserver(self, proj_path, application=None, urls=None):
         self.init(proj_path)
         self.load_urls()
         self.load_application(application)

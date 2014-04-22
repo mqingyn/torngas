@@ -33,7 +33,7 @@ class RouteLoader(object):
             else:
                 handler_module = handler
             pattern = u.get('pattern')
-            pattern += '?' if pattern.endswith('/') else '/?'
+            # pattern += '?' if pattern.endswith('/') else '/?'
             path = u.get('path', None)
 
             if path:
