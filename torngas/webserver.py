@@ -180,22 +180,24 @@ class Server(object):
                 enable_pretty_logging_path(options, logging.getLogger(log))
         return self
 
-    def server_start(self):
-        #服务启动
-        try:
-            addr = options.address
-        except AttributeError:
-            addr = '127.0.0.1'
-        from tornado.netutil import bind_sockets
+    def server_start(self, no_keep_alive=False, io_loop=None,
+                     xheaders=False, ssl_options=None, protocol=None, sockets=None, **kwargs):
+        if not sockets:
+            try:
+                addr = options.address
+            except AttributeError:
+                addr = '127.0.0.1'
+            from tornado.netutil import bind_sockets
 
-        if self.settings.IPV4_ONLY:
-            import socket
+            if self.settings.IPV4_ONLY:
+                import socket
 
-            sockets = bind_sockets(options.port, addr, family=socket.AF_INET)
-        else:
-            sockets = bind_sockets(options.port, addr)
+                sockets = bind_sockets(options.port, addr, family=socket.AF_INET)
+            else:
+                sockets = bind_sockets(options.port, addr)
 
-        http_server = tornado.httpserver.HTTPServer(self.application)
+        http_server = tornado.httpserver.HTTPServer(self.application, no_keep_alive, io_loop,
+                                                    xheaders, ssl_options, protocol, **kwargs)
         http_server.add_sockets(sockets)
         self.print_settings_info()
 
@@ -204,22 +206,20 @@ class Server(object):
     def print_settings_info(self):
 
         if self.settings.TORNADO_CONF.debug:
-            from tornado.log import gen_log
-
-            gen_log.info('tornado version: %s' % tornado.version)
-            gen_log.info('project path: %s' % self.proj_path)
-            gen_log.info('load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__())
-            gen_log.info('debug open: %s' % self.settings.TORNADO_CONF.debug)
-            gen_log.info('locale support: %s' % self.settings.TRANSLATIONS)
-            gen_log.info('load apps:\n %s' % self.settings.INSTALLED_APPS.__str__())
-            gen_log.info('IPV4_Only: %s' % self.settings.IPV4_ONLY)
-            gen_log.info('template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine)
-            gen_log.info('log file path: %s' % os.path.abspath(options.log_prefix))
-            gen_log.info('server started. development server at http://%s:%s/' % ( options.address, options.port))
+            print 'tornado version: %s' % tornado.version
+            print 'project path: %s' % self.proj_path
+            print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
+            print 'debug open: %s' % self.settings.TORNADO_CONF.debug
+            print 'locale support: %s' % self.settings.TRANSLATIONS
+            print 'load apps:\n %s' % self.settings.INSTALLED_APPS.__str__()
+            print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
+            print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
+            print 'log file path: %s' % os.path.abspath(options.log_prefix)
+            print 'server started. development server at http://%s:%s/' % ( options.address, options.port)
 
     def runserver(self, proj_path, application=None, urls=None):
         self.init(proj_path)
-        self.load_urls()
+        self.load_urls(urls)
         self.load_application(application)
         self.load_logger_config()
         self.server_start()
