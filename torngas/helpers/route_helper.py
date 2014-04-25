@@ -62,20 +62,20 @@ class url(object):
     :return:dict，路由字典
     """
 
-    def __call__(self, name=None, pattern=None, view='', path=None, kwargs=None):
+    def __call__(self, name=None, pattern=None, handler='', path=None, kwargs=None):
 
 
         if not name:
             raise exception.ArgumentError('You must give a value for "name"')
         if not kwargs:
             kwargs = {}
-        if not view:
-            raise exception.ArgumentError('You must give a value for "view"')
+        if not handler:
+            raise exception.ArgumentError('You must give a value for "handler"')
 
 
         return dict(
             pattern=pattern,
-            handler=view,
+            handler=handler,
             name=name,
             path=path,
             kwargs=kwargs

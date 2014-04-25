@@ -8,9 +8,10 @@ from torngas.utils.storage import storage
 from torngas import global_settings
 import warnings
 
+SETTINGS_MODULE = "SETTINGS_MODULE"
+
 
 class Settings(object):
-
     def __contains__(self, item):
         setting = self._get_settings()
         return hasattr(setting, item)
@@ -30,8 +31,8 @@ class Settings(object):
     def _get_settings(self):
         if not hasattr(self, 'setting'):
             try:
-                if os.environ.get("SETTINGS_MODULE", None):
-                    settings_module = import_object(os.environ["SETTINGS_MODULE"])
+                if os.environ.get(SETTINGS_MODULE, None):
+                    settings_module = import_object(os.environ[SETTINGS_MODULE])
                 else:
                     settings_module = import_object('.'.join(["settings", options.setting]))
             except AttributeError:
