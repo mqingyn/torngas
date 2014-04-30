@@ -5,6 +5,7 @@ from torngas.utils import lazyimport
 
 settings_module = lazyimport('torngas.helpers.settings_helper')
 
+
 class MiddlewareManager():
     def __init__(self):
         self.request_middleware = []
@@ -16,20 +17,20 @@ class MiddlewareManager():
         self.load()
 
     def run_init_hooks(self, app):
-        self.__run_hooks('init', self.init_middleware, app)
+        return self.__run_hooks('init', self.init_middleware, app)
 
     def run_call_hooks(self, request):
-        self.__run_hooks('call', self.call_middleware, request)
+        return self.__run_hooks('call', self.call_middleware, request)
 
     def run_endcall_hooks(self, request):
-        self.__run_hooks('endcall', self.endcall_middleware, request)
+        return self.__run_hooks('endcall', self.endcall_middleware, request)
 
     def run_request_hooks(self, req_handler):
-        self.__run_hooks('request', self.request_middleware, req_handler)
+        return self.__run_hooks('request', self.request_middleware, req_handler)
 
     def run_response_hooks(self, req_handler):
 
-        self.__run_hooks('response', self.response_middleware, req_handler)
+        return self.__run_hooks('response', self.response_middleware, req_handler)
 
     def __run_hooks(self, type, middleware_classes, process_object):
         for middleware_class in middleware_classes:
@@ -41,6 +42,7 @@ class MiddlewareManager():
 
                 elif (type == 'response'):
                     middleware_class.process_response(process_object)
+                    return middleware_class.is_finished
 
                 elif (type == 'call'):
                     middleware_class.process_call(process_object)
@@ -52,7 +54,7 @@ class MiddlewareManager():
 
                 if hasattr(middleware_class, 'process_exception'):
 
-                    middleware_class.process_exception(process_object, ex)
+                    return middleware_class.process_exception(process_object, ex)
                 else:
                     raise
 
@@ -93,6 +95,7 @@ class BaseMiddleware(object):
     编写中间件需继承BaseMiddleware并实现其中任何一个方法即可
 
     """
+    is_finished = False
 
     def process_init(self, application):
         """

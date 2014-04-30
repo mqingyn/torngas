@@ -6,13 +6,13 @@ import os
 ############
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.SessionMiddleware',
+    'torngas.middleware.SignalMiddleware',
 )
 
 ############
 # 加载的应用 #
 ############
 INSTALLED_APPS = (
-
 )
 
 ###########
@@ -27,16 +27,7 @@ CACHES = {
             'CULL_FREQUENCY': 3
         }
     },
-    'session_loccache': {
-        'BACKEND': 'torngas.cache.backends.localcache.LocMemCache',
-        'LOCATION': 'process_session',
-        'OPTIONS': {
-            'MAX_ENTRIES': 10000,
-            'CULL_FREQUENCY': 3
-        }
-
-    },
-    'memcache': {
+    'default_memcache': {
         'BACKEND': 'torngas.cache.backends.memcached.MemcachedCache',
         'LOCATION': [
             '127.0.0.1:11211'
@@ -50,13 +41,13 @@ CACHES = {
         'BACKEND': 'torngas.cache.backends.filebased.FileBasedCache',
         'LOCATION': '.'
     },
-    'redis_cache': {
+    'default_redis': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
         'LOCATION': '127.0.0.1:6379',
         'TIMEOUT': 3,
         'OPTIONS': {
             'DB': 0,
-            # 'PASSWORD': 'yadayada',
+            # 'PASSWORD': 'yourredispwd',
             'PARSER_CLASS': 'redis.connection.DefaultParser'
         },
         'KEY_PREFIX': '',
@@ -127,7 +118,7 @@ LOG_RELATED_NAME = {
 
 #开启session支持
 SESSION = {
-    'session_cache_alias': 'session_loccache',  # 'session_loccache',对应cache配置
+    'session_cache_alias': 'default',  # 'session_loccache',对应cache配置
     'session_name': '__TORNADOID',
     'cookie_domain': '',
     'cookie_path': '/',
@@ -136,7 +127,7 @@ SESSION = {
     'httponly': True,
     'secure': False,
     'secret_key': 'fLjUfxqXtfNoIldA0A0J',
-    'session_version': 'v1'
+    'session_version': 'EtdHjDO1'
 }
 
 
@@ -145,9 +136,10 @@ SESSION = {
 #若使用自带的请给予None
 #支持mako和jinja2
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
-#初始化参数请参照jinja的Environment或mako的TemplateLookup
+#jinj2设置为torngas.template.jinja2_loader.Jinja2TemplateLoader
+#初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
 TEMPLATE_CONFIG = {
-    'template_engine': 'torngas.template.mako_loader.MakoTemplateLoader',
+    'template_engine': None,
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
     'filesystem_checks': True,  #通用选项
     'cache_directory': '../_tmpl_cache',  #模版编译文件目录,通用选项
@@ -159,17 +151,15 @@ TEMPLATE_CONFIG = {
 }
 
 
-
 # 数据库连接字符串，
 # 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
 DATABASE_CONNECTION = {
-
     'default': {
         'kwargs': {'pool_recycle': 3600},
         'connections': [{
                             'ROLE': 'master',
                             'DRIVER': 'mysql+mysqldb',
-                            'UID': '',
+                            'UID': 'root',
                             'PASSWD': '',
                             'HOST': '',
                             'PORT': 3306,
@@ -180,7 +170,7 @@ DATABASE_CONNECTION = {
                         {
                             'ROLE': 'slave',
                             'DRIVER': 'mysql+mysqldb',
-                            'UID': '',
+                            'UID': 'root',
                             'PASSWD': '',
                             'HOST': '',
                             'PORT': 3306,

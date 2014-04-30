@@ -2,3 +2,4 @@
 from middleware_manager import MiddlewareManager
 from session_middleware import SessionMiddleware
 from middleware_manager import BaseMiddleware
+from signal_middleware import SignalMiddleware

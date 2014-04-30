@@ -114,5 +114,3 @@ class FlashMessageMixIn(object):
         messages = self.messages()
         self.clear_cookie(self._flash_name)
         return messages
-
-

@@ -32,19 +32,3 @@ class ApiHandler(CommonHandler):
         else:
             raise APIError(400, 'Unknown response format requested: %s' % format)
 
-            #根据场景可实现个性化的api错误处理
-            # def write_error(self, status_code, **kwargs):
-            #     errortext = 'Internal error'
-            #     error_code = status_code
-            #     import traceback
-            #
-            #     self.logger.error(traceback.format_exc())
-            #     if kwargs.get('error_code'):
-            #         error_code = kwargs.get('error_code')
-            #     exc_info = kwargs.get('exc_info')
-            #     if exc_info:
-            #         errortext = getattr(exc_info[1], 'log_message', errortext)
-            #     self.write_api({'error_code': error_code,
-            #                     'error_info': errortext,
-            #                     'description': self.request.path},
-            #                    nofail=True)

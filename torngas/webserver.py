@@ -85,7 +85,7 @@ class Server(object):
                 app_urls = import_object(app_name + '.urls.urls')
 
                 for url in app_urls:
-                    url.kwargs['subapp_name'] = app_name
+                    url.kwargs['current_appname'] = app_name
                     url.name = '%s-%s' % (app_name, url.name,)
                 urls.extend(app_urls)
         else:

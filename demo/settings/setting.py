@@ -5,6 +5,7 @@ import os
 ############
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.SessionMiddleware',
+    'torngas.middleware.SignalMiddleware',
 )
 
 ############
@@ -29,21 +30,12 @@ CACHES = {
             'CULL_FREQUENCY': 3
         }
     },
-    'session_loccache': {
-        'BACKEND': 'torngas.cache.backends.localcache.LocMemCache',
-        'LOCATION': 'process_session',
-        'OPTIONS': {
-            'MAX_ENTRIES': 10000,
-            'CULL_FREQUENCY': 3
-        }
-
-    },
-    'memcache': {
+    'default_memcache': {
         'BACKEND': 'torngas.cache.backends.memcached.MemcachedCache',
         'LOCATION': [
             '127.0.0.1:11211'
         ],
-        'TIMEOUT': 500
+        'TIMEOUT': 300
     },
     'dummy': {
         'BACKEND': 'torngas.cache.backends.dummy.DummyCache'
@@ -52,13 +44,13 @@ CACHES = {
         'BACKEND': 'torngas.cache.backends.filebased.FileBasedCache',
         'LOCATION': '.'
     },
-    'redis_cache': {
+    'default_redis': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
         'LOCATION': '127.0.0.1:6379',
         'TIMEOUT': 3,
         'OPTIONS': {
             'DB': 0,
-            # 'PASSWORD': 'yadayada',
+            # 'PASSWORD': 'yourredispwd',
             'PARSER_CLASS': 'redis.connection.DefaultParser'
         },
         'KEY_PREFIX': '',
@@ -68,10 +60,11 @@ CACHES = {
 }
 
 
+
 #################
 #本地化翻译文件地址#
 #################
-TRANSLATIONS = False #是否开启国际化
+TRANSLATIONS = False  #是否开启国际化
 TRANSLATIONS_CONF = {
     'translations_dir': os.path.join(os.path.dirname(__file__), 'translations'),
     'locale_default': 'zh_CN',
@@ -124,18 +117,18 @@ LOG_CONFIG = {
 # {'日志目录名','logger名'}
 #使用时通过logging.getLogger(logger名)可以拿到相应的logger
 LOG_RELATED_NAME = {
-    'exception_log':'exception',
-    'info_log':'info'
-    }
+    'exception_log': 'exception',
+    'info_log': 'info'
+}
 IPV4_ONLY = True
 
 #开启session支持
 SESSION = {
-    'session_cache_alias': 'session_loccache', # 'session_loccache',
+    'session_cache_alias': 'default',  # 'session_loccache',
     'session_name': '__TORNADOID',
     'cookie_domain': '',
     'cookie_path': '/',
-    'expires': 0, # 24 * 60 * 60, # 24 hours in seconds
+    'expires': 0,  # 24 * 60 * 60, # 24 hours in seconds
     'ignore_change_ip': False,
     # 'expired_message': 'Session expired',
     'httponly': True,
@@ -153,15 +146,15 @@ SESSION = {
 #初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
 TEMPLATE_CONFIG = {
     'template_engine': None,
-    ########### mako 配置项 使用mako时生效###########
+
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
-    'filesystem_checks': True, #通用选项
-    'cache_directory': '../_tmpl_cache', #模版编译文件目录,通用选项
-    'collection_size': 50, #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
-    'cache_size': 0, #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
-    'format_exceptions': False, #格式化异常输出，mako专用
-    'autoescape': False #默认转义设定，jinja2专用
-    ###########      end        ##################
+    'filesystem_checks': True,  #通用选项
+    'cache_directory': '../_tmpl_cache',  #模版编译文件目录,通用选项
+    'collection_size': 50,  #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
+    'cache_size': 0,  #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
+    'format_exceptions': False,  #格式化异常输出，mako专用
+    'autoescape': False  #默认转义设定，jinja2专用
+
 }
 
 

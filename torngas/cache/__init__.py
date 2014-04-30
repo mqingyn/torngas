@@ -20,7 +20,7 @@ See license.txt for original license.
 
 try:
     from urllib.parse import parse_qsl
-except ImportError:     # Python 2
+except ImportError:  # Python 2
     from urlparse import parse_qsl
 
 from torngas.exception import ConfigError
@@ -43,11 +43,14 @@ BACKENDS = {
     'localcache': 'localcache',
     'file': 'filebased',
     'dummy': 'dummy',
+    'redis': 'rediscache'
 }
 
 DEFAULT_CACHE_ALIAS = 'default'
 DEFAULT_REDIS_ALIAS = 'default_redis'
 DEFAULT_MEMCACHED_ALIAS = 'default_memcache'
+DEFAULT_DUMMY_ALIAS = 'dummy'
+DEFAULT_FILEBASED_ALIAS = 'filebased'
 if DEFAULT_CACHE_ALIAS not in settings_helper.settings.CACHES:
     raise ConfigError("You must define a '%s' cache" % DEFAULT_CACHE_ALIAS)
 
