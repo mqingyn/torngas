@@ -4,7 +4,6 @@ import os
 #   中间件  #
 ############
 MIDDLEWARE_CLASSES = (
-    'torngas.middleware.common.CommonMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.middleware.signal.SignalMiddleware',
 )
