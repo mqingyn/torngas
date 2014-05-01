@@ -4,8 +4,9 @@ import os
 #   中间件  #
 ############
 MIDDLEWARE_CLASSES = (
-    'torngas.middleware.SessionMiddleware',
-    'torngas.middleware.SignalMiddleware',
+    'torngas.middleware.common.CommonMiddleware',
+    'torngas.middleware.session.SessionMiddleware',
+    'torngas.middleware.signal.SignalMiddleware',
 )
 
 ############
@@ -15,7 +16,6 @@ INSTALLED_APPS = (
 
     'helloworld',
 )
-
 
 
 ###########
@@ -46,8 +46,8 @@ CACHES = {
     },
     'default_redis': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
-        'LOCATION': '127.0.0.1:6379',
-        'TIMEOUT': 3,
+        'LOCATION': '192.168.1.103:6379',
+        'TIMEOUT': 300,
         'OPTIONS': {
             'DB': 0,
             # 'PASSWORD': 'yourredispwd',
@@ -145,7 +145,7 @@ SESSION = {
 #jinj2设置为torngas.template.jinja2_loader.Jinja2TemplateLoader
 #初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
 TEMPLATE_CONFIG = {
-    'template_engine': None,
+    'template_engine': 'torngas.template.jinja2_loader.Jinja2TemplateLoader',
 
     #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
     'filesystem_checks': True,  #通用选项
@@ -157,4 +157,16 @@ TEMPLATE_CONFIG = {
 
 }
 
+# 用编译的正则表达式来限定user-agent，来自django，可参考django的处理方式
+# example:
+# import re
+# DISALLOWED_USER_AGENTS = (
+#     re.compile(r'^NaverBot.*'),
+#     re.compile(r'^EmailSiphon.*'),
+#     re.compile(r'^SiteSucker.*'),
+#     re.compile(r'^sohu-search')
+# )
+DISALLOWED_USER_AGENTS = ()
 
+#为所有的url移除尾部'/'
+REMOVE_SLASH_ALL = True
