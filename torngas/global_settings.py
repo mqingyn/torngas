@@ -5,8 +5,8 @@ import os
 #   中间件  #
 ############
 MIDDLEWARE_CLASSES = (
-    'torngas.middleware.SessionMiddleware',
-    'torngas.middleware.SignalMiddleware',
+    'torngas.middleware.session.SessionMiddleware',
+    'torngas.middleware.signal.SignalMiddleware',
 )
 
 ############
@@ -129,6 +129,26 @@ SESSION = {
     'secret_key': 'fLjUfxqXtfNoIldA0A0J',
     'session_version': 'EtdHjDO1'
 }
+
+# 用编译的正则表达式来限定user-agent，来自django，可参考django的处理方式
+# example:
+# import re
+# DISALLOWED_USER_AGENTS = (
+#     re.compile(r'^NaverBot.*'),
+#     re.compile(r'^EmailSiphon.*'),
+#     re.compile(r'^SiteSucker.*'),
+#     re.compile(r'^sohu-search')
+# )
+DISALLOWED_USER_AGENTS = ()
+#为所有的url移除尾部'/'
+#依赖common_middleware
+REMOVE_SLASH_ALL = False
+
+# 是否开启对包含非法字符的请求做403处理
+# 若启用请先引入torngas.middleware.common.CommonMiddleware
+ILLEGAL_CHARACTER_FORBIDDEN = False
+# 当启用非法请求处理时，请填写非法字符列表#
+ILLEGAL_CHARACTER = ()
 
 
 #配置模版引擎

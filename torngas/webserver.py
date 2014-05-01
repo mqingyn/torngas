@@ -207,14 +207,18 @@ class Server(object):
         if self.settings.TORNADO_CONF.debug:
             print 'tornado version: %s' % tornado.version
             print 'project path: %s' % self.proj_path
-            print 'load middleware: %s' % list(self.settings.MIDDLEWARE_CLASSES).__str__()
+            print 'load middleware:'
+            for middl in self.settings.MIDDLEWARE_CLASSES:
+                print ' -', str(middl)
             print 'debug open: %s' % self.settings.TORNADO_CONF.debug
             print 'locale support: %s' % self.settings.TRANSLATIONS
-            print 'load apps:\n %s' % self.settings.INSTALLED_APPS.__str__()
+            print 'load apps:'
+            for app in self.settings.INSTALLED_APPS:
+                print ' -', str(app)
             print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
             print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
             print 'log file path: %s' % os.path.abspath(options.log_prefix)
-            print 'server started. development server at http://%s:%s/' % ( options.address, options.port)
+            print 'server started. development server at http://%s:%s/' % (options.address, options.port)
 
     def runserver(self, proj_path, application=None, urls=None):
         self.init(proj_path)

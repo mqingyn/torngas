@@ -28,7 +28,7 @@ class UncaughtExceptionMixin(object):
         if self.application.settings.get('debug', False) is False:
             full_message = kwargs.get('exception', None)
             if not full_message or unicode(full_message) == '':
-                full_message = 'Sky is falling!'
+                full_message = 'Server error.'
 
             return "<html><title>%(code)d: %(message)s</title><body><h1>%(code)d: %(message)s</h1>%(full_message)s</body></html>" % {
                 "code": status_code,

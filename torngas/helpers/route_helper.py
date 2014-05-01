@@ -50,7 +50,7 @@ class RouteLoader(object):
         return urls
 
 
-class url(object):
+class Url(object):
     """
 
     :param name:路由的名字，设计为必填项。这样能更好的管理路由，方便使用reverse_url生成路由
@@ -64,14 +64,12 @@ class url(object):
 
     def __call__(self, name=None, pattern=None, handler='', path=None, kwargs=None):
 
-
         if not name:
             raise exception.ArgumentError('You must give a value for "name"')
         if not kwargs:
             kwargs = {}
         if not handler:
             raise exception.ArgumentError('You must give a value for "handler"')
-
 
         return dict(
             pattern=pattern,
@@ -82,5 +80,5 @@ class url(object):
         )
 
 
-url = url()
+url = Url()
 

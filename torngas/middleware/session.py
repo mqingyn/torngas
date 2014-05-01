@@ -32,19 +32,18 @@ import hmac, re
 from torngas.utils.storage import storage
 from torngas.utils.strtools import safestr
 from torngas.utils import lazyimport
-from middleware_manager import BaseMiddleware
+from torngas.middleware import BaseMiddleware
 from torngas.utils import Null
 from tornado.log import app_log
+
 settings_module = lazyimport('torngas.helpers.settings_helper')
 cache_module = lazyimport('torngas.cache')
 rx = re.compile('^[0-9a-fA-F]+$')
 
 
-
 class SessionMiddleware(BaseMiddleware):
     def process_init(self, application):
         self._cachestore = cache_module.get_cache(settings_module.settings.SESSION.session_cache_alias)
-
 
     def process_request(self, handler):
         session = SessionManager(handler, self._cachestore, settings_module.settings.SESSION)
@@ -65,7 +64,6 @@ class SessionMiddleware(BaseMiddleware):
         pass
 
 
-
 _DAY1 = 24 * 60 * 60
 _DAY30 = _DAY1 * 30
 _VERIFICATION_KEY = '__VERIFID'
@@ -78,7 +76,7 @@ session_parameters = storage({
     'session_name': '__TORNADOID',
     'cookie_domain': None,
     'cookie_path': '/',
-    'expires': 0, #24 * 60 * 60, # 24 hours in seconds
+    'expires': 0,  #24 * 60 * 60, # 24 hours in seconds
     'ignore_change_ip': False,
     'httponly': True,
     'secure': False,
@@ -148,7 +146,7 @@ class SessionManager(object):
 
             httponly = self.config.httponly
             secure = self.config.secure
-            expires = self.config.expires#单位是秒
+            expires = self.config.expires  #单位是秒
             cache_expires = expires
             if expires == 0:
                 #过期时间为0时，对于tornado来说，是会话有效期，关闭浏览器失效，但是

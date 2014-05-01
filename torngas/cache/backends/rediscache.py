@@ -133,10 +133,11 @@ class CacheClass(BaseCache):
         """
         Connect to Redis, and set up cache backend.
         """
+        super(CacheClass, self).__init__(params)
         self._init(server, params)
 
     def _init(self, server, params):
-        super(CacheClass, self).__init__(params)
+
         self._server = server
         self._params = params
 
@@ -349,7 +350,6 @@ class CacheClass(BaseCache):
         for key, value in data.items():
             self.set(key, value, timeout, version=version, client=pipeline)
         pipeline.execute()
-
 
     def incr(self, key, delta=1, version=None):
         """
