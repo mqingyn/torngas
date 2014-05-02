@@ -13,14 +13,20 @@ SETTINGS_MODULE = "SETTINGS_MODULE"
 
 class Settings(object):
     def __contains__(self, item):
-        setting = self._get_settings()
+        setting = self.settings_module
         return hasattr(setting, item)
 
     def __getattr__(self, item):
-        setting = self._get_settings()
+        setting = self.settings_module
 
         if hasattr(setting, item):
-            config = getattr(setting, item)
+            if item in ('TORNADO_CONF', 'LOG_CONFIG', 'SESSION', 'TEMPLATE_CONFIG',):
+                config = getattr(global_settings, item)
+                user_config = getattr(setting, item)
+                config.update(user_config)
+            else:
+                config = getattr(setting, item)
+
         elif hasattr(global_settings, item):
             config = getattr(global_settings, item)
         else:
@@ -28,23 +34,22 @@ class Settings(object):
 
         return storage(config) if type(config) is dict else config
 
-    def _get_settings(self):
-        if not hasattr(self, 'setting'):
+    @property
+    def settings_module(self):
+        if not hasattr(self, '__conf'):
             try:
                 if os.environ.get(SETTINGS_MODULE, None):
-                    settings_module = import_object(os.environ[SETTINGS_MODULE])
+                    self.__conf = import_object(os.environ[SETTINGS_MODULE])
                 else:
-                    settings_module = import_object('.'.join(["settings", options.setting]))
+                    self.__conf = import_object('.'.join(['settings', options.settings]))
             except AttributeError:
-                settings_module = import_object('.'.join(["settings", "setting"]))
+                self.__conf = import_object('.'.join(["settings", "setting"]))
             except ImportError:
-                settings_module = global_settings
                 warnings.warn(
-                    'settings file import error. using global settings now. you need create "settings" module')
-
-            self._config = settings_module
-
-        return self._config
+                    'settings file import error. using global settings now. you need create "setting" files')
+                self.__conf = global_settings
+        return self.__conf
 
 
 settings = Settings()
+

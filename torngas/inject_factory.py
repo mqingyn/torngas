@@ -30,14 +30,14 @@ LIFECYCLE_TYPE = (SINGLETON, TRANSIENT, POOLED, THREAD)
 
 
 class InjectFactory(object):
-    def register(self, alias_name, module, lifecycle_type=POOLED):
 
+    def register(self, alias_name, module, lifecycle_type=POOLED):
         assert inspect.isclass(module), 'register must be a class object'
         if alias_name not in _REGISTER_TABLE:
             if lifecycle_type not in LIFECYCLE_TYPE:
                 raise ArgumentError("lifecycle_type error.")
             _REGISTER_TABLE[alias_name] = (module,
-                                           lifecycle_type )
+                                           lifecycle_type)
             if lifecycle_type == SINGLETON:
                 resolve_name = hashlib.md5(alias_name).hexdigest()
                 _FACTORY_CONTAINER[resolve_name] = module()
@@ -67,7 +67,6 @@ class InjectFactory(object):
             if resolve_name not in _FACTORY_CONTAINER:
                 _FACTORY_CONTAINER[resolve_name] = service(*args, **kwargs)
             return _FACTORY_CONTAINER[resolve_name]
-
 
     def R(self, alias_name, *args, **kwargs):
         return self.resolve(alias_name, *args, **kwargs)
