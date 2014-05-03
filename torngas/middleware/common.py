@@ -47,4 +47,3 @@ class CommonMiddleware(BaseMiddleware):
     def process_exception(self, ex_obj, exec_info):
         if HTTPError in exec_info[0].__bases__:
             raise
-        raise
