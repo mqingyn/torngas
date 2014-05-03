@@ -14,7 +14,10 @@ sessioin过期策略分为三种情形：
     *cookie策略：timeout1年
     *缓存策略：1年
 """
-import os, time
+import os
+import time
+import hmac
+import re
 
 try:
     import cPickle as pickle
@@ -28,12 +31,11 @@ except ImportError:
     import sha
 
     sha1 = sha.new
-import hmac, re
+
 from torngas.utils.storage import storage
 from torngas.utils.strtools import safestr
 from torngas.utils import lazyimport
 from torngas.middleware import BaseMiddleware
-from torngas.utils import Null
 from tornado.log import app_log
 
 settings_module = lazyimport('torngas.helpers.settings_helper')
@@ -51,26 +53,18 @@ class SessionMiddleware(BaseMiddleware):
         handler.session = session
 
     def process_exception(self, ex_object, exception):
-        self.session = Null()
+        self.session = None
         app_log.error("session middleware error:{0}".format(exception.message))
-
 
     def process_response(self, handler):
         if hasattr(handler, "session"):
             handler.session.save()
             del handler.session
 
-    def process_endcall(self, handler):
-        pass
-
 
 _DAY1 = 24 * 60 * 60
 _DAY30 = _DAY1 * 30
 _VERIFICATION_KEY = '__VERIFID'
-__all__ = [
-    'Session', 'SessionExpired',
-    'Store', 'DiskStore', 'DBStore', 'SimpleCacheStore'
-]
 
 session_parameters = storage({
     'session_name': '__TORNADOID',
@@ -81,7 +75,7 @@ session_parameters = storage({
     'httponly': True,
     'secure': False,
     'secret_key': 'fLjUfxqXtfNoIldA0A0J',
-    'session_version': 'V1.6'
+    'session_version': ''
 })
 
 
@@ -89,12 +83,10 @@ class SessionManager(object):
     _killed = False
 
     def __init__(self, handler, store, config=session_parameters):
-
         self._get_cookie = handler.get_cookie
         self._set_cookie = handler.set_cookie
         self.remote_ip = handler.request.remote_ip
         self.store = store
-
         self.config = storage(config)
         self._data = {}
 
@@ -106,7 +98,6 @@ class SessionManager(object):
 
     def __getitem__(self, key):
         return self._data.get(key, None)
-
 
     def __delitem__(self, key):
         del self._data[key]
@@ -140,13 +131,11 @@ class SessionManager(object):
 
         self._data['remote_ip'] = self.remote_ip
 
-
     def save(self):
         if not self._killed:
-
             httponly = self.config.httponly
             secure = self.config.secure
-            expires = self.config.expires  #单位是秒
+            expires = self.config.expires  #单位:秒
             cache_expires = expires
             if expires == 0:
                 #过期时间为0时，对于tornado来说，是会话有效期，关闭浏览器失效，但是
@@ -174,24 +163,21 @@ class SessionManager(object):
                              path=self.config.cookie_path,
                              secure=secure,
                              httponly=httponly)
-            self.store.set(self.sessionid, ( expires, self._data), cache_expires)
+            self.store.set(self.sessionid, (expires, self._data), cache_expires)
 
         else:
             self._set_cookie(self.config.session_name, self.sessionid, expires=-1)
             self._set_cookie(_VERIFICATION_KEY, self._generate_hmac(self.sessionid), expires=-1)
             del self.store[self.sessionid]
 
-
-    def _valid_session_id(self, sessionid):
+    def _valid_session_id(self, session_id):
         """
         验证sessionid格式
         :return:bool
         """
-
-        if sessionid:
-            sessionid = sessionid.split('|')[0]
-
-            return rx.match(sessionid)
+        if session_id:
+            session_id = session_id.split('|')[0]
+            return rx.match(session_id)
 
     def expired(self):
         """
@@ -202,19 +188,15 @@ class SessionManager(object):
         self.save()
 
     def _create_sessionid(self):
-        while True:
-            rand = os.urandom(16)
-            now = time.time()
-            secret_key = self.config.secret_key
-            session_id = sha1("%s%s%s%s" % (rand, now, safestr(self.remote_ip), secret_key))
-            session_id = session_id.hexdigest()
-            if session_id not in self.store:
-                break
+        rand = os.urandom(16)
+        now = time.time()
+        secret_key = self.config.secret_key
+        session_id = sha1("%s%s%s%s" % (rand, now, safestr(self.remote_ip), secret_key))
+        session_id = session_id.hexdigest()
         return str(session_id).upper() + '|' + self.config.session_version
 
     def _generate_hmac(self, session_id):
         return hmac.new(session_id, self.config.secret_key, hashlib.sha1).hexdigest()
-
 
     def _validate_ip(self):
         if self.sessionid and self._data.get('remote_ip', None) != self.remote_ip:
@@ -224,13 +206,3 @@ class SessionManager(object):
     def set_expire(self, expires):
         self.config.expires = expires
         self.save()
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod()
-
-
-
-
