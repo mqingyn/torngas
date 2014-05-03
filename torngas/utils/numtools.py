@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+
 def intget(integer, default=None):
     """
     Returns `integer` as an int or `default` if it can't.
@@ -14,7 +16,6 @@ def intget(integer, default=None):
         return int(integer)
     except (TypeError, ValueError):
         return default
-
 
 
 def numify(string):

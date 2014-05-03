@@ -5,6 +5,7 @@ synclock，from django
 """
 
 import contextlib
+
 try:
     import threading
 except ImportError:
@@ -24,12 +25,13 @@ class RWLock(object):
         writer_enters()
         writer_leaves()
     """
+
     def __init__(self):
-        self.mutex     = threading.RLock()
-        self.can_read  = threading.Semaphore(0)
+        self.mutex = threading.RLock()
+        self.can_read = threading.Semaphore(0)
         self.can_write = threading.Semaphore(0)
-        self.active_readers  = 0
-        self.active_writers  = 0
+        self.active_readers = 0
+        self.active_writers = 0
         self.waiting_readers = 0
         self.waiting_writers = 0
 
@@ -46,7 +48,7 @@ class RWLock(object):
         with self.mutex:
             self.active_readers -= 1
             if self.active_readers == 0 and self.waiting_writers != 0:
-                self.active_writers  += 1
+                self.active_writers += 1
                 self.waiting_writers -= 1
                 self.can_write.release()
 
@@ -71,7 +73,7 @@ class RWLock(object):
         with self.mutex:
             self.active_writers -= 1
             if self.waiting_writers != 0:
-                self.active_writers  += 1
+                self.active_writers += 1
                 self.waiting_writers -= 1
                 self.can_write.release()
             elif self.waiting_readers != 0:

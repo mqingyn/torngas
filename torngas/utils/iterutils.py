@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import sys ,traceback ,time
+import sys, traceback, time
 from torngas.utils.storage import storage
 
 
@@ -98,7 +98,7 @@ if hasattr(__builtin__, 'set'):
     iters.append(set)
 if hasattr(__builtin__, 'frozenset'):
     iters.append(set)
-if sys.version_info < (2, 6): # sets module deprecated in 2.6
+if sys.version_info < (2, 6):  # sets module deprecated in 2.6
     try:
         from sets import Set
 
@@ -115,6 +115,7 @@ iters.__doc__ = """
 A list of iterable items (like lists, but not strings). Includes whichever
 of lists, tuples, sets, and Sets are available in this version of Python.
 """
+
 
 def group(seq, size):
     """

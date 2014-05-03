@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import itertools
+
 iters = [list, tuple]
+
 
 def to36(q):
     """
@@ -125,7 +127,7 @@ def safestr(obj, encoding='utf-8'):
         return obj.encode(encoding)
     elif isinstance(obj, str):
         return obj
-    elif hasattr(obj, 'next'): # iterator
+    elif hasattr(obj, 'next'):  # iterator
         return itertools.imap(safestr, obj)
     else:
         return str(obj)
@@ -134,7 +136,9 @@ def safestr(obj, encoding='utf-8'):
 utf8 = safestr
 
 import re
-re_compile=re.compile
+
+re_compile = re.compile
+
 
 class _re_subm_proxy:
     def __init__(self):
@@ -160,9 +164,8 @@ def re_subm(pat, repl, string):
     compiled_pat.sub(proxy.__call__, string)
     return compiled_pat.sub(repl, string), proxy.match
 
+
 r_url = re_compile('(?<!\()(http://(\S+))')
 
-
-
-if __name__=='__main__':
+if __name__ == '__main__':
     print iters

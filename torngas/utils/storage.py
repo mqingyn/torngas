@@ -7,7 +7,7 @@ except NameError:
 from torngas.utils.strtools import safeunicode
 from threading import local as threadlocal
 import warnings
-import sys,copy
+import sys, copy
 
 PY3 = (sys.version_info >= (3,))
 
@@ -275,7 +275,6 @@ class SortedDict(dict):
 sorteddict = SortedDict
 
 
-
 class ThreadedDict(threadlocal):
     """
     Thread local storage.
@@ -309,6 +308,7 @@ class ThreadedDict(threadlocal):
         """
         for t in list(ThreadedDict._instances):
             t.clear()
+
     clear_all = staticmethod(clear_all)
 
     # Define all these methods to more or less fully emulate dict -- attribute access

@@ -25,7 +25,7 @@ def tryall(context, prefix=None):
     Then you can run `python test/stuff.py` and get the results of 
     all the tests.
     """
-    context = context.copy() # vars() would update
+    context = context.copy()  # vars() would update
     results = {}
     for (key, value) in context.iteritems():
         if not hasattr(value, '__call__'):

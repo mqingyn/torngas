@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import re, sys, time, threading, itertools, traceback, os
-try:
-    import datetime
-except ImportError:
-    pass
+import sys, threading
+import datetime
 
 
 class TimeoutError(Exception): pass
@@ -96,14 +93,14 @@ def datestr(then, now=None):
     def agohence(n, what, divisor=None):
         if divisor: n = n // divisor
 
-        out = str(abs(n)) + ' ' + what       # '2 day'
-        if abs(n) != 1: out += 's'           # '2 days'
-        out += ' '                           # '2 days '
+        out = str(abs(n)) + ' ' + what  # '2 day'
+        if abs(n) != 1: out += 's'  # '2 days'
+        out += ' '  # '2 days '
         if n < 0:
             out += 'from now'
         else:
             out += 'ago'
-        return out                           # '2 days ago'
+        return out  # '2 days ago'
 
     oneday = 24 * 60 * 60
 
@@ -119,17 +116,17 @@ def datestr(then, now=None):
     delta = now - then
     deltaseconds = int(delta.days * oneday + delta.seconds + delta.microseconds * 1e-06)
     deltadays = abs(deltaseconds) // oneday
-    if deltaseconds < 0: deltadays *= -1 # fix for oddity of floor
+    if deltaseconds < 0: deltadays *= -1  # fix for oddity of floor
 
     if deltadays:
         if abs(deltadays) < 4:
             return agohence(deltadays, 'day')
 
         try:
-            out = then.strftime('%B %e') # e.g. 'June  3'
+            out = then.strftime('%B %e')  # e.g. 'June  3'
         except ValueError:
             # %e doesn't work on Windows.
-            out = then.strftime('%B %d') # e.g. 'June 03'
+            out = then.strftime('%B %d')  # e.g. 'June 03'
 
         if then.year != now.year or deltadays < 0:
             out += ', %s' % then.year
@@ -144,13 +141,16 @@ def datestr(then, now=None):
             return agohence(deltaseconds, 'second')
 
     deltamicroseconds = delta.microseconds
-    if delta.days: deltamicroseconds = int(delta.microseconds - 1e6) # datetime oddity
+    if delta.days: deltamicroseconds = int(delta.microseconds - 1e6)  # datetime oddity
     if abs(deltamicroseconds) > 1000:
         return agohence(deltamicroseconds, 'millisecond', 1000)
 
     return agohence(deltamicroseconds, 'microsecond')
 
+
 from numtools import denumify
+
+
 def dateify(datestring):
     """
     Formats a numified `datestring` properly.
