@@ -8,16 +8,16 @@ from torngas.utils.storage import storage
 from torngas import global_settings
 import warnings
 
-SETTINGS_MODULE = "SETTINGS_MODULE"
+SETTINGS_MODULE_ENVIRON = "SETTINGS_MODULE"
 
 
 class Settings(object):
     def __contains__(self, item):
-        setting = self.settings_module
+        setting = Settings.settings_object()
         return hasattr(setting, item)
 
     def __getattr__(self, item):
-        setting = self.settings_module
+        setting = Settings.settings_object()
 
         if hasattr(setting, item):
             if item in ('TORNADO_CONF', 'LOG_CONFIG', 'SESSION', 'TEMPLATE_CONFIG',):
@@ -34,21 +34,24 @@ class Settings(object):
 
         return storage(config) if type(config) is dict else config
 
-    @property
-    def settings_module(self):
-        if not hasattr(self, '__conf'):
+    @classmethod
+    def settings_object(cls):
+        if not hasattr(cls, '_sett'):
             try:
-                if os.environ.get(SETTINGS_MODULE, None):
-                    self.__conf = import_object(os.environ[SETTINGS_MODULE])
-                else:
-                    self.__conf = import_object('.'.join(['settings', options.settings]))
+                sett_obj = import_object(options.settings)
+                cls._sett = sett_obj
             except AttributeError:
-                self.__conf = import_object('.'.join(["settings", "setting"]))
+                if os.environ.get(SETTINGS_MODULE_ENVIRON, None):
+                    cls._sett = import_object(os.environ[SETTINGS_MODULE_ENVIRON])
+                else:
+                    raise ConfigError(
+                        'tornado.options not have "settings",You may try to use settings \
+                         before "define settings module"')
             except ImportError:
                 warnings.warn(
                     'settings file import error. using global settings now. you need create "setting" files')
-                self.__conf = global_settings
-        return self.__conf
+                cls._sett = global_settings
+        return cls._sett
 
 
 settings = Settings()
