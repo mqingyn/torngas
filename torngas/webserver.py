@@ -35,7 +35,7 @@ class Server(object):
         define("setting", default='setting', help="""config used to set the configuration file type,\n
         settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""",
                type=str)
-        define("address", default='localhost', help='listen host,default:localhost', type=str)
+        define("address", default='127.0.0.1', help='listen host,default:127.0.0.1', type=str)
         define("log_prefix", default='../log', help='log file dirname', type=str)
         return self
 
@@ -182,18 +182,14 @@ class Server(object):
     def server_start(self, no_keep_alive=False, io_loop=None,
                      xheaders=False, ssl_options=None, protocol=None, sockets=None, **kwargs):
         if not sockets:
-            try:
-                addr = options.address
-            except AttributeError:
-                addr = '127.0.0.1'
             from tornado.netutil import bind_sockets
 
             if self.settings.IPV4_ONLY:
                 import socket
 
-                sockets = bind_sockets(options.port, addr, family=socket.AF_INET)
+                sockets = bind_sockets(options.port, options.address, family=socket.AF_INET)
             else:
-                sockets = bind_sockets(options.port, addr)
+                sockets = bind_sockets(options.port, options.address)
 
         http_server = tornado.httpserver.HTTPServer(self.application, no_keep_alive, io_loop,
                                                     xheaders, ssl_options, protocol, **kwargs)
