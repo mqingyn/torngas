@@ -1,7 +1,6 @@
 *.py[cod]
 _torngas
 log
-logs/*.log
 # C extensions
 *.so
 .idea
