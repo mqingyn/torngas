@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-from torngas.webserver import Server
 from tornado.options import options
 
 PROJ_PATH = os.path.dirname(os.path.abspath(__file__))
 
 if __name__ == '__main__':
+    from torngas.webserver import Server
+
     server = Server(PROJ_PATH)
     server.parse_command_line()
 

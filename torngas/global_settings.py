@@ -10,7 +10,9 @@ MIDDLEWARE_CLASSES = (
     'torngas.middleware.signal.SignalMiddleware',
     'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
 )
-INSTALLED_APPS = ()
+INSTALLED_APPS = (
+    'helloworld',
+)
 # 全局modules配置
 COMMON_MODULES = (
     # 'module限定名',
@@ -79,7 +81,8 @@ TORNADO_CONF = {
     "debug": True,
     "xheaders": True,
     "login_url": '/login',
-    "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q="
+    "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
+    "template_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates'),
     #安全起见，可以定期生成新的cookie 秘钥，生成方法：
     #base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 }
@@ -102,20 +105,20 @@ LOGGER_CONFIG = {
 #####默认日志logger模块
 #access log 访问日志统计
 ACCESS_LOGGING_OPEN = True
-ACCESS_LOGGING_NAME = 'tornado.amaps_accesslog'
-ACCESS_LOGGING_FILE = "logs/amaps_access_log.log"
+ACCESS_LOGGING_NAME = 'tornado.torngas_accesslog'
+ACCESS_LOGGING_FILE = "logs/torngas_access_log.log"
 ACCESS_LOGGING_ROLLOVER_WHEN = "midnight"
 
 #general log 错误，警告，和异常输出，**不要关闭这个log
 GENERAL_LOGGING_OPEN = True
-GENERAL_LOGGING_NAME = "tornado.amaps_generallog"
-GENERAL_LOGGING_FILE = "logs/amaps_trace_log.log"
+GENERAL_LOGGING_NAME = "tornado.torngas_generallog"
+GENERAL_LOGGING_FILE = "logs/torngas_trace_log.log"
 GENERAL_LOGGING_ROLLOVER_WHEN = "midnight"
 
 #info log ，info和debug类型日志输出
 INFO_LOGGING_OPEN = True
-INFO_LOGGING_NAME = "tornado.amaps_infolog"
-INFO_LOGGING_FILE = "logs/amaps_info_log.log"
+INFO_LOGGING_NAME = "tornado.torngas_infolog"
+INFO_LOGGING_FILE = "logs/torngas_info_log.log"
 INFO_LOGGING_ROLLOVER_WHEN = "midnight"
 ########
 IPV4_ONLY = True

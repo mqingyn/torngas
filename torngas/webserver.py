@@ -11,6 +11,7 @@ from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError, BaseError
 
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 define("port", default=8000, help="run server on it", type=int)
@@ -44,7 +45,9 @@ class Server(object):
                 locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
+        from torngas.logger import patch_tornado_logger
 
+        patch_tornado_logger()
         if not application:
             if not self.urls:
                 raise BaseError("urls not found.")
