@@ -140,7 +140,6 @@ class LocMemCache(BaseCache):
         self._cache.clear()
         self._expire_info.clear()
 
-
     def clear_expires(self, **kwargs):
 
         for key in self._cache.keys():

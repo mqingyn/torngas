@@ -6,6 +6,7 @@ import hashlib
 import os
 import shutil
 import time
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -13,6 +14,7 @@ except ImportError:
 
 from torngas.cache.backends.base import BaseCache
 from torngas.utils.strtools import safestr
+
 
 class FileBasedCache(BaseCache):
     def __init__(self, dir, params):
@@ -145,9 +147,10 @@ class FileBasedCache(BaseCache):
 
     def _get_num_entries(self):
         count = 0
-        for _,_,files in os.walk(self._dir):
+        for _, _, files in os.walk(self._dir):
             count += len(files)
         return count
+
     _num_entries = property(_get_num_entries)
 
     def clear(self):
@@ -155,6 +158,7 @@ class FileBasedCache(BaseCache):
             shutil.rmtree(self._dir)
         except (IOError, OSError):
             pass
+
 
 # For backwards compatibility
 class CacheClass(FileBasedCache):

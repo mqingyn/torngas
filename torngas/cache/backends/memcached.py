@@ -9,6 +9,7 @@ from torngas.cache.backends.base import BaseCache, InvalidCacheBackendError
 
 from torngas.utils.strtools import safestr
 
+
 class BaseMemcachedCache(BaseCache):
     def __init__(self, server, params, library, value_not_found_exception):
         super(BaseMemcachedCache, self).__init__(params)
@@ -42,7 +43,7 @@ class BaseMemcachedCache(BaseCache):
         way. Call this function to obtain a safe value for your timeout.
         """
         timeout = timeout or self.default_timeout
-        if timeout > 2592000: # 60*60*24*30, 30 days
+        if timeout > 2592000:  # 60*60*24*30, 30 days
             # See http://code.google.com/p/memcached/wiki/FAQ
             # "You can set expire times up to 30 days in the future. After that
             # memcached interprets it as a date, and will expire the item after
@@ -139,9 +140,11 @@ class BaseMemcachedCache(BaseCache):
     def clear(self):
         self._cache.flush_all()
 
+
 class CacheClass(BaseMemcachedCache):
     def __init__(self, server, params):
         import warnings
+
         warnings.warn(
             "memcached.CacheClass has been split into memcached.MemcachedCache and memcached.PyLibMCCache. Please update your cache backend setting.",
             DeprecationWarning
@@ -151,23 +154,29 @@ class CacheClass(BaseMemcachedCache):
         except ImportError:
             raise InvalidCacheBackendError(
                 "Memcached cache backend requires either the 'memcache' or 'cmemcache' library"
-                )
+            )
         super(CacheClass, self).__init__(server, params,
                                          library=memcache,
                                          value_not_found_exception=ValueError)
 
+
 class MemcachedCache(BaseMemcachedCache):
     "An implementation of a cache binding using python-memcached"
+
     def __init__(self, server, params):
         import memcache
+
         super(MemcachedCache, self).__init__(server, params,
                                              library=memcache,
                                              value_not_found_exception=ValueError)
 
+
 class PyLibMCCache(BaseMemcachedCache):
     "An implementation of a cache binding using pylibmc"
+
     def __init__(self, server, params):
         import pylibmc
+
         self._local = local()
         super(PyLibMCCache, self).__init__(server, params,
                                            library=pylibmc,

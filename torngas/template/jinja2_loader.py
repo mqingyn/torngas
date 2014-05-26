@@ -3,7 +3,7 @@
 import os
 from jinja2 import Environment, FileSystemLoader, FileSystemBytecodeCache
 from tornado.template import Loader
-from torngas.helpers.settings_helper import settings
+from torngas.settings_manager import settings
 from jinja2.defaults import *
 from jinja2.runtime import Undefined
 
@@ -30,8 +30,7 @@ _JINJA_ENV = Environment(bytecode_cache=_CACHE,
                          extensions=cfg.get('extensions', ()),
                          optimized=cfg.get('optimized', True),
                          undefined=cfg.get('undefined', Undefined),
-                         finalize=cfg.get('finalize', None)
-)
+                         finalize=cfg.get('finalize', None))
 
 
 class Jinja2TemplateLoader(Loader):
@@ -45,7 +44,6 @@ class Jinja2TemplateLoader(Loader):
             os.makedirs(cache_dir)
         _CACHE.directory = cache_dir
 
-
     def load(self, name, parent_path=None):
         with self.lock:
             if os.path.isabs(name):
@@ -56,7 +54,6 @@ class Jinja2TemplateLoader(Loader):
                 template = _JINJA_ENV.get_template(name)
             template.generate = template.render
             return template
-
 
     def reset(self):
         if hasattr(_JINJA_ENV, 'bytecode_cache') and _JINJA_ENV.bytecode_cache:

@@ -6,9 +6,7 @@ Torngas Whitelist Module
 """
 from tornado import web
 import types
-from torngas.utils import lazyimport
-
-settings_module = lazyimport('torngas.helpers.settings_helper')
+from torngas.settings_manager import settings
 
 
 def whitelisted(argument=None):
@@ -27,10 +25,10 @@ def whitelisted(argument=None):
     if type(argument) is types.FunctionType:
 
         def wrapper(self, *args, **kwargs):
-            white_setting = settings_module.settings.WHITELIST
+            white_setting = settings.WHITELIST
             if white_setting:
                 if is_whitelisted(self.request.remote_ip,
-                                  settings_module.settings.WHITELIST):
+                                  settings.WHITELIST):
                     return argument(self, *args, **kwargs)
                 raise web.HTTPError(403)
             else:

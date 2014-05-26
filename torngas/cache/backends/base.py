@@ -8,11 +8,13 @@ from __future__ import unicode_literals
 
 import warnings
 
-from torngas.exception import TorngasError
+from torngas.exception import BaseError
 from tornado.util import import_object
 
-class InvalidCacheBackendError(TorngasError):
+
+class InvalidCacheBackendError(BaseError):
     pass
+
 
 class CacheKeyWarning(RuntimeWarning):
     pass
@@ -20,6 +22,7 @@ class CacheKeyWarning(RuntimeWarning):
 
 # Memcached does not accept keys longer than this.
 MEMCACHE_MAX_KEY_LENGTH = 250
+
 
 def default_key_func(key, key_prefix, version):
     """
@@ -30,6 +33,7 @@ def default_key_func(key, key_prefix, version):
     function with custom key making behavior.
     """
     return '%s:%s:%s' % (key_prefix, version, key)
+
 
 def get_key_func(key_func):
     """
@@ -45,6 +49,7 @@ def get_key_func(key_func):
             key_func_module = import_object(key_func_module_path)
             return getattr(key_func_module, key_func_name)
     return default_key_func
+
 
 class BaseCache(object):
     def __init__(self, params):
@@ -221,9 +226,9 @@ class BaseCache(object):
         if value is None:
             raise ValueError("Key '%s' not found" % key)
 
-        self.set(key, value, version=version+delta)
+        self.set(key, value, version=version + delta)
         self.delete(key, version=version)
-        return version+delta
+        return version + delta
 
     def decr_version(self, key, delta=1, version=None):
         """Substracts delta from the cache version for the supplied key. Returns

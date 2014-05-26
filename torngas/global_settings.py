@@ -5,16 +5,20 @@ import os
 #   中间件  #
 ############
 MIDDLEWARE_CLASSES = (
+    'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.middleware.signal.SignalMiddleware',
+    'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
 )
-
-############
-# 加载的应用 #
-############
-INSTALLED_APPS = (
+INSTALLED_APPS = ()
+# 全局modules配置
+COMMON_MODULES = (
+    # 'module限定名',
 )
-
+# 路由modules，针对某个路由或某些路由起作用
+ROUTE_MODULES = {
+    # {'路由名称':['module限定名'],['!被排除的全局module限定名']}
+}
 ###########
 # 缓存配置 #
 ###########
@@ -89,32 +93,33 @@ WHITELIST = False
 # )
 
 #tornado日志功能配置
-LOG_CONFIG = {
-    'level': 'info',  #日志级别
-    'rotating_handler': 'TimedRotatingFileHandler',  #备份类型，目前默认仅支持使用RotatingFileHandler，或TimedRotatingFileHandler
-    'filesize': 1000 * 1000 * 1000,  #日志文件大小限制,针对file方式
-    'backup_num': 10,  #最多保留文件数
-    # params when:
-    # 'S'	Seconds
-    # 'M'	Minutes
-    # 'H'	Hours
-    # 'D'	Days
-    # 'W0'-'W6'	Weekday (0=Monday)
-    # 'midnight'	Roll over at midnight
-    #备份时间类型，默认D
-    'when': 'D',
-    'interval': 1,
-    'delay': True,
-    'suffix': '%Y-%m-%d_%H%M%S',
-    'log_to_stderr': True
+LOGGER_CONFIG = {
+    "tcp_logging_port": 9020,
+    "tcp_logging_host": 'localhost',
+    "root_logger_name": 'tornado',
+    "level": 'DEBUG'
 }
+#####默认日志logger模块
+#access log 访问日志统计
+ACCESS_LOGGING_OPEN = True
+ACCESS_LOGGING_NAME = 'tornado.amaps_accesslog'
+ACCESS_LOGGING_FILE = "logs/amaps_access_log.log"
+ACCESS_LOGGING_ROLLOVER_WHEN = "midnight"
+
+#general log 错误，警告，和异常输出，**不要关闭这个log
+GENERAL_LOGGING_OPEN = True
+GENERAL_LOGGING_NAME = "tornado.amaps_generallog"
+GENERAL_LOGGING_FILE = "logs/amaps_trace_log.log"
+GENERAL_LOGGING_ROLLOVER_WHEN = "midnight"
+
+#info log ，info和debug类型日志输出
+INFO_LOGGING_OPEN = True
+INFO_LOGGING_NAME = "tornado.amaps_infolog"
+INFO_LOGGING_FILE = "logs/amaps_info_log.log"
+INFO_LOGGING_ROLLOVER_WHEN = "midnight"
+########
 IPV4_ONLY = True
 
-#日志logger名，不同的日志名会相应生成不同的日志目录
-# {'日志目录名','logger名'}
-LOG_RELATED_NAME = {
-    'exception_log': 'exception'
-}
 
 #开启session支持
 SESSION = {

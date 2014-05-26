@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Created by mengqingyun on 14-5-26.
+import threading
+
+
+class BaseHttpModule(object):
+    """
+    编写httpmodule需继承BaseHttpModule并实现其中任何一个方法即可
+
+    """
+    _instance_lock = threading.Lock()
+    __instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls.__instance:
+            with cls._instance_lock:
+                cls.__instance = super(BaseHttpModule, cls).__new__(
+                    cls, *args, **kwargs)
+
+        return cls.__instance
+
+    def begin_request(self, handler):
+        """
+        匹配路由后，执行处理handler时调用,你可以在这里对request进行过滤后finish request
+        :param handler: handler对象
+        """
+        pass
+
+    def process_exception(self, handler, exception):
+        """
+        发生异常时调用
+        :param handler: 返回handler对象
+        :param exception: 异常栈对象
+        """
+        raise
+
+    def begin_response(self, handler, chunk=None):
+        """
+        请求结束后响应时调用，此事件在finish之前,render之后被调用，
+        这里你可以对响应数据做最后的处理
+        ***切记，这里不能再次调用finish，否则会发生循环调用导致错误***
+        :param handler: handler对象
+        """
+        pass
+
+    def complete_response(self, handler):
+        """
+        请求呈现客户端后调用
+        :param handler: handler对象
+        """
+        pass
+

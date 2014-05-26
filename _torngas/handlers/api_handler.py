@@ -17,7 +17,6 @@ class ApiHandler(CommonHandler):
                     format = 'json'
         return format or 'json'
 
-
     def write_api(self, obj, nofail=False):
         format = self.get_format()
         if format == 'json':

@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-torngas exception module
+Created by mengqingyun on 14-5-21.
 """
+
+from tornado.web import HTTPError
+
 try:
     from exceptions import Exception, StandardError, Warning
 except ImportError:
@@ -10,31 +13,20 @@ except ImportError:
     StandardError = Exception
 
 
-class TorngasError(StandardError):
-    """Exception related to operation with torngas."""
+class BaseError(StandardError):
+    """Base Error"""
 
 
-class ArgumentError(TorngasError):
+class ArgumentError(BaseError):
     """Arguments error"""
 
 
-class ConfigError(TorngasError):
+class ConfigError(BaseError):
     """raise config error"""
 
 
-class UrlError(TorngasError):
+class UrlError(BaseError):
     """route write error"""
-
-
-from tornado.web import HTTPError
-
-
-class APIError(HTTPError):
-    """API error handling exception
-    """
-
-    def __init__(self, status_code, log_message=None, *args, **kwargs):
-        super(APIError, self).__init__(status_code, log_message, *args, **kwargs)
 
 
 class Http404(HTTPError):

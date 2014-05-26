@@ -3,15 +3,13 @@
 
 import random, threading
 from tornado.ioloop import PeriodicCallback
-from torngas.helpers.settings_helper import settings
+from torngas.settings_manager import settings
 from torngas.exception import ConfigError
 from torngas.utils.storage import storage
 from torngas.dispatch import signals
-from sqlalchemy import Column
-from sqlalchemy import Integer
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine import url
 
 
@@ -33,7 +31,7 @@ class Model(object):
 def _create_session(engine):
     if not engine:
         return None
-    session = sessionmaker(bind=engine)#, query_cls=Query)
+    session = sessionmaker(bind=engine)
     return scoped_session(session)
 
 
@@ -59,12 +57,12 @@ class SqlConnection(object):
 
                     for conn in connections_str:
                         dburl = url.URL(drivername=conn['DRIVER']
-                            , username=conn['UID']
-                            , password=conn['PASSWD']
-                            , host=conn['HOST']
-                            , port=conn['PORT']
-                            , database=conn['DATABASE']
-                            , query=conn['QUERY'])
+                                        , username=conn['UID']
+                                        , password=conn['PASSWD']
+                                        , host=conn['HOST']
+                                        , port=conn['PORT']
+                                        , database=conn['DATABASE']
+                                        , query=conn['QUERY'])
 
                         if conn['ROLE'] == _CONNECTION_TYPE[0]:
                             master.append(dburl)
@@ -100,13 +98,15 @@ class SQLAlchemy(object):
 
     """
 
-    def __init__(self, base_conf={}, master_url=None, slaves_url=[], **kwargs):
+    def __init__(self, base_conf=None, master_url=None, slaves_url=None, **kwargs):
+        if not slaves_url:
+            slaves_url = []
+        if not base_conf:
+            base_conf = {}
         self.engine = engine_from_config(base_conf, prefix='sqlalchemy.', url=master_url, **kwargs)
-        # self.engine = create_engine(master, **kwargs)
         self._master_session = _create_session(self.engine)
         self._slaves_session = []
         for slave in slaves_url:
-            # slave = create_engine(slave, **kwargs)
             slave_engine = engine_from_config(base_conf, prefix='sqlalchemy.', url=slave, **kwargs)
             self._slaves_session.append(_create_session(slave_engine))
 
@@ -115,7 +115,7 @@ class SQLAlchemy(object):
             PeriodicCallback(self._ping_db,
                              kwargs['pool_recycle'] * 1000).start()
 
-        signals.call_finished.connect(self._remove)#注册信号，请求结束后remove
+        signals.call_finished.connect(self._remove)  #注册信号，请求结束后remove
 
     def _remove(self, **kwargs):
         self._master_session.remove()
@@ -158,7 +158,6 @@ class SQLAlchemy(object):
         self._master_session.execute('show variables')
         for slave in self._slaves_session:
             slave.execute('show variables')
-
 
     def create_db(self):
         self.Model.metadata.create_all(self.engine)

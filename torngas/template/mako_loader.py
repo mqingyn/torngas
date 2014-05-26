@@ -3,7 +3,7 @@
 import os
 from mako.lookup import TemplateLookup
 from tornado.template import Loader
-from torngas.helpers.settings_helper import settings
+from torngas.settings_manager import settings
 
 cfg = settings.TEMPLATE_CONFIG
 _lookup = TemplateLookup(input_encoding=cfg.get('input_encoding', 'utf-8'),
@@ -57,7 +57,6 @@ class MakoTemplateLoader(Loader):
         template.generate = template.render
 
         return template
-
 
     def reset(self):
         pass

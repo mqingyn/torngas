@@ -1,4 +1,5 @@
 *.py[cod]
+_torngas
 log
 # C extensions
 *.so
