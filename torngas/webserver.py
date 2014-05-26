@@ -11,6 +11,7 @@ from tornado.util import import_object
 from torngas.utils import lazyimport
 from torngas.exception import ConfigError, BaseError
 
+settings = lazyimport("torngas.settings_manager.settings")
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -21,19 +22,9 @@ define("servermode", default='httpserver', help="run server mode", type=str, met
 
 
 class Server(object):
-    settings = None
+    settings = settings
     urls = []
     application = None
-
-    def __init__(self, project_path):
-        sys.path.append(project_path)
-
-    def parse_command_line(self):
-        tornado.options.parse_command_line()
-        from torngas.settings_manager import settings
-
-        self.settings = settings
-        return self
 
     def load_application(self, application=None):
 

@@ -2,21 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import os
-from tornado.options import options
-
-PROJ_PATH = os.path.dirname(os.path.abspath(__file__))
+from tornado.options import options, parse_command_line
+from torngas.webserver import Server
 
 if __name__ == '__main__':
-    from torngas.webserver import Server
 
-    server = Server(PROJ_PATH)
-    server.parse_command_line()
-
+    parse_command_line()
     setting = options.settings
     if not setting:
         os.environ.setdefault('TORNGAS_APP_SETTINGS', 'settings.setting')
 
     if options.servermode == 'httpserver':
+
+
+        server = Server()
         server.runserver()
 
     elif options.servermode == 'logserver':
