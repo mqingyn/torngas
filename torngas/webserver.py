@@ -36,8 +36,7 @@ class Server(object):
         return self
 
     def load_application(self, application=None):
-        #加载app，进行初始化配置,如无ap参数，则使用内置app初始化
-        #加载本地化配置
+
         if self.settings.TRANSLATIONS:
             try:
                 from tornado import locale
