@@ -1,5 +1,4 @@
-from torngas.handlers import WebHandler
-from torngas.cache import get_cache
+from torngas.handler import WebHandler
 
 
 class BaseHandler(WebHandler):
@@ -11,6 +10,5 @@ class BaseHandler(WebHandler):
 
 class Main(BaseHandler):
     def get(self):
-        # cache = get_cache('')
         welcome = "Hello,Torngas!"
         self.render("index.html", welcome=welcome)

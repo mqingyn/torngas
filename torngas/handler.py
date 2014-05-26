@@ -67,6 +67,15 @@ class CommonHandler(RequestHandler):
         return tornado.locale.get(settings.TRANSLATIONS_CONF.locale_default)
 
 
+class WebHandler(UncaughtExceptionMixin, CommonHandler):
+    def create_template_loader(self, template_path):
+        loader = self.application.tmpl
+        if loader is None:
+            return super(CommonHandler, self).create_template_loader(template_path)
+        else:
+            return loader(template_path)
+
+
 class ApiHandler(CommonHandler):
     def get_format(self):
         format = self.get_argument('format', None)

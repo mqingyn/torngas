@@ -4,10 +4,11 @@
 common middleware
 """
 from torngas.middleware import BaseMiddleware
-from torngas.helpers.settings_helper import settings
+from torngas.settings_manager import settings
 from torngas.exception import Http404, HttpForbiddenError
 from tornado.log import gen_log
 from tornado.web import HTTPError
+
 
 def validate_illegal(query, illegals):
     if any([query.find(s) >= 0 for s in illegals]):

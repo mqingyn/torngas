@@ -4,8 +4,8 @@
 import logging
 import logging.handlers
 from tornado.log import LogFormatter
-from ..settings_manager import settings
-from . import DEFAULT_FORMAT, DEFAULT_DATE_FORMAT
+from torngas.settings_manager import settings
+from torngas.logger import DEFAULT_FORMAT, DEFAULT_DATE_FORMAT
 
 
 class BaseServerLogger(object):

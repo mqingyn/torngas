@@ -17,7 +17,7 @@ class Url(object):
         if kwargs:
             self.overall_kw = kwargs
 
-    def __call__(self, pattern, handler, kwargs=None, name=None):
+    def __call__(self, pattern='', handler='', kwargs=None, name=None):
         kw = {}
         if self.overall_kw:
             kw.update(self.overall_kw)

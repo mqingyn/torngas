@@ -73,7 +73,7 @@ class Signal(object):
                 a receiver. This will usually be a string, though it may be
                 anything hashable.
         """
-        from torngas.helpers.settings_helper import settings
+        from torngas.settings_manager import settings
 
         # If DEBUG is on, check that we got a good receiver
         if settings.TORNADO_CONF.debug:

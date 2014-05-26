@@ -5,8 +5,8 @@ import logging
 import logging.handlers
 from functools import partial
 from tornado.options import options
-from ..settings_manager import settings
-from torngas.logger.server import GENERAL_LOGGER, ACCESS_LOGGER, INFO_LOGGER
+from torngas.settings_manager import settings
+# from torngas.logger.server import GENERAL_LOGGER, ACCESS_LOGGER, INFO_LOGGER
 
 
 socket_handler = logging.handlers.SocketHandler(

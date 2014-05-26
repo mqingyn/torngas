@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import warnings
-import logging, os, sys
+import sys
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -14,17 +14,18 @@ from torngas.exception import ConfigError, BaseError
 reload(sys)
 sys.setdefaultencoding('utf-8')
 define("port", default=8000, help="run server on it", type=int)
-define("setting", default='setting', help="""config used to set the configuration file type,\n
-settings_devel was default,you can set settings_functest or settings_production (it's your config file name)""",
-       type=str)
+define("settings", help="setting module name", type=str)
 define("address", default='127.0.0.1', help='listen host,default:127.0.0.1', type=str)
-define("server", default='runserver', help="run server mode", type=str)
+define("servermode", default='httpserver', help="run server mode", type=str, metavar='httpserver|logserver')
 
 
 class Server(object):
     settings = None
     urls = []
     application = None
+
+    def __init__(self, project_path):
+        sys.path.append(project_path)
 
     def parse_command_line(self):
         tornado.options.parse_command_line()
@@ -106,10 +107,9 @@ class Server(object):
                 print ' -', str(app)
             print 'IPV4_Only: %s' % self.settings.IPV4_ONLY
             print 'template engine: %s' % self.settings.TEMPLATE_CONFIG.template_engine
-            print 'server started. development server at http://%s:%s/' % (options.addr, options.port)
+            print 'server started. development server at http://%s:%s/' % (options.address, options.port)
 
     def runserver(self, application=None):
-        self.parse_command_line()
         self.load_urls()
         self.load_application(application)
         self.server_start()

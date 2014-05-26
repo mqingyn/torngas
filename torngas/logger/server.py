@@ -81,7 +81,7 @@ class LoggingTCPServer(TCPServer):
             logging.exception('logserver except: %s' % ex)
 
 
-def runserver():
+def run_logserver():
     GENERAL_LOGGER.propagate = 0
     ACCESS_LOGGER.propagate = 0
     INFO_LOGGER.propagate = 0

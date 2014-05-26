@@ -24,7 +24,7 @@ except ImportError:  # Python 2
     from urlparse import parse_qsl
 
 from torngas.exception import ConfigError
-from torngas.helpers import settings_helper
+from torngas.settings_manager import settings
 from backends.base import (
     InvalidCacheBackendError, CacheKeyWarning, BaseCache)
 from tornado.util import import_object
@@ -51,7 +51,7 @@ DEFAULT_REDIS_ALIAS = 'default_redis'
 DEFAULT_MEMCACHED_ALIAS = 'default_memcache'
 DEFAULT_DUMMY_ALIAS = 'dummy'
 DEFAULT_FILEBASED_ALIAS = 'filebased'
-if DEFAULT_CACHE_ALIAS not in settings_helper.settings.CACHES:
+if DEFAULT_CACHE_ALIAS not in settings.CACHES:
     raise ConfigError("You must define a '%s' cache" % DEFAULT_CACHE_ALIAS)
 
 
@@ -61,7 +61,7 @@ def parse_backend_conf(backend, **kwargs):
     that doesn't use the URI notation.
     """
     # Try to get the CACHES entry for the given backend name first
-    conf = settings_helper.settings.CACHES.get(backend, None)
+    conf = settings.CACHES.get(backend, None)
     if conf is not None:
         args = conf.copy()
         args.update(kwargs)

@@ -20,7 +20,7 @@ class SignalMiddleware(BaseMiddleware):
     def process_request(self, handler):
         signals_module.signals.handler_started.send(sender=handler.__class__)
 
-    def process_response(self, handler):
+    def process_response(self, handler,chunk = None):
         signals_module.signals.handler_finished.send(sender=handler.__class__)
 
     def process_endcall(self, handler):

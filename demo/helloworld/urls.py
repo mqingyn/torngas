@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from torngas.helpers.route_helper import url, RouteLoader
+from torngas.urlhelper import Url
 
-route = RouteLoader(path='/')
-
-urls = route.urlhelper('helloworld.views',
-                       #也可以传递对象
-                       url('Index', r'/', 'main_handler.Main')
+u = Url('helloworld.views')
+urls = u.route(
+    u(name='Index', pattern=r'/', handler='main_handler.Main')
 )
 
-if __name__ == '__main__':
-    pass
