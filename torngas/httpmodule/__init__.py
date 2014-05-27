@@ -35,6 +35,15 @@ class BaseHttpModule(object):
         """
         raise
 
+    def begin_render(self, handler, template_name, **kwargs):
+        """
+
+        :param handler: 返回handler对象
+        :param template_name: 模板名称
+        :param kwargs: 模板变量
+        """
+        pass
+
     def begin_response(self, handler, chunk=None):
         """
         请求结束后响应时调用，此事件在finish之前,render之后被调用，

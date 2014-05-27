@@ -37,6 +37,15 @@ class BaseMiddleware(object):
         """
         raise
 
+    def process_render(self, handler, template_name, **kwargs):
+        """
+        此方法在调用render/render_string时发生
+        :param handler: handler对象
+        :param template_name: 模板名称
+        :param kwargs: 模板参数
+        """
+        pass
+
     def process_response(self, handler, chunk=None):
         """
         请求结束后响应时调用，此方法在render之后，finish之前执行，可以对chunk做最后的封装和处理

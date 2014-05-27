@@ -7,16 +7,17 @@ from torngas.exception import BaseError
 from torngas.settings_manager import settings
 from torngas.middleware import BaseMiddleware
 import sys
-
+import copy
 
 class MiddlewareManager():
     def __init__(self):
+        self.init_middleware = []
         self.request_middleware = []
         self.response_middleware = []
         self.exception_middleware = []
         self.call_middleware = []
         self.endcall_middleware = []
-        self.init_middleware = []
+        self.render_middleware = []
         self.load_middleware()
 
     def run_init_hooks(self, application):
@@ -34,7 +35,11 @@ class MiddlewareManager():
     def run_response_hooks(self, handler, chunk):
         self.__run_hooks('response', self.response_middleware, handler, chunk=chunk)
 
-    def __run_hooks(self, types, middleware_classes, process_object, chunk=None):
+    def run_render_hooks(self, handler, template=None, **kwargs):
+        kwargs['template__'] = template
+        self.__run_hooks('render', self.render_middleware, handler, **kwargs)
+
+    def __run_hooks(self, types, middleware_classes, process_object, **kwargs):
         for middleware_class in middleware_classes:
             if types == 'init':
                 middleware_class.process_init(process_object)
@@ -43,6 +48,7 @@ class MiddlewareManager():
                     middleware_class.process_request(process_object)
 
                 elif types == 'response':
+                    chunk = kwargs.get('chunk', None)
                     middleware_class.process_response(process_object, chunk)
 
                 elif types == 'call':
@@ -50,6 +56,12 @@ class MiddlewareManager():
 
                 elif types == 'endcall':
                     middleware_class.process_endcall(process_object)
+
+                elif types == 'render':
+                    kw = copy.copy(kwargs)
+                    template = kw.pop('template__', None)
+
+                    middleware_class.process_render(process_object, template, **kw)
 
             except BaseException:
                 middleware_class.process_exception(process_object, sys.exc_info())
@@ -85,6 +97,9 @@ class MiddlewareManager():
 
                 if hasattr(inst, 'process_endcall'):
                     self.endcall_middleware.append(inst)
+
+                if hasattr(inst, 'process_render'):
+                    self.render_middleware.append(inst)
 
         self.response_middleware.reverse()
         self.endcall_middleware.reverse()

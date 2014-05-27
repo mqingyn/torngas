@@ -16,6 +16,7 @@ INSTALLED_APPS = (
 # 全局modules配置
 COMMON_MODULES = (
     # 'module限定名',
+    'http_modules.test.Module',
 )
 # 路由modules，针对某个路由或某些路由起作用
 ROUTE_MODULES = {

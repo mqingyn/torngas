@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-22.
+"""
+common handler,webhandler,apihandler
+要获得torngas的中间件等特性需继承这些handler
+"""
 import json
 import tornado.locale
 from tornado.web import RequestHandler, HTTPError
@@ -24,6 +28,10 @@ class CommonHandler(RequestHandler):
 
     def on_prepare(self):
         pass
+
+    def render_string(self, template_name, **kwargs):
+        self.application.middleware_manager.run_render_hooks(self, template_name, **kwargs)
+        return super(CommonHandler, self).render_string(template_name, **kwargs)
 
     def finish(self, chunk=None):
         # finish之前可能执行过多次write，反而chunk可能为None

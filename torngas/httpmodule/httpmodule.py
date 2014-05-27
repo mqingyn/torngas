@@ -19,11 +19,15 @@ class HttpModuleMiddleware(BaseMiddleware):
     named_handlers = None
     non_executes_modules = {}
 
-    def _execute_module(self, handler, module, method, name=None, chunk=None, **kwargs):
+    def _execute_module(self, handler, module, method, name=None, **kwargs):
         try:
             def run_method_():
                 if method.__name__ == "begin_response":
+                    chunk = kwargs.pop("chunk__")
                     method(handler, chunk)
+                elif method.__name__ == "begin_render":
+                    template_name = kwargs.pop("template_name__")
+                    method(handler, template_name, **kwargs)
                 else:
                     method(handler)
 
@@ -104,19 +108,23 @@ class HttpModuleMiddleware(BaseMiddleware):
                 except ImportError:
                     raise
 
-    def _do_all_execute(self, handler, method_name, chunk=None, **kwargs):
+    def _do_all_execute(self, handler, method_name, **kwargs):
         for c_module in self.common_modules:
-            self._execute_module(handler, c_module, getattr(c_module, method_name), chunk=chunk, **kwargs)
+            self._execute_module(handler, c_module, getattr(c_module, method_name), **kwargs)
 
         for name, r_module in self.route_modules.items():
-            [self._execute_module(handler, md, getattr(md, method_name), name, chunk=chunk, **kwargs)
+            [self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
              for md in r_module]
 
     def process_request(self, handler):
         self._do_all_execute(handler, 'begin_request')
 
     def process_response(self, handler, chunk=None):
-        self._do_all_execute(handler, 'begin_response', chunk)
+        self._do_all_execute(handler, 'begin_response', chunk__=chunk)
+
+    def process_render(self, handler, template_name, **kwargs):
+        kwargs['template_name__'] = template_name
+        self._do_all_execute(handler, 'begin_render', **kwargs)
 
     def process_endcall(self, handler):
         self._do_all_execute(handler, 'complete_response')
