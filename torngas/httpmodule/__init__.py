@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-26.
 import threading
+from torngas.middleware import BaseMiddleware
 
 
 class BaseHttpModule(object):
@@ -19,6 +20,10 @@ class BaseHttpModule(object):
                     cls, *args, **kwargs)
 
         return cls.__instance
+
+    @staticmethod
+    def finish(handler, chunk):
+        return BaseMiddleware.finish(handler, chunk)
 
     def begin_request(self, handler):
         """

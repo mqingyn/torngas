@@ -11,13 +11,15 @@ class BaseMiddleware(object):
     """
     _finish = False
 
-    def finish(self, handler, chunk=None):
+    @staticmethod
+    def finish(handler, chunk=None):
         """
         终止执行，直接finish
         """
         if handler and isinstance(handler, RequestHandler):
             BaseMiddleware._finish = True
             handler.finish(chunk)
+        return BaseMiddleware._finish
 
     def process_init(self, application):
         """

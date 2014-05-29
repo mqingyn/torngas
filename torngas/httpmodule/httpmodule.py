@@ -14,7 +14,7 @@ EXCLUDE_PREFIX = '!'
 
 
 class HttpModuleMiddleware(BaseMiddleware):
-    common_modules = set()
+    common_modules = []
     route_modules = {}
     named_handlers = None
     non_executes_modules = {}
@@ -24,12 +24,12 @@ class HttpModuleMiddleware(BaseMiddleware):
             def run_method_():
                 if method.__name__ == "begin_response":
                     chunk = kwargs.pop("chunk__")
-                    method(handler, chunk)
+                    return method(handler, chunk)
                 elif method.__name__ == "begin_render":
                     template_name = kwargs.pop("template_name__")
-                    method(handler, template_name, **kwargs)
+                    return method(handler, template_name, **kwargs)
                 else:
-                    method(handler)
+                    return method(handler)
 
             if name:
                 if name == handler.url_name__:
@@ -51,7 +51,7 @@ class HttpModuleMiddleware(BaseMiddleware):
                     run_method_()
         except BaseException:
             if hasattr(module, 'process_exception'):
-                module.process_exception(handler, sys.exc_info())
+                return module.process_exception(handler, sys.exc_info())
             else:
                 raise
 
@@ -79,25 +79,29 @@ class HttpModuleMiddleware(BaseMiddleware):
 
                 except ImportError:
                     raise
-                self.common_modules.add(m)
+                if m not in self.common_modules:
+                    self.common_modules.append(m)
         # 路由级module载入
         r_modules = settings.ROUTE_MODULES
         if r_modules:
             for name, r_mods in r_modules.items():
                 try:
-                    modules_lst = set()
-                    non_modules = set()
+                    modules_lst = []
+                    non_modules = []
 
                     def choice_module_(m):
 
                         if m.startswith(EXCLUDE_PREFIX):
                             import_m = import_object(m.lstrip(EXCLUDE_PREFIX))
                             check_baseclass_(import_m)
-                            non_modules.add(import_m)
+                            if import_m not in non_modules:
+                                non_modules.append(import_m)
                         else:
                             import_m = import_object(m)
                             check_baseclass_(import_m)
-                            modules_lst.add(import_m())
+                            inst_import_m = import_m()
+                            if inst_import_m not in modules_lst:
+                                modules_lst.append(inst_import_m)
 
                     [choice_module_(m) for m in r_mods]
                     if non_modules:
@@ -109,12 +113,17 @@ class HttpModuleMiddleware(BaseMiddleware):
                     raise
 
     def _do_all_execute(self, handler, method_name, **kwargs):
-        for c_module in self.common_modules:
-            self._execute_module(handler, c_module, getattr(c_module, method_name), **kwargs)
-
-        for name, r_module in self.route_modules.items():
-            [self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
-             for md in r_module]
+        if not BaseMiddleware._finish:
+            for c_module in self.common_modules:
+                self._execute_module(handler, c_module, getattr(c_module, method_name), **kwargs)
+                if BaseMiddleware._finish:
+                    break
+        if not BaseMiddleware._finish:
+            for name, r_module in self.route_modules.items():
+                for md in r_module:
+                    if BaseMiddleware._finish:
+                        break
+                    self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
 
     def process_request(self, handler):
         self._do_all_execute(handler, 'begin_request')
