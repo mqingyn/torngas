@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-22.
+from tornado.web import RequestHandler
 
 
 class BaseMiddleware(object):
@@ -8,6 +9,15 @@ class BaseMiddleware(object):
     编写中间件需继承BaseMiddleware并实现其中任何一个方法即可
 
     """
+    _finish = False
+
+    def finish(self, handler, chunk=None):
+        """
+        终止执行，直接finish
+        """
+        if handler and isinstance(handler, RequestHandler):
+            BaseMiddleware._finish = True
+            handler.finish(chunk)
 
     def process_init(self, application):
         """
