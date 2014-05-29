@@ -19,7 +19,7 @@ COMMON_MODULES = (
 )
 # 路由modules，针对某个路由或某些路由起作用
 ROUTE_MODULES = {
-    # {'路由名称':['module限定名'],['!被排除的全局module限定名']}
+    # '路由名称':['module限定名','!被排除的全局module限定名'],
 }
 ###########
 # 缓存配置 #
