@@ -13,8 +13,6 @@ if __name__ == '__main__':
         os.environ.setdefault('TORNGAS_APP_SETTINGS', 'settings.setting')
 
     if options.servermode == 'httpserver':
-
-
         server = Server()
         server.runserver()
 
