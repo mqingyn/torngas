@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-22.
 import warnings
@@ -34,14 +34,15 @@ class Url(object):
         urlsp.repr_pattern = pattern
         return urlsp
 
-    def route(self, *pattens):
-        urls = []
-        for patt in pattens:
-            if isinstance(patt, (tuple, list)):
-                urls += list(patt)
-            else:
-                urls.append(patt)
-        return urls
+
+def route(*pattens):
+    urls = []
+    for patt in pattens:
+        if isinstance(patt, (tuple, list)):
+            urls += list(patt)
+        else:
+            urls.append(patt)
+    return urls
 
 
 def include(pattern, handlers, prefix_name=None):
