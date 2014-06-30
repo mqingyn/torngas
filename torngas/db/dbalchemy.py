@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import random, threading
@@ -6,7 +6,6 @@ from tornado.ioloop import PeriodicCallback
 from torngas.settings_manager import settings
 from torngas.exception import ConfigError
 from torngas.utils.storage import storage
-from torngas.dispatch import signals
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,7 +18,7 @@ _CONNECTION_TYPE = (
 )
 
 
-class Model(object):
+class BaseModel(object):
     query = None
     __tablename__ = ''
 
@@ -38,12 +37,12 @@ def _create_session(engine):
 class SqlConnection(object):
     _conn_lock = threading.Lock()
 
-    @property
-    def connetion(self):
-        if hasattr(self, '_conn'):
-            return self._conn
+    @staticmethod
+    def connetion():
+        if hasattr(SqlConnection, '_conn'):
+            return SqlConnection._conn
         else:
-            with self._conn_lock:
+            with SqlConnection._conn_lock:
                 connection_pool = storage()
                 connections = settings.DATABASE_CONNECTION
 
@@ -70,16 +69,22 @@ class SqlConnection(object):
                             slaves.append(dburl)
 
                     if not len(master):
-                        raise ConfigError('conn:%s ,master connection not found' % connection_name)
+                        raise ConfigError('conn:%s ,master connection not found.' % connection_name)
+                    try:
+                        connection_pool[connection_name] = SQLAlchemy(config, master_url=master[0], slaves_url=slaves,
+                                                                      **kwargs)
+                    except Exception:
+                        raise
 
-                    connection_pool[connection_name] = SQLAlchemy(config, master_url=master[0], slaves_url=slaves,
-                                                                  **kwargs)
-
-                self._conn = connection_pool
-            return self._conn
+                SqlConnection._conn = connection_pool
+            return SqlConnection._conn
 
 
-sql_connection = SqlConnection()
+sql_connection = SqlConnection
+
+
+def get_base_model():
+    return declarative_base(cls=BaseModel, name='Model')
 
 
 class SQLAlchemy(object):
@@ -115,14 +120,13 @@ class SQLAlchemy(object):
             PeriodicCallback(self._ping_db,
                              kwargs['pool_recycle'] * 1000).start()
 
-        signals.call_finished.connect(self._remove)  #注册信号，请求结束后remove
+            # signals.call_finished.connect(self._remove)  #不在自动处理，通过用户手动决
 
-    def _remove(self, **kwargs):
+    def remove(self):
         self._master_session.remove()
         if self._slaves_session:
             for slave in self._slaves_session:
                 slave.remove()
-
 
     @property
     def session(self):
@@ -145,7 +149,7 @@ class SQLAlchemy(object):
         if hasattr(self, '_base'):
             base = self._base
         else:
-            base = declarative_base(cls=Model, name='Model')
+            base = get_base_model()
             self._base = base
         if self._slaves_session:
             slave = random.choice(self._slaves_session)
@@ -160,4 +164,4 @@ class SQLAlchemy(object):
             slave.execute('show variables')
 
     def create_db(self):
-        self.Model.metadata.create_all(self.engine)
+        get_base_model().metadata.create_all(self.engine)
