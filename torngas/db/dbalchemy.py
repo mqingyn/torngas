@@ -37,8 +37,8 @@ def _create_session(engine):
 class SqlConnection(object):
     _conn_lock = threading.Lock()
 
-    @staticmethod
-    def connetion():
+    @property
+    def connetion(self):
         if hasattr(SqlConnection, '_conn'):
             return SqlConnection._conn
         else:
@@ -80,7 +80,7 @@ class SqlConnection(object):
             return SqlConnection._conn
 
 
-sql_connection = SqlConnection
+sql_connection = SqlConnection()
 
 
 def get_base_model():
