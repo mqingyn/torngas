@@ -164,4 +164,4 @@ class SQLAlchemy(object):
             slave.execute('show variables')
 
     def create_db(self):
-        get_base_model().metadata.create_all(self.engine)
+        self.Model.metadata.create_all(self.engine)
