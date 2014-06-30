@@ -68,10 +68,10 @@ class SessionMiddleware(BaseMiddleware):
 
 _DAY1 = 24 * 60 * 60
 _DAY30 = _DAY1 * 30
-_VERIFICATION_KEY = '__VERIFID'
+_VERIFICATION_KEY = '__VERIFSSID'
 
 session_parameters = storage({
-    'session_name': '__TORNADOID',
+    'session_name': '__TORNADOSSID',
     'cookie_domain': None,
     'cookie_path': '/',
     'expires': 0,  #24 * 60 * 60, # 24 hours in seconds

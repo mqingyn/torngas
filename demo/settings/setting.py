@@ -127,7 +127,7 @@ IPV4_ONLY = True
 #开启session支持
 SESSION = {
     'session_cache_alias': 'default',  # 'session_loccache',对应cache配置
-    'session_name': '__TORNADOID',
+    'session_name': '__TORNADOSSID',
     'cookie_domain': '',
     'cookie_path': '/',
     'expires': 0,  # 24 * 60 * 60, # 24 hours in seconds,0代表浏览器会话过期
