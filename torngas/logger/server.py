@@ -11,6 +11,7 @@ import logging.handlers
 from tornado.tcpserver import TCPServer
 from tornado.ioloop import IOLoop
 from tornado.gen import coroutine, Task
+from tornado.util import import_object
 from ..settings_manager import settings
 from .logger_factory import GeneralLogger, AccessLogger, InfoLogger
 from . import patch_tornado_logger
@@ -19,9 +20,27 @@ general_l = GeneralLogger()
 access_l = AccessLogger()
 info_l = InfoLogger()
 
-GENERAL_LOGGER = general_l.get_logger()
-ACCESS_LOGGER = access_l.get_logger()
-INFO_LOGGER = info_l.get_logger()
+GENERAL_LOGGER = general_l.get_logger(level=logging.WARNING)
+ACCESS_LOGGER = access_l.get_logger(level=logging.INFO)
+INFO_LOGGER = info_l.get_logger(level=logging.INFO)
+
+
+def load_custom_logger():
+    custom_logger = settings.CUSTOM_LOGGING_CONFIG
+    loggers = []
+    for k, v in custom_logger.items():
+        logger = import_object(v['LOGGER'])
+        logger.propagate = 0
+        loggers.append({
+            'name': v['NAME'],
+            'open': v['OPEN'],
+            'logger': logger
+
+        })
+    return loggers
+
+
+custom_loggers = load_custom_logger()
 
 
 class LoggingTCPServer(TCPServer):
@@ -55,6 +74,7 @@ class LoggingTCPServer(TCPServer):
             def handle_(setting_name, isopen, thislogger):
                 if name == setting_name and isopen:
                     thislogger.handle(record)
+                    return True
 
             handle_loggers = [
                 (settings.GENERAL_LOGGING_NAME,
@@ -70,12 +90,15 @@ class LoggingTCPServer(TCPServer):
                  INFO_LOGGER)
             ]
 
-            [handle_(n, op, l) for n, op, l in handle_loggers]
-
-            if name not in (general_l.log_name,
-                            info_l.log_name,
-                            access_l.log_name):
-                logging.getLogger().handle(record)
+            for n, op, l in handle_loggers:
+                if handle_(n, op, l):
+                    break
+            else:
+                for log in custom_loggers:
+                    if handle_(log['name'], log['open'], log['logger']):
+                        break
+                else:
+                    logging.getLogger().handle(record)
 
         except Exception, ex:
             logging.exception('logserver except: %s' % ex)
