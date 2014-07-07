@@ -72,8 +72,9 @@ class LoggingTCPServer(TCPServer):
             name = record.name
 
             def handle_(setting_name, isopen, thislogger):
-                if name == setting_name and isopen:
-                    thislogger.handle(record)
+                if name == setting_name:
+                    if isopen:
+                        thislogger.handle(record)
                     return True
 
             handle_loggers = [
