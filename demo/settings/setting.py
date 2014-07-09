@@ -111,13 +111,13 @@ ACCESS_LOGGING_FILE = os.path.join(PROJECT_PATH, "logs/torngas_access_log.log")
 ACCESS_LOGGING_ROLLOVER_WHEN = "midnight"
 
 #general log 错误，警告，和异常输出，**不要关闭这个log
-GENERAL_LOGGING_OPEN = True
+GENERAL_LOGGING_OPEN = False
 GENERAL_LOGGING_NAME = "tornado.torngas_generallog"
 GENERAL_LOGGING_FILE = os.path.join(PROJECT_PATH, "logs/torngas_trace_log.log")
 GENERAL_LOGGING_ROLLOVER_WHEN = "midnight"
 
 #info log ，info和debug类型日志输出
-INFO_LOGGING_OPEN = True
+INFO_LOGGING_OPEN = False
 INFO_LOGGING_NAME = "tornado.torngas_infolog"
 INFO_LOGGING_FILE = os.path.join(PROJECT_PATH, "logs/torngas_info_log.log")
 INFO_LOGGING_ROLLOVER_WHEN = "midnight"
@@ -127,7 +127,7 @@ CUSTOM_LOGGING_CONFIG = {
         "NAME": "tornado.torngas_customlog",  #必要
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_custom_log.log"),  #必要
         "ROLLOVER_WHEN": "midnight",
-        "OPEN": True,  #必要
+        "OPEN": False,  #必要
         "LOGGER": "mylogger.logger.customlog"  #必要
     }
 }

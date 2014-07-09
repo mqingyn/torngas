@@ -8,7 +8,6 @@ from torngas.exception import ConfigError
 from torngas.utils.storage import storage
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine import url
 
 
@@ -16,15 +15,6 @@ _CONNECTION_TYPE = (
     'master',
     'slave',
 )
-
-
-class BaseModel(object):
-    query = None
-    __tablename__ = ''
-
-    def __init__(self, **kwargs):
-        for k, v in kwargs.iteritems():
-            setattr(self, k, v)
 
 
 def _create_session(engine):
@@ -83,26 +73,7 @@ class SqlConnection(object):
 sql_connection = SqlConnection()
 
 
-def get_base_model():
-    return declarative_base(cls=BaseModel, name='Model')
-
-
 class SQLAlchemy(object):
-    """
-    Example::
-
-        db = SQLAlchemy("mysql://user:pass@host:port/db", pool_recycle=3600)
-
-        from sqlalchemy import Column, String
-
-        class User(db.Model):
-            username = Column(String(16), unique=True, nullable=False)
-            password = Column(String(30), nullable=False)
-
-
-
-    """
-
     def __init__(self, base_conf=None, master_url=None, slaves_url=None, **kwargs):
         if not slaves_url:
             slaves_url = []
@@ -129,7 +100,7 @@ class SQLAlchemy(object):
                 slave.remove()
 
     @property
-    def session(self):
+    def master_session(self):
 
         return self._master_session
 
@@ -145,23 +116,18 @@ class SQLAlchemy(object):
             return self._master_session
 
     @property
-    def Model(self):
-        if hasattr(self, '_base'):
-            base = self._base
-        else:
-            base = get_base_model()
-            self._base = base
+    def query(self):
         if self._slaves_session:
             slave = random.choice(self._slaves_session)
-            base.query = slave.query_property()
+            return slave.query_property()
         else:
-            base.query = self._master_session.query_property()
-        return base
+            return self._master_session.query_property()
 
     def _ping_db(self):
         self._master_session.execute('show variables')
         for slave in self._slaves_session:
             slave.execute('show variables')
 
-    def create_db(self):
-        self.Model.metadata.create_all(self.engine)
+    def create_db(self, base_model):
+        base_model.metadata.create_all(self.engine)
+

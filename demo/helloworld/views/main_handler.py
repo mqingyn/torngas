@@ -1,5 +1,5 @@
-from torngas.handler import WebHandler
 
+from torngas.handler import WebHandler
 
 class BaseHandler(WebHandler):
     """
