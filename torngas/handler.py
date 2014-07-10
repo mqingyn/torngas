@@ -8,7 +8,7 @@ common handler,webhandler,apihandler
 import json
 import tornado.locale
 from tornado.web import RequestHandler, HTTPError
-from logger.client import applogger
+from logger.client import general_logger
 from torngas.settings_manager import settings
 from torngas.mixins.exception import UncaughtExceptionMixin
 
@@ -56,9 +56,9 @@ class CommonHandler(RequestHandler):
                 format = "%d %s: " + value.log_message
                 args = ([value.status_code, self._request_summary()] +
                         list(value.args))
-                applogger.warning(format, *args)
+                general_logger.warning(format, *args)
         else:
-            applogger.error("Uncaught exception %s\n%r", self._request_summary(),
+            general_logger.error("Uncaught exception %s\n%r", self._request_summary(),
                             self.request, exc_info=(typ, value, tb))
 
     def on_finish(self):

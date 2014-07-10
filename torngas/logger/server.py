@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-23.
+"""
+log server,可以将多个进程的日志汇总，仅在非debug模式启动有效
+"""
 try:
     import cPickle as pickle
 except ImportError:
@@ -12,24 +15,20 @@ from tornado.tcpserver import TCPServer
 from tornado.ioloop import IOLoop
 from tornado.gen import coroutine, Task
 from tornado.util import import_object
-from ..settings_manager import settings
-from .logger_factory import GeneralLogger, AccessLogger, InfoLogger
 from . import patch_tornado_logger
-
-general_l = GeneralLogger()
-access_l = AccessLogger()
-info_l = InfoLogger()
-
-GENERAL_LOGGER = general_l.get_logger(level=logging.WARNING)
-ACCESS_LOGGER = access_l.get_logger(level=logging.INFO)
-INFO_LOGGER = info_l.get_logger(level=logging.INFO)
+from ..exception import ConfigError
+from ..logger.logger_factory import *
 
 
 def load_custom_logger():
-    custom_logger = settings.CUSTOM_LOGGING_CONFIG
+    custom_logger = settings.LOGGER_MODULE
     loggers = []
     for k, v in custom_logger.items():
-        logger = import_object(v['LOGGER'])
+        try:
+            logger = import_object(v['LOGGER'])
+            logger = logger().new()
+        except ImportError, ex:
+            raise ConfigError('%s not found,please give a module path in customlog setting' % v['LOGGER'])
         logger.propagate = 0
         loggers.append({
             'name': v['NAME'],
@@ -40,10 +39,11 @@ def load_custom_logger():
     return loggers
 
 
-custom_loggers = load_custom_logger()
-
-
 class LoggingTCPServer(TCPServer):
+    def __init__(self, io_loop=None, ssl_options=None, max_buffer_size=None, loggers=None):
+        self.loggers = loggers
+        super(LoggingTCPServer, self).__init__(io_loop, ssl_options, max_buffer_size)
+
     @coroutine
     def handle_stream(self, stream, address):
         try:
@@ -77,42 +77,23 @@ class LoggingTCPServer(TCPServer):
                         thislogger.handle(record)
                     return True
 
-            handle_loggers = [
-                (settings.GENERAL_LOGGING_NAME,
-                 settings.GENERAL_LOGGING_OPEN,
-                 GENERAL_LOGGER),
-
-                (settings.ACCESS_LOGGING_NAME,
-                 settings.ACCESS_LOGGING_OPEN,
-                 ACCESS_LOGGER),
-
-                (settings.INFO_LOGGING_NAME,
-                 settings.INFO_LOGGING_OPEN,
-                 INFO_LOGGER)
-            ]
-
-            for n, op, l in handle_loggers:
-                if handle_(n, op, l):
+            for log in self.loggers:
+                if handle_(log['name'], log['open'], log['logger']):
                     break
             else:
-                for log in custom_loggers:
-                    if handle_(log['name'], log['open'], log['logger']):
-                        break
-                else:
-                    logging.getLogger().handle(record)
+                logging.getLogger('default').handle(record)
 
         except Exception, ex:
+            logging.getLogger('default').handle(record)
             logging.exception('logserver except: %s' % ex)
 
 
-def run_logserver():
-    GENERAL_LOGGER.propagate = 0
-    ACCESS_LOGGER.propagate = 0
-    INFO_LOGGER.propagate = 0
 
+def runserver():
     patch_tornado_logger()
+    loggers = load_custom_logger()
 
-    server = LoggingTCPServer()
+    server = LoggingTCPServer(loggers=loggers)
     server.listen(address=settings.LOGGER_CONFIG['tcp_logging_host'],
                   port=settings.LOGGER_CONFIG['tcp_logging_port'])
 

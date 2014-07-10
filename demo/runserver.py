@@ -17,8 +17,8 @@ if __name__ == '__main__':
         server.runserver()
 
     elif options.servermode == 'logserver':
-        from torngas.logger.server import run_logserver
+        from torngas.logger.server import runserver
 
-        run_logserver()
+        runserver()
     else:
         print 'wrong servermode,please run python main.py --help'

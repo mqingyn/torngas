@@ -12,7 +12,8 @@ from torngas.logger.client import access_logger
 
 
 def log_request(handler):
-    if settings.ACCESS_LOGGING_OPEN:
+    if settings.LOGGER_MODULE['ACCESS_LOG']['OPEN']:
+        print 'aaaaa'
         _datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         request_time = 1000.0 * handler.request.request_time()
         user_agent = handler.request.headers.get("User-Agent", "-")

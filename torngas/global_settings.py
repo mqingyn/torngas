@@ -4,6 +4,7 @@ import os
 ############
 #   中间件  #
 ############
+
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
@@ -102,25 +103,33 @@ LOGGER_CONFIG = {
     "root_logger_name": 'tornado',
     "level": 'DEBUG'
 }
-#####默认日志logger模块
-#access log 访问日志统计
-ACCESS_LOGGING_OPEN = True
-ACCESS_LOGGING_NAME = 'tornado.torngas_accesslog'
-ACCESS_LOGGING_FILE = "logs/torngas_access_log.log"
-ACCESS_LOGGING_ROLLOVER_WHEN = "midnight"
+LOGGER_MODULE = {
+    # access log 访问日志统计
+    "ACCESS_LOG": {
+        "NAME": 'tornado.torngas_accesslog',
+        "FILE": "logs/torngas_access_log.log",
+        "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
+        "OPEN": True,
+        "LOGGER": "torngas.logger.logger_factory.AccessLogger"
+    },
+    #general log 错误，警告，和异常输出，**不要关闭这个log
+    "GENERAL_LOG": {
+        "NAME": 'tornado.torngas_generallog',
+        "FILE": "logs/torngas_trace_log.log",
+        "ROLLOVER_WHEN": "midnight",
+        "OPEN": True,
+        "LOGGER": "torngas.logger.logger_factory.GeneralLogger"
+    },
+    #info log ，info和debug类型日志输出
+    "INFO_LOG": {
+        "NAME": 'tornado.torngas_infolog',
+        "FILE": "logs/torngas_info_log.log",
+        "ROLLOVER_WHEN": "midnight",
+        "OPEN": True,
+        "LOGGER": "torngas.logger.logger_factory.InfoLogger"
+    }
+}
 
-#general log 错误，警告，和异常输出，**不要关闭这个log
-GENERAL_LOGGING_OPEN = True
-GENERAL_LOGGING_NAME = "tornado.torngas_generallog"
-GENERAL_LOGGING_FILE = "logs/torngas_trace_log.log"
-GENERAL_LOGGING_ROLLOVER_WHEN = "midnight"
-
-#info log ，info和debug类型日志输出
-INFO_LOGGING_OPEN = True
-INFO_LOGGING_NAME = "tornado.torngas_infolog"
-INFO_LOGGING_FILE = "logs/torngas_info_log.log"
-INFO_LOGGING_ROLLOVER_WHEN = "midnight"
-########
 IPV4_ONLY = True
 
 

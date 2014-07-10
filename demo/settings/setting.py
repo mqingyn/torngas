@@ -79,7 +79,7 @@ TRANSLATIONS_CONF = {
 TORNADO_CONF = {
     "static_path": "static",
     "xsrf_cookies": True,
-    "debug": True,
+    "debug": False,
     "xheaders": True,
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
@@ -96,39 +96,47 @@ WHITELIST = False
 # '127.0.0.2',
 # )
 
-#tornado日志功能配置
+# tornado日志功能配置
 LOGGER_CONFIG = {
     "tcp_logging_port": 9020,
     "tcp_logging_host": 'localhost',
     "root_logger_name": 'tornado',
     "level": 'DEBUG'
 }
-#####默认日志logger模块
-#access log 访问日志统计
-ACCESS_LOGGING_OPEN = True
-ACCESS_LOGGING_NAME = 'tornado.torngas_accesslog'
-ACCESS_LOGGING_FILE = os.path.join(PROJECT_PATH, "logs/torngas_access_log.log")
-ACCESS_LOGGING_ROLLOVER_WHEN = "midnight"
 
-#general log 错误，警告，和异常输出，**不要关闭这个log
-GENERAL_LOGGING_OPEN = False
-GENERAL_LOGGING_NAME = "tornado.torngas_generallog"
-GENERAL_LOGGING_FILE = os.path.join(PROJECT_PATH, "logs/torngas_trace_log.log")
-GENERAL_LOGGING_ROLLOVER_WHEN = "midnight"
-
-#info log ，info和debug类型日志输出
-INFO_LOGGING_OPEN = False
-INFO_LOGGING_NAME = "tornado.torngas_infolog"
-INFO_LOGGING_FILE = os.path.join(PROJECT_PATH, "logs/torngas_info_log.log")
-INFO_LOGGING_ROLLOVER_WHEN = "midnight"
-# 自定义类型logger,可配置多个
-CUSTOM_LOGGING_CONFIG = {
+# logserver的logger模块,可配置多个
+LOGGER_MODULE = {
+    # access log 访问日志统计
+    "ACCESS_LOG": {
+        "NAME": 'tornado.torngas_accesslog',
+        "FILE": os.path.join(PROJECT_PATH, "logs/torngas_access_log.log"),
+        "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
+        "OPEN": True,
+        "LOGGER": "torngas.logger.logger_factory.AccessLogger"
+    },
+    #general log 错误，警告，和异常输出，**不要关闭这个log
+    "GENERAL_LOG": {
+        "NAME": 'tornado.torngas_generallog',
+        "FILE": os.path.join(PROJECT_PATH, "logs/torngas_trace_log.log"),
+        "ROLLOVER_WHEN": "midnight",
+        "OPEN": True,
+        "LOGGER": "torngas.logger.logger_factory.GeneralLogger"
+    },
+    #info log ，info和debug类型日志输出
+    "INFO_LOG": {
+        "NAME": 'tornado.torngas_infolog',
+        "FILE": os.path.join(PROJECT_PATH, "logs/torngas_info_log.log"),
+        "ROLLOVER_WHEN": "midnight",
+        "OPEN": True,
+        "LOGGER": "torngas.logger.logger_factory.InfoLogger"
+    },
+    #example custom
     "CUSTOM_LOG": {
         "NAME": "tornado.torngas_customlog",  #必要
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_custom_log.log"),  #必要
         "ROLLOVER_WHEN": "midnight",
-        "OPEN": False,  #必要
-        "LOGGER": "mylogger.logger.customlog"  #必要
+        "OPEN": True,  #必要
+        "LOGGER": "mylogger.logger.CustomLogger"  #必要，自定義的logger，會自動查找import
     }
 }
 
