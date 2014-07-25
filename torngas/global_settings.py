@@ -12,7 +12,6 @@ MIDDLEWARE_CLASSES = (
     'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
 )
 INSTALLED_APPS = (
-    'helloworld',
 )
 # 全局modules配置
 COMMON_MODULES = (
@@ -221,8 +220,8 @@ DATABASE_CONNECTION = {
 # sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
-    'echo': True,
-    'max_overflow': 10,
-    'echo_pool': True,
-    'pool_timeout': 10
+    'sqlalchemy.echo': True,
+    'sqlalchemy.max_overflow': 10,
+    'sqlalchemy.echo_pool': True,
+    'sqlalchemy.pool_timeout': 10
 }
