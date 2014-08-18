@@ -9,6 +9,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.engine import url
 
+"""
+基于sqlalchemy的数据库组件，提供全局连接，配置管理，主从库支持
+"""
 
 _CONNECTION_TYPE = (
     'master',
@@ -136,6 +139,7 @@ class SQLAlchemy(object):
             self._slaves_session.append(_create_session(slave_engine))
 
     def remove(self):
+        # 连接释放通过中间件提供，用户可自行决定是否要使用
         self._master_session.remove()
         if self._slaves_session:
             for slave in self._slaves_session:
