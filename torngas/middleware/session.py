@@ -36,7 +36,7 @@ from torngas.utils.storage import storage
 from torngas.utils.strtools import safestr
 from torngas.utils import lazyimport
 from torngas.middleware import BaseMiddleware
-from tornado.log import app_log
+from torngas.logger.client import SysLogger
 from torngas.settings_manager import settings
 from torngas.cache import get_cache
 
@@ -58,7 +58,7 @@ class SessionMiddleware(BaseMiddleware):
 
     def process_exception(self, ex_object, exception):
         self.session = None
-        app_log.error("session middleware error:{0}".format(exception.message))
+        SysLogger.error("session middleware error:{0}".format(exception.message))
 
     def process_response(self, handler, chunk=None):
         if hasattr(handler, "session"):

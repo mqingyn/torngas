@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import random, threading
-from tornado.ioloop import PeriodicCallback
 from torngas.settings_manager import settings
 from torngas.exception import ConfigError
 from torngas.utils.storage import storage
@@ -15,6 +14,43 @@ _CONNECTION_TYPE = (
     'master',
     'slave',
 )
+"""
+connection config eg:
+DATABASE_CONNECTION = {
+    'default': {
+        'kwargs': {'pool_recycle': 3600},
+        'connections': [{
+                            'ROLE': 'master',
+                            'DRIVER': 'mysql+mysqldb',
+                            'UID': 'root',
+                            'PASSWD': '',
+                            'HOST': '',
+                            'PORT': 3306,
+                            'DATABASE': '',
+                            'QUERY': {"charset": "utf8"}
+
+                        },
+                        {
+                            'ROLE': 'slave',
+                            'DRIVER': 'mysql+mysqldb',
+                            'UID': 'root',
+                            'PASSWD': '',
+                            'HOST': '',
+                            'PORT': 3306,
+                            'DATABASE': '',
+                            'QUERY': {"charset": "utf8"}
+
+                        }]
+    }
+}
+"""
+
+_BASE_SQLALCHEMY_CONFIGURATION = {
+    'sqlalchemy.echo': True,
+    'sqlalchemy.max_overflow': 10,
+    'sqlalchemy.echo_pool': True,
+    'sqlalchemy.pool_timeout': 10
+}
 
 
 def _create_session(engine):
@@ -35,8 +71,10 @@ class SqlConnection(object):
             with SqlConnection._conn_lock:
                 connection_pool = storage()
                 connections = settings.DATABASE_CONNECTION
-
-                config = settings.SQLALCHEMY_CONFIGURATION
+                try:
+                    config = settings.SQLALCHEMY_CONFIGURATION
+                except ConfigError, ex:
+                    config = _BASE_SQLALCHEMY_CONFIGURATION
 
                 for connection_name, connection_item in connections.items():
                     master = []
@@ -75,23 +113,27 @@ sql_connection = SqlConnection()
 
 class SQLAlchemy(object):
     def __init__(self, base_conf=None, master_url=None, slaves_url=None, **kwargs):
+
+        """
+        连接对象init
+        :param base_conf: 全局配置，sqlalchemy.开头
+        :param master_url: 主库连接
+        :param slaves_url: 从库连接
+        :param kwargs: 自定义配置
+        """
+        self.kwargs = kwargs
         if not slaves_url:
             slaves_url = []
         if not base_conf:
-            base_conf = {}
-        self.engine = engine_from_config(base_conf, prefix='sqlalchemy.', url=master_url, **kwargs)
+            self.base_conf = {}
+        else:
+            self.base_conf = base_conf
+        self.engine = engine_from_config(self.base_conf, prefix='sqlalchemy.', url=master_url, **kwargs)
         self._master_session = _create_session(self.engine)
         self._slaves_session = []
         for slave in slaves_url:
-            slave_engine = engine_from_config(base_conf, prefix='sqlalchemy.', url=slave, **kwargs)
+            slave_engine = engine_from_config(self.base_conf, prefix='sqlalchemy.', url=slave, **kwargs)
             self._slaves_session.append(_create_session(slave_engine))
-
-        if 'pool_recycle' in kwargs:
-            # ping db, so that mysql won't goaway
-            PeriodicCallback(self._ping_db,
-                             kwargs['pool_recycle'] * 1000).start()
-
-            # signals.call_finished.connect(self._remove)  #不在自动处理，通过用户手动决
 
     def remove(self):
         self._master_session.remove()
@@ -123,7 +165,7 @@ class SQLAlchemy(object):
         else:
             return self._master_session.query_property()
 
-    def _ping_db(self):
+    def ping_db(self):
         self._master_session.execute('show variables')
         for slave in self._slaves_session:
             slave.execute('show variables')
