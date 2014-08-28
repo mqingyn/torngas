@@ -13,7 +13,7 @@ except ImportError:
     import pickle
 
 from torngas.cache.backends.base import BaseCache
-from torngas.utils.strtools import safestr
+from torngas.utils import safestr
 
 
 class FileBasedCache(BaseCache):

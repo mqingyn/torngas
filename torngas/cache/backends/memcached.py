@@ -7,7 +7,7 @@ from threading import local
 
 from torngas.cache.backends.base import BaseCache, InvalidCacheBackendError
 
-from torngas.utils.strtools import safestr
+from torngas.utils import safestr
 
 
 class BaseMemcachedCache(BaseCache):

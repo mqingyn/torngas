@@ -8,7 +8,7 @@ from tornado.util import import_object
 from tornado.options import options
 
 from exception import ConfigError
-from torngas.utils.storage import storage
+from torngas.storage import storage
 from torngas import global_settings
 
 SETTINGS_MODULE_ENVIRON = "TORNGAS_APP_SETTINGS"

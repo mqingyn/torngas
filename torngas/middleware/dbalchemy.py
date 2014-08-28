@@ -7,10 +7,10 @@ dbalchemy中间件，加入此中间件可以自动帮助dbalchemy模块处理�
 
 from torngas.middleware import BaseMiddleware
 from torngas.logger.client import SysLogger
-from torngas.db.dbalchemy import SqlConnection
+from torngas.db.dbalchemy import sql_connection
 from tornado.ioloop import PeriodicCallback
 
-connection = SqlConnection.connetion
+connection = sql_connection.connetion
 
 
 class DBAlchemyMiddleware(BaseMiddleware):
@@ -21,9 +21,9 @@ class DBAlchemyMiddleware(BaseMiddleware):
 
         for k, conn in connection.items():
             if 'pool_recycle' in conn.kwargs:
-                ping_db_(connection, conn.kwargs['pool_recycle'])
+                ping_db_(conn, conn.kwargs['pool_recycle'])
             elif 'sqlalchemy.pool_recycle' in conn.base_conf:
-                ping_db_(connection, conn.kwargs['sqlalchemy.pool_recycle'])
+                ping_db_(conn, conn.kwargs['sqlalchemy.pool_recycle'])
 
     def process_endcall(self, handler):
         for k, conn in connection.items():

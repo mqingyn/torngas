@@ -32,8 +32,8 @@ except ImportError:
 
     sha1 = sha.new
 
-from torngas.utils.storage import storage
-from torngas.utils.strtools import safestr
+from torngas.storage import storage
+from torngas.utils import safestr
 from torngas.utils import lazyimport
 from torngas.middleware import BaseMiddleware
 from torngas.logger.client import SysLogger

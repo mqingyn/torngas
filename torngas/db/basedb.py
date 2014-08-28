@@ -25,9 +25,9 @@ try:
 except ImportError:
     datetime = None
 
-from torngas.utils.iterutils import IterBetter
-from torngas.utils.strtools import safeunicode, safestr
-from torngas.utils.storage import Storage, ThreadedDict
+from torngas.utils import IterBetter
+from torngas.utils import safeunicode, safestr
+from torngas.storage import Storage, ThreadedDict
 
 try:
     set

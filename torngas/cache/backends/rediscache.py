@@ -30,8 +30,8 @@ CACHES = {
 }
 """
 from torngas.cache.backends.base import BaseCache, InvalidCacheBackendError
-from torngas.utils.storage import SortedDict
-from torngas.utils.strtools import safestr, safeunicode
+from torngas.storage import SortedDict
+from torngas.utils import safestr, safeunicode
 from tornado.util import import_object
 from torngas.exception import ConfigError
 

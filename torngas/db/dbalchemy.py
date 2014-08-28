@@ -4,7 +4,7 @@
 import random, threading
 from torngas.settings_manager import settings
 from torngas.exception import ConfigError
-from torngas.utils.storage import storage
+from torngas.storage import storage
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.engine import url
@@ -63,15 +63,15 @@ def _create_session(engine):
     return scoped_session(session)
 
 
-class SqlConnection(object):
+class _SqlConnection(object):
     _conn_lock = threading.Lock()
 
     @property
     def connetion(self):
-        if hasattr(SqlConnection, '_conn'):
-            return SqlConnection._conn
+        if hasattr(_SqlConnection, '_conn'):
+            return _SqlConnection._conn
         else:
-            with SqlConnection._conn_lock:
+            with _SqlConnection._conn_lock:
                 connection_pool = storage()
                 connections = settings.DATABASE_CONNECTION
                 try:
@@ -107,11 +107,11 @@ class SqlConnection(object):
                     except Exception:
                         raise
 
-                SqlConnection._conn = connection_pool
-            return SqlConnection._conn
+                _SqlConnection._conn = connection_pool
+            return _SqlConnection._conn
 
 
-sql_connection = SqlConnection()
+sql_connection = _SqlConnection()
 
 
 class SQLAlchemy(object):

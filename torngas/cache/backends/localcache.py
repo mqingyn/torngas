@@ -3,14 +3,8 @@
 """Thread-safe in-memory cache backend."""
 
 import time
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
 from torngas.cache import BaseCache
-from torngas.utils.synclock import RWLock
+from torngas.utils import RWLock
 
 # Global in-memory store of cache data. Keyed by name, to provide
 # multiple named local memory caches.
@@ -34,10 +28,9 @@ class LocMemCache(BaseCache):
             exp = self._expire_info.get(key)
             if exp is None or exp <= time.time():
                 try:
-                    pickled = pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
-                    self._set(key, pickled, timeout)
+                    self._set(key, value, timeout)
                     return True
-                except pickle.PickleError:
+                except:
                     pass
             return False
 
@@ -50,9 +43,9 @@ class LocMemCache(BaseCache):
                 return default
             elif exp > time.time():
                 try:
-                    pickled = self._cache[key]
-                    return pickle.loads(pickled)
-                except pickle.PickleError:
+                    val = self._cache[key]
+                    return val
+                except:
                     return default
         with self._lock.writer():
             try:
@@ -75,9 +68,8 @@ class LocMemCache(BaseCache):
         self.validate_key(key)
         with self._lock.writer():
             try:
-                pickled = pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
-                self._set(key, pickled, timeout)
-            except pickle.PickleError:
+                self._set(key, value, timeout)
+            except:
                 raise
 
     def incr(self, key, delta=1, version=None):
@@ -88,9 +80,8 @@ class LocMemCache(BaseCache):
         key = self.make_key(key, version=version)
         with self._lock.writer():
             try:
-                pickled = pickle.dumps(new_value, pickle.HIGHEST_PROTOCOL)
-                self._cache[key] = pickled
-            except pickle.PickleError:
+                self._cache[key] = value
+            except:
                 pass
         return new_value
 
