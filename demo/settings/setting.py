@@ -1,10 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+from torngas.global_settings import *
+
+PROJECT_PATH = os.path.dirname(os.path.dirname(__file__))
+# tornado全局配置
+TORNADO_CONF = {
+    "static_path": "static",
+    "xsrf_cookies": True,
+    "debug": False,
+    "xheaders": True,
+    "login_url": '/login',
+    "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
+    "template_path": os.path.join(PROJECT_PATH, 'templates'),
+    # 安全起见，可以定期生成新的cookie 秘钥，生成方法：
+    # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
+}
+
+
 # ###########
 # 中间件  #
 # ###########
-PROJECT_PATH = os.path.dirname(os.path.dirname(__file__))
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
@@ -75,18 +91,7 @@ TRANSLATIONS_CONF = {
     'use_accept_language': True
 }
 
-# tornado全局配置
-TORNADO_CONF = {
-    "static_path": "static",
-    "xsrf_cookies": True,
-    "debug": False,
-    "xheaders": True,
-    "login_url": '/login',
-    "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
-    "template_path": os.path.join(PROJECT_PATH, 'templates'),
-    # 安全起见，可以定期生成新的cookie 秘钥，生成方法：
-    # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
-}
+
 
 # 白名单未开启，如需使用，请用元祖列出白名单ip
 WHITELIST = False
@@ -98,10 +103,13 @@ WHITELIST = False
 
 # tornado日志功能配置
 LOGGER_CONFIG = {
+    "root_logger_name": 'tornado',
+    "root_level": 'DEBUG',
+    "use_tcp_server": False,
+    # 提供一个bufferhandler(logging.handlers.MemoryHandler的实例)实例，可以缓存log延迟发送
+    "use_tcp_buffer_handler": None,
     "tcp_logging_port": 9020,
     "tcp_logging_host": 'localhost',
-    "root_logger_name": 'tornado',
-    "level": 'DEBUG'
 }
 
 # logserver的logger模块,可配置多个
@@ -109,26 +117,29 @@ LOGGER_MODULE = {
     # access log 访问日志统计
     "ACCESS_LOG": {
         "NAME": 'tornado.torngas_accesslog',
+        "USE_PORTNO": True,  # 使用本地文件输出时，用端口号区分文件名
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_access_log.log"),
         "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
         "OPEN": True,
-        "LOGGER": "torngas.logger.logger_factory.AccessLogger"
+        "LOGGER": "torngas.logger.loggers.AccessLogger"
     },
-    #general log 错误，警告，和异常输出，**不要关闭这个log
+    # general log 错误，警告，和异常输出，**不要关闭这个log
     "GENERAL_LOG": {
         "NAME": 'tornado.torngas_generallog',
+        "USE_PORTNO": False,
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_trace_log.log"),
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,
-        "LOGGER": "torngas.logger.logger_factory.GeneralLogger"
+        "LOGGER": "torngas.logger.loggers.GeneralLogger"
     },
     #info log ，info和debug类型日志输出
     "INFO_LOG": {
         "NAME": 'tornado.torngas_infolog',
+        "USE_PORTNO": False,
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_info_log.log"),
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,
-        "LOGGER": "torngas.logger.logger_factory.InfoLogger"
+        "LOGGER": "torngas.logger.loggers.InfoLogger"
     },
     #example custom
     "CUSTOM_LOG": {
@@ -141,7 +152,7 @@ LOGGER_MODULE = {
 }
 
 
-########
+# #######
 IPV4_ONLY = True
 
 

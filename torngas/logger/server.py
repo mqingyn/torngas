@@ -13,31 +13,10 @@ import struct
 import logging.handlers
 from tornado.tcpserver import TCPServer
 from tornado.ioloop import IOLoop
-from tornado.gen import coroutine, Task
-from tornado.util import import_object
+from tornado.gen import coroutine
 from . import patch_tornado_logger
-from ..exception import ConfigError
-from ..logger.logger_factory import *
-
-
-def load_custom_logger():
-    custom_logger = settings.LOGGER_MODULE
-    loggers = []
-    for k, v in custom_logger.items():
-        try:
-            logger = import_object(v['LOGGER'])
-            logger = logger().new()
-        except ImportError, ex:
-            raise ConfigError('%s not found,please give a module path in customlog setting' % v['LOGGER'])
-        logger.propagate = 0
-        loggers.append({
-            'name': v['NAME'],
-            'open': v['OPEN'],
-            'logger': logger
-
-        })
-    return loggers
-
+from loggers import load_logger
+from ..settings_manager import settings
 
 class LoggingTCPServer(TCPServer):
     def __init__(self, io_loop=None, ssl_options=None, max_buffer_size=None, loggers=None):
@@ -48,15 +27,15 @@ class LoggingTCPServer(TCPServer):
     def handle_stream(self, stream, address):
         try:
             while 1:
-                chunk = yield Task(stream.read_bytes, 4)
+                chunk = yield stream.read_bytes(4)
                 if len(chunk) < 4:
                     break
                 unpack_data = struct.unpack('>L', chunk)
                 slen = int(unpack_data[0]) if unpack_data else None
                 if slen:
-                    chunk = yield Task(stream.read_bytes, slen)
+                    chunk = yield stream.read_bytes(slen)
                     while len(chunk) < slen:
-                        add_result = yield Task(stream.read_bytes, slen - len(chunk))
+                        add_result = yield stream.read_bytes(slen - len(chunk))
                         chunk = chunk + add_result
                     obj = pickle.loads(chunk)
                     record = logging.makeLogRecord(obj)
@@ -91,7 +70,7 @@ class LoggingTCPServer(TCPServer):
 
 def runserver():
     patch_tornado_logger()
-    loggers = load_custom_logger()
+    loggers = load_logger()
 
     server = LoggingTCPServer(loggers=loggers)
     server.listen(address=settings.LOGGER_CONFIG['tcp_logging_host'],
