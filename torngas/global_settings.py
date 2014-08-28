@@ -112,7 +112,7 @@ LOGGER_MODULE = {
         "FILE": "logs/torngas_access_log.log",
         "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
         "OPEN": True,
-        "LOGGER": "torngas.logger.logger_factory.AccessLogger"
+        "LOGGER": "torngas.logger.loggers.AccessLogger"
     },
     #general log 错误，警告，和异常输出，**不要关闭这个log
     "GENERAL_LOG": {
@@ -121,7 +121,7 @@ LOGGER_MODULE = {
         "FILE": "logs/torngas_trace_log.log",
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,
-        "LOGGER": "torngas.logger.logger_factory.GeneralLogger"
+        "LOGGER": "torngas.logger.loggers.GeneralLogger"
     },
     #info log ，info和debug类型日志输出
     "INFO_LOG": {
@@ -130,7 +130,7 @@ LOGGER_MODULE = {
         "FILE": "logs/torngas_info_log.log",
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,
-        "LOGGER": "torngas.logger.logger_factory.InfoLogger"
+        "LOGGER": "torngas.logger.loggers.InfoLogger"
     }
 }
 
