@@ -1,6 +1,6 @@
  Torngas 
 ==========
-version:v0.9.1
+version:v1.3.0
 
 基于tornado的django like框架
 

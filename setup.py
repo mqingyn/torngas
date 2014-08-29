@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="torngas",
-    version="0.9.1",
+    version="1.3.0",
     description="torngas based on tornado",
     author="qingyun.meng",
     url="https://github.com/mqingyn/torngas",
