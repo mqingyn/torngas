@@ -58,7 +58,7 @@ class SessionMiddleware(BaseMiddleware):
 
     def process_exception(self, ex_object, exception):
         self.session = None
-        SysLogger.error("session middleware error:{0}".format(exception.message))
+        SysLogger.error("session middleware error:{0}".format(exception))
 
     def process_response(self, handler, chunk=None):
         if hasattr(handler, "session"):
