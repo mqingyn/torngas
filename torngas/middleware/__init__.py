@@ -30,6 +30,7 @@ class BaseMiddleware(object):
     def process_call(self, request):
         """
         在请求进入application时调用，参数为请求对象，此时还未匹配路由
+        您不能在此方法内finish
         :param request: 请求对象
         """
         pass

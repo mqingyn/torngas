@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-22.
 from tornado import web
+from tornado import version_info
 from tornado.log import app_log
 from torngas.middleware.manager import MiddlewareManager
+from tornado import httputil
 
 
 class Application(web.Application):
@@ -22,11 +24,23 @@ class Application(web.Application):
         self.middleware_manager = MiddlewareManager()
         self.middleware_manager.run_init_hooks(self)
 
-    def __call__(self, request):
-        try:
-            self.middleware_manager.run_call_hooks(request)
-            return web.Application.__call__(self, request)
+        if version_info[0] > 3:
+            this = self
 
-        except Exception, e:
-            app_log.error(e)
-            raise
+            class HttpRequestHook(httputil.HTTPServerRequest):
+                def __init__(self, *args, **kwargs):
+                    super(HttpRequestHook, self).__init__(*args, **kwargs)
+                    this.middleware_manager.run_call_hooks(self)
+
+            httputil.HTTPServerRequest = HttpRequestHook
+
+
+    def __call__(self, request):
+        if version_info[0] < 4:
+            try:
+                self.middleware_manager.run_call_hooks(request)
+                return web.Application.__call__(self, request)
+
+            except Exception, e:
+                app_log.error(e)
+                raise

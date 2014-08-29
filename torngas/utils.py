@@ -9,15 +9,32 @@ Modify by: qingyun.meng
 Description: 
 """
 from tornado.util import import_object
+from tornado.concurrent import Future
+try:
+    import futures
+except ImportError:
+    futures = None
+
+if futures is None:
+    FUTURES = Future
+else:
+    FUTURES = (futures.Future, Future)
+
+def is_future(x):
+    return isinstance(x, FUTURES)
+
 
 import contextlib
 import itertools
+
 try:
     import threading
 except ImportError:
     import dummy_threading as threading
 
 iters = [list, tuple]
+
+
 class RWLock(object):
     """
     Classic implementation of reader-writer lock with preference to writers.
@@ -98,17 +115,22 @@ class RWLock(object):
         finally:
             self.writer_leaves()
 
+
 class LazyImport:
     """lazy import module"""
-    def __init__(self,module_name):
-        self.module_name=module_name
-        self.module=None
-    def __getattr__(self,func_name):
-        if self.module is None:
-            self.module=import_object(self.module_name)
-        return getattr(self.module,func_name)
 
-lazyimport=LazyImport
+    def __init__(self, module_name):
+        self.module_name = module_name
+        self.module = None
+
+    def __getattr__(self, func_name):
+        if self.module is None:
+            self.module = import_object(self.module_name)
+        return getattr(self.module, func_name)
+
+
+lazyimport = LazyImport
+
 
 class Null(object):
     def __new__(cls, *args, **kwargs):
@@ -244,6 +266,7 @@ def strips(text, remove):
     """
     return rstrips(lstrips(text, remove), remove)
 
+
 class IterBetter:
     """
     Returns an object that can be used as an iterator
@@ -288,7 +311,7 @@ class IterBetter:
             self.c += 1
 
     def __getitem__(self, i):
-        #todo: slices
+        # todo: slices
         if i < self.c:
             raise IndexError, "already passed " + str(i)
         try:
