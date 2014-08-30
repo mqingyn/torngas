@@ -6,10 +6,14 @@ import threading
 import logging.handlers
 from tornado.log import LogFormatter
 from ..settings_manager import settings
-from . import DEFAULT_FORMAT, DEFAULT_DATE_FORMAT
 from tornado.util import import_object
 from torngas.exception import ConfigError
 from tornado.options import options
+
+if settings.TORNADO_CONF['debug']:
+    DEFAULT_FORMAT = LogFormatter.DEFAULT_FORMAT
+else:
+    DEFAULT_FORMAT = '[P %(pid)s][%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
 
 
 class BaseServerLogger(object):
@@ -62,7 +66,6 @@ class GeneralLogger(BaseServerLogger):
             log_file = log_file + '.%s' % options.port
         rollover_when = GENERAL_LOG['ROLLOVER_WHEN']
         log_formatter = LogFormatter(fmt=DEFAULT_FORMAT,
-                                     datefmt=DEFAULT_DATE_FORMAT,
                                      color=settings.TORNADO_CONF['debug'])
 
         log_backupcount = GENERAL_LOG.get('BUCKUP_COUNT', 30)
@@ -138,7 +141,6 @@ class InfoLogger(BaseServerLogger):
             log_file = log_file + '.%s' % options.port
         rollover_when = INFO_LOG['ROLLOVER_WHEN']
         log_formatter = LogFormatter(fmt=DEFAULT_FORMAT,
-                                     datefmt=DEFAULT_DATE_FORMAT,
                                      color=settings.TORNADO_CONF['debug'])
 
         log_backupcount = INFO_LOG.get('BUCKUP_COUNT', 30)
@@ -168,16 +170,20 @@ class InfoLogger(BaseServerLogger):
         return log_handler, logging.INFO
 
 
-def load_logger():
+def load_logger(no_propagate=False):
     custom_logger = settings.LOGGER_MODULE
     loggers = []
+    logtostd = options.log_to_stderr
+    servermode = options.servermode
     for k, v in custom_logger.items():
         try:
             logger = import_object(v['LOGGER'])
             logger = logger().new()
         except ImportError, ex:
             raise ConfigError('%s not found,please give a module path in customlog setting' % v['LOGGER'])
-        logger.propagate = 0
+        if not logtostd:
+            if servermode == 'logserver':
+                logger.propagate = 0
         loggers.append({
             'name': v['NAME'],
             'open': v['OPEN'],

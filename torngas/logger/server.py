@@ -14,9 +14,9 @@ import logging.handlers
 from tornado.tcpserver import TCPServer
 from tornado.ioloop import IOLoop
 from tornado.gen import coroutine
-from . import patch_tornado_logger
 from loggers import load_logger
 from ..settings_manager import settings
+
 
 class LoggingTCPServer(TCPServer):
     def __init__(self, io_loop=None, ssl_options=None, max_buffer_size=None, loggers=None):
@@ -67,9 +67,7 @@ class LoggingTCPServer(TCPServer):
             logging.exception('logserver except: %s' % ex)
 
 
-
 def runserver():
-    patch_tornado_logger()
     loggers = load_logger()
 
     server = LoggingTCPServer(loggers=loggers)

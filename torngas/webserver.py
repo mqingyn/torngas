@@ -6,19 +6,23 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
-from tornado.options import define, options
+from tornado.options import define, options, parse_command_line
 from tornado.util import import_object
-from torngas.utils import lazyimport
 from torngas.exception import ConfigError, BaseError
-
-settings = lazyimport("torngas.settings_manager.settings")
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
 define("port", default=8000, help="run server on it", type=int)
 define("settings", help="setting module name", type=str)
 define("address", default='127.0.0.1', help='listen host,default:127.0.0.1', type=str)
 define("servermode", default='httpserver', help="run server mode", type=str, metavar='httpserver|logserver')
+parse_command_line()
+# 一些配置的使用必须先parse_command_line()
+from logger import init_logger_config
+from settings_manager import settings
+
+init_logger_config()
 
 
 class Server(object):
@@ -35,9 +39,7 @@ class Server(object):
                 locale.load_translations(self.settings.TRANSLATIONS_CONF.translations_dir)
             except:
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
-        from torngas.logger import patch_tornado_logger
 
-        patch_tornado_logger()
         if not application:
             if not self.urls:
                 raise BaseError("urls not found.")
@@ -66,8 +68,7 @@ class Server(object):
         self.urls = urls
         return self
 
-    def server_start(self, no_keep_alive=False, io_loop=None,
-                     xheaders=False, ssl_options=None, protocol=None, sockets=None, **kwargs):
+    def server_start(self, sockets=None, **kwargs):
 
         if not sockets:
             from tornado.netutil import bind_sockets
@@ -79,8 +80,8 @@ class Server(object):
             else:
                 sockets = bind_sockets(options.port, options.address)
 
-        http_server = tornado.httpserver.HTTPServer(self.application, no_keep_alive, io_loop,
-                                                    xheaders, ssl_options, protocol, **kwargs)
+        http_server = tornado.httpserver.HTTPServer(self.application, **kwargs)
+
         http_server.add_sockets(sockets)
         self.print_settings_info()
 
@@ -108,3 +109,15 @@ class Server(object):
         self.server_start()
 
 
+def run():
+    if options.servermode == 'httpserver':
+
+        server = Server()
+        server.runserver()
+
+    elif options.servermode == 'logserver':
+        from torngas.logger.server import runserver
+
+        runserver()
+    else:
+        print 'wrong servermode,please run python main.py --help'

@@ -13,16 +13,13 @@ from functools import partial
 from ..settings_manager import settings
 from tornado.util import import_object
 from torngas.exception import ConfigError
-
-
-
+from torngas.logger import root_logger
 
 
 def _init_logger():
     log_conf = settings.LOGGER_CONFIG
     if not settings.TORNADO_CONF['debug']:
-        ROOT_LOGGER = logging.getLogger(settings.LOGGER_CONFIG['root_logger_name'])
-        ROOT_LOGGER.setLevel(settings.LOGGER_CONFIG['root_level'])
+
         if log_conf['use_tcp_server']:
             socket_handler = logging.handlers.SocketHandler(
                 log_conf['tcp_logging_host'],
@@ -34,13 +31,14 @@ def _init_logger():
                     if not isinstance(memory, logging.handlers.MemoryHandler):
                         raise ConfigError('need a MemoryHandler instance.')
                     memory.setTarget(socket_handler)
-                    ROOT_LOGGER.addHandler(memory)
+                    root_logger.addHandler(memory)
                 except ImportError, ex:
                     raise
             else:
-                ROOT_LOGGER.addHandler(socket_handler)
+                root_logger.addHandler(socket_handler)
         else:
-            from server import load_logger
+            from loggers import load_logger
+
             load_logger()
 
 

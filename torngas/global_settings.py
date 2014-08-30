@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os,logging
-############
-#   中间件  #
+import os, logging
+# ###########
+# 中间件  #
 ############
 
 MIDDLEWARE_CLASSES = (
@@ -97,10 +97,11 @@ WHITELIST = False
 
 #tornado日志功能配置
 LOGGER_CONFIG = {
+    "use_tornadolog": False,
     "root_logger_name": 'tornado',
     "level": 'DEBUG',
-    "use_tcp_server":False,
-    "use_tcp_buffer_handler":None ,#提供一个bufferhandler(logging.handlers.MemoryHandler的实例)实例，可以缓存log延迟发送
+    "use_tcp_server": False,
+    "use_tcp_buffer_handler": None,  #提供一个bufferhandler(logging.handlers.MemoryHandler的实例)实例，可以缓存log延迟发送
     "tcp_logging_port": 9020,
     "tcp_logging_host": 'localhost',
 }
@@ -108,7 +109,7 @@ LOGGER_MODULE = {
     # access log 访问日志统计
     "ACCESS_LOG": {
         "NAME": 'tornado.torngas_accesslog',
-        "USE_PORTNO": True,#使用本地文件输出时，用端口号区分文件名
+        "USE_PORTNO": True,  #使用本地文件输出时，用端口号区分文件名
         "FILE": "logs/torngas_access_log.log",
         "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
         "OPEN": True,

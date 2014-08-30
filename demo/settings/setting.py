@@ -8,7 +8,7 @@ PROJECT_PATH = os.path.dirname(os.path.dirname(__file__))
 TORNADO_CONF = {
     "static_path": "static",
     "xsrf_cookies": True,
-    "debug": False,
+    "debug": True,
     "xheaders": True,
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
@@ -103,6 +103,7 @@ WHITELIST = False
 
 # tornado日志功能配置
 LOGGER_CONFIG = {
+    "use_tornadolog": False,
     "root_logger_name": 'tornado',
     "root_level": 'DEBUG',
     "use_tcp_server": False,
@@ -117,9 +118,9 @@ LOGGER_MODULE = {
     # access log 访问日志统计
     "ACCESS_LOG": {
         "NAME": 'tornado.torngas_accesslog',
-        "USE_PORTNO": True,  # 使用本地文件输出时，用端口号区分文件名
+        "USE_PORTNO": False,  # 使用本地文件输出时，用端口号区分文件名
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_access_log.log"),
-        "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
+        "ROLLOVER_WHEN": "midnight",  # S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
         "OPEN": True,
         "LOGGER": "torngas.logger.loggers.AccessLogger"
     },
@@ -132,7 +133,7 @@ LOGGER_MODULE = {
         "OPEN": True,
         "LOGGER": "torngas.logger.loggers.GeneralLogger"
     },
-    #info log ，info和debug类型日志输出
+    # info log ，info和debug类型日志输出
     "INFO_LOG": {
         "NAME": 'tornado.torngas_infolog',
         "USE_PORTNO": False,
@@ -156,7 +157,7 @@ LOGGER_MODULE = {
 IPV4_ONLY = True
 
 
-#开启session支持
+# 开启session支持
 SESSION = {
     'session_cache_alias': 'default',  # 'session_loccache',对应cache配置
     'session_name': '__TORNADOSSID',

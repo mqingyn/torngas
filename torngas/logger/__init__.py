@@ -6,44 +6,44 @@ Created by:Shunping Jiang <shunping.jiang@autonavi.com>
 Description:logger server
 """
 import logging
-import tornado
-from tornado.log import LogFormatter
+import tornado.log
 from ..settings_manager import settings
-
-if settings.TORNADO_CONF['debug']:
-    DEFAULT_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
-else:
-    DEFAULT_FORMAT = '[P %(pid)s][%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
-DEFAULT_DATE_FORMAT = '%y%m%d %H:%M:%S'
+from tornado.options import options
 
 
-def patch_define_logging_options(options=None):
-    pass
+root_logger = logging.getLogger(settings.LOGGER_CONFIG['root_logger_name'])
+root_logger.setLevel(settings.LOGGER_CONFIG['root_level'])
 
 
-def patch_enable_pretty_logging(logger=None, fmt=None):
+#
+
+def load_stream_logger(logger=None, fmt=None):
     if logger is None:
         return
     if not logger.handlers:
         channel = logging.StreamHandler()
         if fmt:
-            channel.setFormatter(LogFormatter(fmt=fmt))
+            channel.setFormatter(tornado.log.LogFormatter(fmt=fmt))
         else:
-            channel.setFormatter(LogFormatter())
+            channel.setFormatter(tornado.log.LogFormatter(fmt=fmt))
         logger.addHandler(channel)
 
 
-def patch_tornado_logger():
-    # 對於debug模式僅僅輸出在屏幕上，非debug模式輸出到日志文件，廢棄tornado默認的日誌設定
+def init_logger_config():
+    if settings.LOGGER_CONFIG.use_tornadolog:
+        return
+
+    options.logging = None
     logging.getLogger().handlers = []
-    if not settings.TORNADO_CONF['debug']:
+    if settings.TORNADO_CONF.debug or options.log_to_stderr:
+        load_stream_logger(root_logger, fmt=tornado.log.LogFormatter.DEFAULT_FORMAT)
+    from .client import SysLogger
+
+    if not settings.TORNADO_CONF.debug:
         tornado.log.app_log = SysLogger
         tornado.log.gen_log = SysLogger
         tornado.log.access_log = SysLogger
-        patch_enable_pretty_logging(logging.getLogger("default"))
-    else:
-        patch_enable_pretty_logging(logging.getLogger("tornado"), fmt=DEFAULT_FORMAT)
+
+    # tornado.log.enable_pretty_logging(None, root_logger)
 
 
-tornado.log.define_logging_options = patch_define_logging_options
-from .client import SysLogger
