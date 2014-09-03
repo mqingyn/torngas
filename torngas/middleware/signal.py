@@ -14,21 +14,21 @@ signals_module = lazyimport('torngas.dispatch')
 
 
 class SignalMiddleware(BaseMiddleware):
-    def process_call(self, request, next, finish):
+    def process_call(self, request, do_next, finish):
         signals_module.signals.call_started.send(sender=request.__class__)
-        next()
+        do_next()
 
-    def process_request(self, handler, next, finish):
+    def process_request(self, handler, do_next, finish):
         signals_module.signals.handler_started.send(sender=handler.__class__)
-        next()
+        do_next()
 
-    def process_response(self, handler, chunk, next, finish):
+    def process_response(self, handler, chunk, do_next, finish):
         signals_module.signals.handler_finished.send(sender=handler.__class__)
-        next()
+        do_next()
 
-    def process_endcall(self, handler, next, finish):
+    def process_endcall(self, handler, do_next, finish):
         signals_module.signals.call_finished.send(sender=handler.__class__)
-        next()
+        do_next()
 
 
 if __name__ == '__main__':

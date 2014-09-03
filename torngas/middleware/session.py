@@ -51,23 +51,23 @@ class SessionMiddleware(BaseMiddleware):
     def process_init(self, application):
         self._cachestore = get_cache(settings.SESSION.session_cache_alias)
 
-    def process_request(self, handler, next, finish):
+    def process_request(self, handler, do_next, finish):
         session = SessionManager(handler, self._cachestore, settings.SESSION)
         session.load_session()
         handler.session = session
-        next()
+        do_next()
 
-    def process_exception(self, ex_object, exception, next, finish):
+    def process_exception(self, ex_object, exception, do_next, finish):
         self.session = None
-        SysLogger.error("session middleware error:{0}".format(exception))
-        next()
+        SysLogger.error("session middleware error:%s" % exception[1].message)
+        do_next()
 
-    def process_response(self, handler, chunk, next, finish):
+    def process_response(self, handler, chunk, do_next, finish):
         if hasattr(handler, "session"):
             handler.session.save()
             del handler.session
 
-        next()
+        do_next()
 
 
 _DAY1 = 24 * 60 * 60
@@ -147,8 +147,8 @@ class SessionManager(object):
             cache_expires = expires
             if expires == 0:
                 # 过期时间为0时，对于tornado来说，是会话有效期，关闭浏览器失效，但是
-                #对于cache缓存而言，无法及时捕获会话结束状态，鉴于此，将cache的缓存设置为一天
-                #cache在每次请求后会清理过期的缓存
+                # 对于cache缓存而言，无法及时捕获会话结束状态，鉴于此，将cache的缓存设置为一天
+                # cache在每次请求后会清理过期的缓存
                 cache_expires = _DAY1
 
             if not secure:

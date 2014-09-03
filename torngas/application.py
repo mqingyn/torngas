@@ -30,13 +30,13 @@ class Application(web.Application):
         if version_info[0] > 3:
             this = self
 
-            class HttpRequestHook(httputil.HTTPServerRequest):
+            class HttpRequest(httputil.HTTPServerRequest):
                 def __init__(self, *args, **kwargs):
-                    super(HttpRequestHook, self).__init__(*args, **kwargs)
+                    super(HttpRequest, self).__init__(*args, **kwargs)
                     this.middleware_manager.set_request(self)
                     this.middleware_manager.run_call(self)
 
-            httputil.HTTPServerRequest = HttpRequestHook
+            httputil.HTTPServerRequest = HttpRequest
 
 
     def __call__(self, request):

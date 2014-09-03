@@ -25,12 +25,12 @@ class DBAlchemyMiddleware(BaseMiddleware):
             elif 'sqlalchemy.pool_recycle' in conn.base_conf:
                 ping_db_(conn, conn.kwargs['sqlalchemy.pool_recycle'])
 
-    def process_endcall(self, handler, next,finish):
+    def process_endcall(self, handler, do_next, finish):
         for k, conn in connection.items():
             if hasattr(conn, 'remove'):
                 callable(conn.remove) and conn.remove()
-        next()
+        do_next()
 
-    def process_exception(self, ex_obj, exception, next,finish):
+    def process_exception(self, ex_obj, exception, do_next, finish):
         SysLogger.error("dbalchemy middleware error:{0}".format(exception.message))
-        next()
+        do_next()

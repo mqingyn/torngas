@@ -25,7 +25,8 @@ MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.middleware.signal.SignalMiddleware',
-    'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
+    # 'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
+
 )
 INSTALLED_APPS = (
     'helloworld',
@@ -142,10 +143,10 @@ LOGGER_MODULE = {
         "OPEN": True,
         "LOGGER": "torngas.logger.loggers.InfoLogger"
     },
-    #example custom
+    # example custom
     "CUSTOM_LOG": {
-        "NAME": "tornado.torngas_customlog",  #必要
-        "FILE": os.path.join(PROJECT_PATH, "logs/torngas_custom_log.log"),  #必要
+        "NAME": "tornado.torngas_customlog",  # 必要
+        "FILE": os.path.join(PROJECT_PATH, "logs/torngas_custom_log.log"),  # 必要
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,  #必要
         "LOGGER": "mylogger.logger.CustomLogger"  #必要，自定義的logger，會自動查找import
@@ -175,9 +176,9 @@ SESSION = {
 # example:
 # import re
 # DISALLOWED_USER_AGENTS = (
-#     re.compile(r'^NaverBot.*'),
-#     re.compile(r'^EmailSiphon.*'),
-#     re.compile(r'^SiteSucker.*'),
+# re.compile(r'^NaverBot.*'),
+# re.compile(r'^EmailSiphon.*'),
+# re.compile(r'^SiteSucker.*'),
 #     re.compile(r'^sohu-search')
 # )
 DISALLOWED_USER_AGENTS = ()

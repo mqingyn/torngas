@@ -4,7 +4,7 @@
 from functools import partial
 from tornado.util import import_object
 from torngas.exception import BaseError
-from torngas.settings_manager import settings
+from tornado.log import gen_log
 from torngas.middleware import BaseMiddleware
 import sys
 import copy
@@ -57,17 +57,17 @@ class Manager(object):
     def use_all(self, names):
         if not names:
             names = ()
-        names = set(names)
+
         for midd_class in names:
             self.use(midd_class)
 
     def load(self, settings=None):
         if settings:
             self.use_all(settings)
-
-        _RESPONSE_LIST and _RESPONSE_LIST.reverse()
-        _ENDCALL_LIST and _ENDCALL_LIST.reverse()
-
+        _INIT_LIST and _INIT_LIST.reverse()
+        _CALL_LIST and _CALL_LIST.reverse()
+        _REQUEST_LIST and _REQUEST_LIST.reverse()
+        _RENDER_LIST and _RENDER_LIST.reverse()
 
     def set_request(self, request):
         c = copy.copy
@@ -77,16 +77,16 @@ class Manager(object):
         request.response_midd = c(_RESPONSE_LIST)
         request.end_midd = c(_ENDCALL_LIST)
 
-    def _get(self, request, m, func):
+    def _get_func(self, request, m, func):
         try:
             cls = getattr(request, m)
             if len(cls):
                 cls = cls.pop()
                 return getattr(cls, func)
         except Exception, ex:
-            pass
+            gen_log.error(ex)
 
-    def next(self, request, types, process_object, *args, **kwargs):
+    def execute_next(self, request, types, process_object, *args, **kwargs):
         midd = None
 
         if types == _TCALL:
@@ -100,18 +100,22 @@ class Manager(object):
         elif types == _TEND:
             midd = ('end_midd', 'process_endcall',)
         if midd:
-            method = self._get(request, midd[0], midd[1])
+            method = self._get_func(request, midd[0], midd[1])
             if method and callable(method):
-                next_func = partial(self.next, request, types, process_object, *args,
+                next_func = partial(self.execute_next, request, types, process_object, *args,
                                     **kwargs)
                 finish_func = partial(self.finish, request)
                 try:
-                    method(process_object, next=next_func, finish=finish_func, *args, **kwargs)
+                    method(process_object, do_next=next_func, finish=finish_func, *args, **kwargs)
                 except BaseException, ex:
-                    execp = self._get(request, midd[0], 'process_exception')
-                    if execp and callable(execp):
-                        execp(process_object, sys.exc_info(),
-                              next=next_func, finish=finish_func)
+                    try:
+                        method.im_class.process_exception(method.im_self,
+                                                          process_object,
+                                                          sys.exc_info(),
+                                                          do_next=next_func,
+                                                          finish=finish_func)
+                    except Exception, ex:
+                        gen_log.error(ex)
 
     def finish(self, req, func=None, go=False, *args, **kwargs):
         if not go:
@@ -128,22 +132,21 @@ class Manager(object):
             if callable(func.process_init):
                 func.process_init(application)
 
-
     def run_call(self, request):
-        self.next(request, _TCALL, request)
+        self.execute_next(request, _TCALL, request)
 
     def run_request(self, handler):
-        self.next(handler.request, _TREQ, handler)
+        self.execute_next(handler.request, _TREQ, handler)
 
     def run_render(self, handler, template=None, **kwargs):
         kw = copy.copy(kwargs)
-        self.next(handler.request, _TREN, handler, template, **kw)
+        self.execute_next(handler.request, _TREN, handler, template, **kw)
 
     def run_response(self, handler, chunk):
-        self.next(handler.request, _TRES, handler, chunk)
+        self.execute_next(handler.request, _TRES, handler, chunk)
 
     def run_endcall(self, handler):
-        self.next(handler.request, _TEND, handler)
+        self.execute_next(handler.request, _TEND, handler)
 
 
 

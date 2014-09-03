@@ -15,7 +15,7 @@ root_logger = logging.getLogger(settings.LOGGER_CONFIG['root_logger_name'])
 root_logger.setLevel(settings.LOGGER_CONFIG['root_level'])
 
 
-#
+
 
 def load_stream_logger(logger=None, fmt=None):
     if logger is None:
