@@ -71,11 +71,11 @@ class Manager(object):
 
     def set_request(self, request):
         c = copy.copy
-        request.call_midd = c(_CALL_LIST)
-        request.request_midd = c(_REQUEST_LIST)
-        request.render_midd = c(_RENDER_LIST)
-        request.response_midd = c(_RESPONSE_LIST)
-        request.end_midd = c(_ENDCALL_LIST)
+        request.call_midds = c(_CALL_LIST)
+        request.request_midds = c(_REQUEST_LIST)
+        request.render_midds = c(_RENDER_LIST)
+        request.response_midds = c(_RESPONSE_LIST)
+        request.end_midds = c(_ENDCALL_LIST)
 
     def _get_func(self, request, m, func):
         try:
@@ -90,15 +90,15 @@ class Manager(object):
         midd = None
 
         if types == _TCALL:
-            midd = ('call_midd', 'process_call',)
+            midd = ('call_midds', 'process_call',)
         elif types == _TREQ:
-            midd = ('request_midd', 'process_request',)
+            midd = ('request_midds', 'process_request',)
         elif types == _TREN:
-            midd = ('render_midd', 'process_render',)
+            midd = ('render_midds', 'process_render',)
         elif types == _TRES:
-            midd = ('response_midd', 'process_response',)
+            midd = ('response_midds', 'process_response',)
         elif types == _TEND:
-            midd = ('end_midd', 'process_endcall',)
+            midd = ('end_midds', 'process_endcall',)
         if midd:
             method = self._get_func(request, midd[0], midd[1])
             if method and callable(method):
