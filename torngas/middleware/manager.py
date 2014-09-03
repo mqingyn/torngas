@@ -139,8 +139,7 @@ class Manager(object):
         self.execute_next(handler.request, _TREQ, handler)
 
     def run_render(self, handler, template=None, **kwargs):
-        kw = copy.copy(kwargs)
-        self.execute_next(handler.request, _TREN, handler, template, **kw)
+        self.execute_next(handler.request, _TREN, handler, template, **kwargs)
 
     def run_response(self, handler, chunk):
         self.execute_next(handler.request, _TRES, handler, chunk)
