@@ -23,14 +23,14 @@ class CommonHandler(RequestHandler):
         super(CommonHandler, self).__init__(application, request, **kwargs)
 
     def prepare(self):
-        self.application.middleware_manager.run_request_hooks(self)
+        self.application.middleware_manager.run_request(self)
         return self.on_prepare()
 
     def on_prepare(self):
         pass
 
     def render_string(self, template_name, **kwargs):
-        self.application.middleware_manager.run_render_hooks(self, template_name, **kwargs)
+        self.application.middleware_manager.run_render(self, template_name, **kwargs)
         return super(CommonHandler, self).render_string(template_name, **kwargs)
 
     def finish(self, chunk=None):
@@ -40,7 +40,7 @@ class CommonHandler(RequestHandler):
         if chunk:
             self.write(chunk)
             chunk = None
-        self.application.middleware_manager.run_response_hooks(self, self._write_buffer)
+        self.application.middleware_manager.run_response(self, self._write_buffer)
         super(CommonHandler, self).finish(chunk)
 
     def write(self, chunk, status=None):
@@ -62,7 +62,7 @@ class CommonHandler(RequestHandler):
                             self.request, exc_info=(typ, value, tb))
 
     def on_finish(self):
-        self.application.middleware_manager.run_endcall_hooks(self)
+        self.application.middleware_manager.run_endcall(self)
         self.complete_finish()
 
     def complete_finish(self):

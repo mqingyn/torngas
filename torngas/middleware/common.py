@@ -16,13 +16,14 @@ def validate_illegal(query, illegals):
 
 
 class CommonMiddleware(BaseMiddleware):
-    def process_call(self, request):
+    def process_call(self, request, next, finish):
         if settings.REMOVE_SLASH_ALL and request.path.endswith("/"):
             uri = request.path.rstrip("/")
             if uri:  # don't try to redirect '/' to ''
                 request.path = uri
+        next()
 
-    def process_request(self, handler):
+    def process_request(self, handler, next, finish):
         current_user_agent = handler.request.headers.get('User-Agent', None)
         if current_user_agent:
             for user_agent in settings.DISALLOWED_USER_AGENTS:
@@ -43,7 +44,8 @@ class CommonMiddleware(BaseMiddleware):
             if handler.request.body:
                 query = str(handler.request.body)
                 validate_illegal(query, illegals)
+        next()
 
-    def process_exception(self, ex_obj, exec_info):
+    def process_exception(self, ex_obj, exec_info, next, finish):
         if HTTPError in exec_info[0].__bases__:
             raise

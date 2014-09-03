@@ -45,9 +45,12 @@ def get_key_func(key_func):
         if callable(key_func):
             return key_func
         else:
-            key_func_module_path, key_func_name = key_func.rsplit('.', 1)
-            key_func_module = import_object(key_func_module_path)
-            return getattr(key_func_module, key_func_name)
+            try:
+                key_func_module_path, key_func_name = key_func.rsplit('.', 1)
+                key_func_module = import_object(key_func_module_path)
+                return getattr(key_func_module, key_func_name)
+            except:
+                pass
     return default_key_func
 
 

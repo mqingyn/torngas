@@ -4,7 +4,8 @@
 from tornado import web
 from tornado import version_info
 from tornado.log import app_log
-from torngas.middleware.manager import MiddlewareManager
+from torngas.middleware.manager import Manager
+from torngas.settings_manager import settings as config
 from tornado import httputil
 
 
@@ -21,8 +22,10 @@ class Application(web.Application):
             transforms=transforms,
             wsgi=wsgi, **settings)
 
-        self.middleware_manager = MiddlewareManager()
-        self.middleware_manager.run_init_hooks(self)
+        self.middleware_manager = Manager()
+        if hasattr(config, 'MIDDLEWARE_CLASSES') and len(config.MIDDLEWARE_CLASSES):
+            self.middleware_manager.load(config.MIDDLEWARE_CLASSES)
+            self.middleware_manager.run_init(self)
 
         if version_info[0] > 3:
             this = self
@@ -30,7 +33,8 @@ class Application(web.Application):
             class HttpRequestHook(httputil.HTTPServerRequest):
                 def __init__(self, *args, **kwargs):
                     super(HttpRequestHook, self).__init__(*args, **kwargs)
-                    this.middleware_manager.run_call_hooks(self)
+                    this.middleware_manager.set_request(self)
+                    this.middleware_manager.run_call(self)
 
             httputil.HTTPServerRequest = HttpRequestHook
 
@@ -38,7 +42,8 @@ class Application(web.Application):
     def __call__(self, request):
         if version_info[0] < 4:
             try:
-                self.middleware_manager.run_call_hooks(request)
+                self.middleware_manager.set_request(request)
+                self.middleware_manager.run_call(request)
                 return web.Application.__call__(self, request)
 
             except Exception, e:

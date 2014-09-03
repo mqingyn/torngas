@@ -13,7 +13,6 @@ from torngas.logger.client import access_logger
 
 def log_request(handler):
     if settings.LOGGER_MODULE['ACCESS_LOG']['OPEN']:
-        
         _datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         request_time = 1000.0 * handler.request.request_time()
         user_agent = handler.request.headers.get("User-Agent", "-")
@@ -46,8 +45,9 @@ class AccessLogMiddleware(BaseMiddleware):
 
         application.settings['log_function'] = _
 
-    def process_endcall(self, handler):
+    def process_endcall(self, handler, next, finish):
         log_request(handler)
+        next()
 
-    def process_exception(self, ex_obj, exception):
-        pass
+    def process_exception(self, ex_obj, exception, next, finish):
+        next()

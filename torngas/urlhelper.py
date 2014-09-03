@@ -52,7 +52,7 @@ def include(pattern, handlers, prefix_name=None):
         else:
             new_name = '%s'
             warnings.warn("you should give a 'prefix_name' for include urls,to avoid naming conflicts")
-        if handlers and isinstance(handlers, str):
+        if handlers and isinstance(handlers, (str,unicode,)):
             handlers = import_object(handlers)
         else:
             handlers = handlers
