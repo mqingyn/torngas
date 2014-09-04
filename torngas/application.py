@@ -4,8 +4,7 @@
 from tornado import web
 from tornado import version_info
 from tornado.log import app_log
-from torngas.middleware.manager import Manager
-from torngas.settings_manager import settings as config
+from torngas.middleware.manager import MiddlewareManager
 from tornado import httputil
 
 
@@ -22,27 +21,27 @@ class Application(web.Application):
             transforms=transforms,
             wsgi=wsgi, **settings)
 
-        self.middleware_fac = Manager()
-        if hasattr(config, 'MIDDLEWARE_CLASSES') and len(config.MIDDLEWARE_CLASSES):
-            self.middleware_fac.register_all(config.MIDDLEWARE_CLASSES)
-            self.middleware_fac.run_init(self)
+        self.middleware_manager = MiddlewareManager()
+        self.middleware_manager.run_init_hooks(self)
 
         if version_info[0] > 3:
             this = self
 
-            class HttpRequest(httputil.HTTPServerRequest):
+            class HttpRequestHook(httputil.HTTPServerRequest):
                 def __init__(self, *args, **kwargs):
-                    super(HttpRequest, self).__init__(*args, **kwargs)
-                    this.middleware_fac.set_request(self)
-                    this.middleware_fac.run_call(self)
+                    super(HttpRequestHook, self).__init__(*args, **kwargs)
+                    try:
+                        this.middleware_manager.run_call_hooks(self)
+                    except Exception, ex:
+                        app_log.error(ex)
 
-            httputil.HTTPServerRequest = HttpRequest
+            httputil.HTTPServerRequest = HttpRequestHook
+
 
     def __call__(self, request):
         if version_info[0] < 4:
             try:
-                self.middleware_fac.set_request(request)
-                self.middleware_fac.run_call(request)
+                self.middleware_manager.run_call_hooks(request)
                 return web.Application.__call__(self, request)
 
             except Exception, e:

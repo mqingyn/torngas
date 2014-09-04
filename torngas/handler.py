@@ -6,7 +6,7 @@ common handler,webhandler,apihandler
 要获得torngas的中间件等特性需继承这些handler
 """
 import json
-
+import tornado.web
 from tornado.web import RequestHandler, HTTPError
 from torngas.mixins.handler import HandlerMixin
 from torngas.mixins.exception import UncaughtExceptionMixin
@@ -55,3 +55,5 @@ class ErrorHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
         super(ErrorHandler, self).prepare()
         self.set_status(404)
         raise HTTPError(404)
+
+tornado.web.ErrorHandler=ErrorHandler

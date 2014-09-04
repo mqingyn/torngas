@@ -64,4 +64,3 @@ class BaseHttpModule(object):
         :param handler: handler对象
         """
         pass
-

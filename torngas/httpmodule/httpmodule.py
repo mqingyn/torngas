@@ -125,16 +125,15 @@ class HttpModuleMiddleware(BaseMiddleware):
                         break
                     self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
 
-    def process_request(self, handler, do_next, finish):
+    def process_request(self, handler):
         self._do_all_execute(handler, 'begin_request')
 
-    def process_response(self, handler, chunk, do_next, finish):
+    def process_response(self, handler, chunk=None):
         self._do_all_execute(handler, 'begin_response', chunk__=chunk)
 
-    def process_render(self, handler, template_name, do_next, finish, **kwargs):
+    def process_render(self, handler, template_name, **kwargs):
         kwargs['template_name__'] = template_name
         self._do_all_execute(handler, 'begin_render', **kwargs)
 
-    def process_endcall(self, handler, do_next, finish):
+    def process_endcall(self, handler):
         self._do_all_execute(handler, 'complete_response')
-

@@ -1,152 +1,105 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-22.
-from functools import partial
+
 from tornado.util import import_object
 from torngas.exception import BaseError
-from tornado.log import gen_log
+from torngas.settings_manager import settings
 from torngas.middleware import BaseMiddleware
 import sys
 import copy
 
 
-_INIT_LIST = []
-_CALL_LIST = []
-_REQUEST_LIST = []
-_RENDER_LIST = []
-_RESPONSE_LIST = []
-_ENDCALL_LIST = []
-_EXCEPTION_LIST = []
-_TINIT = 0x01
-_TCALL = 0x02
-_TREQ = 0x03
-_TREN = 0x04
-_TRES = 0x05
-_TEND = 0x06
-_TEXC = 0x07
-_TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
+class MiddlewareManager():
+    def __init__(self):
+        self.init_middleware = []
+        self.request_middleware = []
+        self.response_middleware = []
+        self.exception_middleware = []
+        self.call_middleware = []
+        self.endcall_middleware = []
+        self.render_middleware = []
+        self.load_middleware()
 
+    def run_init_hooks(self, application):
+        self.__run_hooks('init', self.init_middleware, application)
 
-class Manager(object):
-    _call_object = None
+    def run_call_hooks(self, request):
+        BaseMiddleware._finish = False
+        self.__run_hooks('call', self.call_middleware, request)
 
-    def register(self, name):
-        if isinstance(name, (str, unicode,)):
-            name = import_object(name)
-        name = name()
+    def run_endcall_hooks(self, handler):
+        self.__run_hooks('endcall', self.endcall_middleware, handler)
 
-        if hasattr(name, 'process_init'):
-            _INIT_LIST.append(name)
-        if hasattr(name, 'process_call'):
-            _CALL_LIST.insert(0, name)
-        if hasattr(name, 'process_request'):
-            _REQUEST_LIST.insert(0, name)
-        if hasattr(name, 'process_render'):
-            _RENDER_LIST.append(name)
+    def run_request_hooks(self, handler):
+        self.__run_hooks('request', self.request_middleware, handler)
 
-        if hasattr(name, 'process_response'):
-            _RESPONSE_LIST.append(name)
+    def run_response_hooks(self, handler, chunk):
+        self.__run_hooks('response', self.response_middleware, handler, chunk=chunk)
 
-        if hasattr(name, 'process_endcall'):
-            _ENDCALL_LIST.append(name)
+    def run_render_hooks(self, handler, template=None, **kwargs):
+        kwargs['template__'] = template
+        self.__run_hooks('render', self.render_middleware, handler, **kwargs)
 
-        if hasattr(name, 'process_exception'):
-            _EXCEPTION_LIST.append(name)
-
-
-    def register_all(self, names):
-        if not names:
-            names = ()
-
-        for midd_class in names:
-            self.register(midd_class)
-
-    def set_request(self, request):
-        c = copy.copy
-        request.call_midds = c(_CALL_LIST)
-        request.request_midds = c(_REQUEST_LIST)
-        request.render_midds = c(_RENDER_LIST)
-        request.response_midds = c(_RESPONSE_LIST)
-        request.end_midds = c(_ENDCALL_LIST)
-        request.exc_midds = c(_EXCEPTION_LIST)
-
-    def _get_func(self, request, m, func):
-        try:
-            cls = []
-            if hasattr(request, m):
-                cls = getattr(request, m)
-            if len(cls):
-                cls = cls.pop()
-                return getattr(cls, func)
-        except Exception, ex:
-            gen_log.error(ex)
-
-    def execute_next(self, request, types, process_object, *args, **kwargs):
-        midd = None
-
-        if types == _TCALL:
-            midd = ('call_midds', 'process_call',)
-        elif types == _TREQ:
-            midd = ('request_midds', 'process_request',)
-        elif types == _TREN:
-            midd = ('render_midds', 'process_render',)
-        elif types == _TRES:
-            midd = ('response_midds', 'process_response',)
-        elif types == _TEND:
-            midd = ('end_midds', 'process_endcall',)
-        elif types == _TEXC:
-            midd = ('exc_midds', 'process_exception',)
-        if midd:
-            method = self._get_func(request, midd[0], midd[1])
-            if method and callable(method):
-                next_func = partial(self.execute_next,
-                                    request, types, process_object,
-                                    *args, **kwargs)
-
-                clear = partial(self.clear_all, request)
-
+    def __run_hooks(self, types, middleware_classes, process_object, **kwargs):
+        if not BaseMiddleware._finish:
+            for middleware_class in middleware_classes:
+                if types == 'init':
+                    middleware_class.process_init(process_object)
                 try:
-                    if types == _TEND:
-                        method(process_object, do_next=next_func, *args, **kwargs)
-                    elif types == _TEXC:
-                        method(process_object, *args, **kwargs)
-                    else:
-                        method(process_object, do_next=next_func, clear=clear, *args, **kwargs)
+                    if types == 'request':
+                        middleware_class.process_request(process_object)
+                    elif types == 'response':
+                        chunk = kwargs.get('chunk', None)
+                        middleware_class.process_response(process_object, chunk)
 
-                except BaseException, ex:
+                    elif types == 'call':
+                        middleware_class.process_call(process_object)
+
+                    elif types == 'endcall':
+                        middleware_class.process_endcall(process_object)
+
+                    elif types == 'render':
+                        kw = copy.copy(kwargs)
+                        template = kw.pop('template__', None)
+
+                        middleware_class.process_render(process_object, template, **kw)
+
+                except BaseException:
+                    middleware_class.process_exception(process_object, sys.exc_info())
+
+    def load_middleware(self):
+        if hasattr(settings, 'MIDDLEWARE_CLASSES') \
+                and len(settings.MIDDLEWARE_CLASSES):
+            for midd_class in settings.MIDDLEWARE_CLASSES:
+                try:
+                    cls = import_object(midd_class)
+
+                except ImportError:
                     raise
 
-    def clear_all(self, request):
-        request.call_midd = []
-        request.request_midd = []
-        request.render_midd = []
-        request.response_midd = []
-        request.end_midd = []
+                try:
+                    inst = cls()
+                    if not isinstance(inst, BaseMiddleware):
+                        raise BaseError(
+                            "middleware '%s' must inherit from the BaseMiddleware" % str(midd_class))
+                except Exception:
+                    raise
+                if hasattr(inst, 'process_init'):
+                    self.init_middleware.append(inst)
 
+                if hasattr(inst, 'process_request'):
+                    self.request_middleware.append(inst)
 
-    def run_init(self, application):
-        for func in _INIT_LIST:
-            if callable(func.process_init):
-                func.process_init(application)
+                if hasattr(inst, 'process_response'):
+                    self.response_middleware.insert(0, inst)
 
-    def run_call(self, request):
-        self.execute_next(request, _TCALL, request)
+                if hasattr(inst, 'process_call'):
+                    self.call_middleware.append(inst)
 
-    def run_request(self, handler):
-        self.execute_next(handler.request, _TREQ, handler)
+                if hasattr(inst, 'process_endcall'):
+                    self.endcall_middleware.insert(0, inst)
 
-    def run_render(self, handler, template=None, **kwargs):
-        self.execute_next(handler.request, _TREN, handler, template, **kwargs)
-
-    def run_response(self, handler, chunk):
-        self.execute_next(handler.request, _TRES, handler, chunk)
-
-    def run_endcall(self, handler):
-        self.execute_next(handler.request, _TEND, handler)
-
-    def run_exception(self, handler, typ, value, tb):
-        if _EXCEPTION_LIST:
-            self.execute_next(handler.request, _TEXC, handler, typ, value, tb)
-            return True
-
+                if hasattr(inst, 'process_render'):
+                    self.render_middleware.append(inst)
 
