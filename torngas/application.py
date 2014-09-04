@@ -22,10 +22,10 @@ class Application(web.Application):
             transforms=transforms,
             wsgi=wsgi, **settings)
 
-        self.middleware_manager = Manager()
+        self.middleware_fac = Manager()
         if hasattr(config, 'MIDDLEWARE_CLASSES') and len(config.MIDDLEWARE_CLASSES):
-            self.middleware_manager.load(config.MIDDLEWARE_CLASSES)
-            self.middleware_manager.run_init(self)
+            self.middleware_fac.register_all(config.MIDDLEWARE_CLASSES)
+            self.middleware_fac.run_init(self)
 
         if version_info[0] > 3:
             this = self
@@ -33,17 +33,16 @@ class Application(web.Application):
             class HttpRequest(httputil.HTTPServerRequest):
                 def __init__(self, *args, **kwargs):
                     super(HttpRequest, self).__init__(*args, **kwargs)
-                    this.middleware_manager.set_request(self)
-                    this.middleware_manager.run_call(self)
+                    this.middleware_fac.set_request(self)
+                    this.middleware_fac.run_call(self)
 
             httputil.HTTPServerRequest = HttpRequest
-
 
     def __call__(self, request):
         if version_info[0] < 4:
             try:
-                self.middleware_manager.set_request(request)
-                self.middleware_manager.run_call(request)
+                self.middleware_fac.set_request(request)
+                self.middleware_fac.run_call(request)
                 return web.Application.__call__(self, request)
 
             except Exception, e:

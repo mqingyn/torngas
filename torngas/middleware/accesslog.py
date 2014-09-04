@@ -6,7 +6,6 @@
 access log中间件，替换tornado的log_request实现插件式日志输出
 """
 from datetime import datetime
-from torngas.middleware import BaseMiddleware
 from torngas.settings_manager import settings
 from torngas.logger.client import access_logger
 
@@ -38,20 +37,13 @@ def log_request(handler):
         access_logger.info(_message)
 
 
-class AccessLogMiddleware(BaseMiddleware):
+class AccessLogMiddleware(object):
     def process_init(self, application):
         def _(__):
             pass
 
         application.settings['log_function'] = _
 
-    def process_endcall(self, handler, do_next, finish):
+    def process_endcall(self, handler, do_next):
         log_request(handler)
-        do_next()
-
-    def process_exception(self, ex_obj, exception, do_next, finish):
-        do_next()
-
-    def process_call(self, request, do_next, finish):
-        print 'access'
         do_next()

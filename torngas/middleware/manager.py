@@ -16,58 +16,50 @@ _REQUEST_LIST = []
 _RENDER_LIST = []
 _RESPONSE_LIST = []
 _ENDCALL_LIST = []
+_EXCEPTION_LIST = []
 _TINIT = 0x01
 _TCALL = 0x02
 _TREQ = 0x03
 _TREN = 0x04
 _TRES = 0x05
 _TEND = 0x06
-_TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND,)
+_TEXC = 0x07
+_TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
 
 
 class Manager(object):
     _call_object = None
 
-    def use(self, name):
+    def register(self, name):
         if isinstance(name, (str, unicode,)):
             name = import_object(name)
         name = name()
-        if not isinstance(name, BaseMiddleware):
-            raise BaseError(
-                "middleware '%s' must inherit from the BaseMiddleware" % str(name))
 
         if hasattr(name, 'process_init'):
             _INIT_LIST.append(name)
-
+        if hasattr(name, 'process_call'):
+            _CALL_LIST.insert(0, name)
         if hasattr(name, 'process_request'):
-            _REQUEST_LIST.append(name)
+            _REQUEST_LIST.insert(0, name)
+        if hasattr(name, 'process_render'):
+            _RENDER_LIST.append(name)
 
         if hasattr(name, 'process_response'):
             _RESPONSE_LIST.append(name)
 
-        if hasattr(name, 'process_call'):
-            _CALL_LIST.append(name)
-
         if hasattr(name, 'process_endcall'):
             _ENDCALL_LIST.append(name)
 
-        if hasattr(name, 'process_render'):
-            _RENDER_LIST.append(name)
+        if hasattr(name, 'process_exception'):
+            _EXCEPTION_LIST.append(name)
 
-    def use_all(self, names):
+
+    def register_all(self, names):
         if not names:
             names = ()
 
         for midd_class in names:
-            self.use(midd_class)
-
-    def load(self, settings=None):
-        if settings:
-            self.use_all(settings)
-        _INIT_LIST and _INIT_LIST.reverse()
-        _CALL_LIST and _CALL_LIST.reverse()
-        _REQUEST_LIST and _REQUEST_LIST.reverse()
-        _RENDER_LIST and _RENDER_LIST.reverse()
+            self.register(midd_class)
 
     def set_request(self, request):
         c = copy.copy
@@ -76,10 +68,13 @@ class Manager(object):
         request.render_midds = c(_RENDER_LIST)
         request.response_midds = c(_RESPONSE_LIST)
         request.end_midds = c(_ENDCALL_LIST)
+        request.exc_midds = c(_EXCEPTION_LIST)
 
     def _get_func(self, request, m, func):
         try:
-            cls = getattr(request, m)
+            cls = []
+            if hasattr(request, m):
+                cls = getattr(request, m)
             if len(cls):
                 cls = cls.pop()
                 return getattr(cls, func)
@@ -99,33 +94,35 @@ class Manager(object):
             midd = ('response_midds', 'process_response',)
         elif types == _TEND:
             midd = ('end_midds', 'process_endcall',)
+        elif types == _TEXC:
+            midd = ('exc_midds', 'process_exception',)
         if midd:
             method = self._get_func(request, midd[0], midd[1])
             if method and callable(method):
-                next_func = partial(self.execute_next, request, types, process_object, *args,
-                                    **kwargs)
-                finish_func = partial(self.finish, request)
-                try:
-                    method(process_object, do_next=next_func, finish=finish_func, *args, **kwargs)
-                except BaseException, ex:
-                    try:
-                        method.im_class.process_exception(method.im_self,
-                                                          process_object,
-                                                          sys.exc_info(),
-                                                          do_next=next_func,
-                                                          finish=finish_func)
-                    except Exception, ex:
-                        gen_log.error(ex)
+                next_func = partial(self.execute_next,
+                                    request, types, process_object,
+                                    *args, **kwargs)
 
-    def finish(self, req, func=None, go=False, *args, **kwargs):
-        if not go:
-            req.call_midd = []
-            req.request_midd = []
-            req.render_midd = []
-            req.response_midd = []
-            req.end_midd = []
-        if func:
-            func(*args, **kwargs)
+                clear = partial(self.clear_all, request)
+
+                try:
+                    if types == _TEND:
+                        method(process_object, do_next=next_func, *args, **kwargs)
+                    elif types == _TEXC:
+                        method(process_object, *args, **kwargs)
+                    else:
+                        method(process_object, do_next=next_func, clear=clear, *args, **kwargs)
+
+                except BaseException, ex:
+                    raise
+
+    def clear_all(self, request):
+        request.call_midd = []
+        request.request_midd = []
+        request.render_midd = []
+        request.response_midd = []
+        request.end_midd = []
+
 
     def run_init(self, application):
         for func in _INIT_LIST:
@@ -147,5 +144,9 @@ class Manager(object):
     def run_endcall(self, handler):
         self.execute_next(handler.request, _TEND, handler)
 
+    def run_exception(self, handler, typ, value, tb):
+        if _EXCEPTION_LIST:
+            self.execute_next(handler.request, _TEXC, handler, typ, value, tb)
+            return True
 
 

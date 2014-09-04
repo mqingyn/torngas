@@ -35,8 +35,6 @@ except ImportError:
 from torngas.storage import storage
 from torngas.utils import safestr
 from torngas.utils import lazyimport
-from torngas.middleware import BaseMiddleware
-from torngas.logger.client import SysLogger
 from torngas.settings_manager import settings
 from torngas.cache import get_cache
 
@@ -44,25 +42,21 @@ cache_module = lazyimport('torngas.cache')
 rx = re.compile('^[0-9a-fA-F]+$')
 
 
-class SessionMiddleware(BaseMiddleware):
+class SessionMiddleware(object):
     _cachestore = None
     session = None
 
     def process_init(self, application):
         self._cachestore = get_cache(settings.SESSION.session_cache_alias)
 
-    def process_request(self, handler, do_next, finish):
+    def process_request(self, handler, do_next, clear):
         session = SessionManager(handler, self._cachestore, settings.SESSION)
         session.load_session()
         handler.session = session
         do_next()
 
-    def process_exception(self, ex_object, exception, do_next, finish):
-        self.session = None
-        SysLogger.error("session middleware error:%s" % exception[1].message)
-        do_next()
 
-    def process_response(self, handler, chunk, do_next, finish):
+    def process_response(self, handler, chunk, do_next, clear):
         if hasattr(handler, "session"):
             handler.session.save()
             del handler.session
