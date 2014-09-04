@@ -21,10 +21,6 @@ class BaseHttpModule(object):
 
         return cls.__instance
 
-    @staticmethod
-    def finish(handler, chunk):
-        return BaseMiddleware.finish(handler, chunk)
-
     def begin_request(self, handler):
         """
         匹配路由后，执行处理handler时调用,你可以在这里对request进行过滤后finish request

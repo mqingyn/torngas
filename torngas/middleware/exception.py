@@ -13,7 +13,7 @@ from torngas.logger.client import syslogger
 
 
 class ExceptionMiddleware(object):
-    def process_exception(self, handler, typ, value, tb):
+    def process_exception(self, handler, clear, typ, value, tb):
         if isinstance(value, HTTPError):
             if value.log_message:
                 format = "%d %s: " + value.log_message
@@ -23,3 +23,5 @@ class ExceptionMiddleware(object):
         else:
             syslogger.error("Uncaught exception %s\n%r", handler._request_summary(),
                             handler.request, exc_info=(typ, value, tb))
+
+

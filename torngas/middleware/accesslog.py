@@ -44,6 +44,6 @@ class AccessLogMiddleware(object):
 
         application.settings['log_function'] = _
 
-    def process_endcall(self, handler, do_next):
+    def process_endcall(self, handler, clear):
         log_request(handler)
-        do_next()
+

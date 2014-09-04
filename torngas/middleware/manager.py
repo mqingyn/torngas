@@ -3,9 +3,8 @@
 # Created by mengqingyun on 14-5-22.
 from functools import partial
 from tornado.util import import_object
-from torngas.exception import BaseError
+from tornado import gen
 from tornado.log import gen_log
-from torngas.middleware import BaseMiddleware
 import sys
 import copy
 
@@ -25,6 +24,7 @@ _TRES = 0x05
 _TEND = 0x06
 _TEXC = 0x07
 _TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
+
 
 
 class Manager(object):
@@ -77,10 +77,12 @@ class Manager(object):
                 cls = getattr(request, m)
             if len(cls):
                 cls = cls.pop()
+
                 return getattr(cls, func)
         except Exception, ex:
             gen_log.error(ex)
 
+    @gen.coroutine
     def execute_next(self, request, types, process_object, *args, **kwargs):
         midd = None
 
@@ -99,30 +101,27 @@ class Manager(object):
         if midd:
             method = self._get_func(request, midd[0], midd[1])
             if method and callable(method):
-                next_func = partial(self.execute_next,
-                                    request, types, process_object,
-                                    *args, **kwargs)
 
                 clear = partial(self.clear_all, request)
 
                 try:
-                    if types == _TEND:
-                        method(process_object, do_next=next_func, *args, **kwargs)
-                    elif types == _TEXC:
-                        method(process_object, *args, **kwargs)
-                    else:
-                        method(process_object, do_next=next_func, clear=clear, *args, **kwargs)
+                    result = method(process_object, clear, *args, **kwargs)
+                    if is_future(result):
+                        result = yield result
+                    if not result:
+                        self.execute_next(
+                            request, types, process_object,
+                            *args, **kwargs)
 
                 except BaseException, ex:
-                    raise
+                    process_object.log_exception(*sys.exc_info())
 
     def clear_all(self, request):
-        request.call_midd = []
-        request.request_midd = []
-        request.render_midd = []
-        request.response_midd = []
-        request.end_midd = []
-
+        request.call_midds = []
+        request.request_midds = []
+        request.render_midds = []
+        request.response_midds = []
+        request.end_midds = []
 
     def run_init(self, application):
         for func in _INIT_LIST:
@@ -133,16 +132,18 @@ class Manager(object):
         self.execute_next(request, _TCALL, request)
 
     def run_request(self, handler):
-        self.execute_next(handler.request, _TREQ, handler)
+
+        result = self.execute_next(handler.request, _TREQ, handler)
 
     def run_render(self, handler, template=None, **kwargs):
-        self.execute_next(handler.request, _TREN, handler, template, **kwargs)
+
+        result = self.execute_next(handler.request, _TREN, handler, template, **kwargs)
 
     def run_response(self, handler, chunk):
-        self.execute_next(handler.request, _TRES, handler, chunk)
+        result = self.execute_next(handler.request, _TRES, handler, chunk)
 
     def run_endcall(self, handler):
-        self.execute_next(handler.request, _TEND, handler)
+        result = self.execute_next(handler.request, _TEND, handler)
 
     def run_exception(self, handler, typ, value, tb):
         if _EXCEPTION_LIST:

@@ -23,8 +23,8 @@ class DBAlchemyMiddleware(object):
             elif 'sqlalchemy.pool_recycle' in conn.base_conf:
                 ping_db_(conn, conn.kwargs['sqlalchemy.pool_recycle'])
 
-    def process_endcall(self, handler, do_next, clear):
+    def process_endcall(self, handler, clear):
         for k, conn in connection.items():
             if hasattr(conn, 'remove'):
                 callable(conn.remove) and conn.remove()
-        do_next()
+

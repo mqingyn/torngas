@@ -34,7 +34,10 @@ class Application(web.Application):
                 def __init__(self, *args, **kwargs):
                     super(HttpRequest, self).__init__(*args, **kwargs)
                     this.middleware_fac.set_request(self)
-                    this.middleware_fac.run_call(self)
+                    try:
+                        this.middleware_fac.run_call(self)
+                    except Exception, ex:
+                        app_log.error(ex)
 
             httputil.HTTPServerRequest = HttpRequest
 

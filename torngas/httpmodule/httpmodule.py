@@ -6,14 +6,13 @@ import sys
 from tornado.util import import_object
 from tornado.web import ErrorHandler
 from torngas.settings_manager import settings
-from torngas.middleware import BaseMiddleware
 from torngas.exception import BaseError
 from torngas.httpmodule import BaseHttpModule
 
 EXCLUDE_PREFIX = '!'
 
 
-class HttpModuleMiddleware(BaseMiddleware):
+class HttpModuleMiddleware(object):
     common_modules = []
     route_modules = {}
     named_handlers = None
@@ -113,28 +112,28 @@ class HttpModuleMiddleware(BaseMiddleware):
                     raise
 
     def _do_all_execute(self, handler, method_name, **kwargs):
-        if not BaseMiddleware._finish:
-            for c_module in self.common_modules:
-                self._execute_module(handler, c_module, getattr(c_module, method_name), **kwargs)
-                if BaseMiddleware._finish:
-                    break
-        if not BaseMiddleware._finish:
-            for name, r_module in self.route_modules.items():
-                for md in r_module:
-                    if BaseMiddleware._finish:
-                        break
-                    self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
+        # if not BaseMiddleware._finish:
+        for c_module in self.common_modules:
+            self._execute_module(handler, c_module, getattr(c_module, method_name), **kwargs)
+            # if BaseMiddleware._finish:
+            # break
+            # if not BaseMiddleware._finish:
+        for name, r_module in self.route_modules.items():
+            for md in r_module:
+                # if BaseMiddleware._finish:
+                # break
+                self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
 
-    def process_request(self, handler, do_next, finish):
+    def process_request(self, handler, clear):
         self._do_all_execute(handler, 'begin_request')
 
-    def process_response(self, handler, chunk, do_next, finish):
+    def process_response(self, handler, chunk, clear):
         self._do_all_execute(handler, 'begin_response', chunk__=chunk)
 
-    def process_render(self, handler, template_name, do_next, finish, **kwargs):
+    def process_render(self, handler, template_name, clear, **kwargs):
         kwargs['template_name__'] = template_name
         self._do_all_execute(handler, 'begin_render', **kwargs)
 
-    def process_endcall(self, handler, do_next, finish):
+    def process_endcall(self, handler, clear):
         self._do_all_execute(handler, 'complete_response')
 

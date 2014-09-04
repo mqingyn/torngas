@@ -49,19 +49,16 @@ class SessionMiddleware(object):
     def process_init(self, application):
         self._cachestore = get_cache(settings.SESSION.session_cache_alias)
 
-    def process_request(self, handler, do_next, clear):
+    def process_request(self, handler, clear):
         session = SessionManager(handler, self._cachestore, settings.SESSION)
         session.load_session()
         handler.session = session
-        do_next()
 
 
-    def process_response(self, handler, chunk, do_next, clear):
+    def process_response(self, handler, chunk, clear):
         if hasattr(handler, "session"):
             handler.session.save()
             del handler.session
-
-        do_next()
 
 
 _DAY1 = 24 * 60 * 60
