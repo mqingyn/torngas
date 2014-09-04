@@ -9,6 +9,7 @@ Description:重构logger client
 import os
 import logging
 import logging.handlers
+
 from functools import partial
 from ..settings_manager import settings
 from tornado.util import import_object
@@ -43,12 +44,19 @@ def _init_logger():
 
 
 _init_logger()
-# 访问记录
-access_logger = logging.getLogger(settings.LOGGER_MODULE['ACCESS_LOG']['NAME'])
-# 通用logger
-general_logger = logging.getLogger(settings.LOGGER_MODULE['GENERAL_LOG']['NAME'])
-# info logger
-info_logger = logging.getLogger(settings.LOGGER_MODULE['INFO_LOG']['NAME'])
+if not settings.LOGGER_CONFIG.use_tornadolog:
+    # 访问记录
+    access_logger = logging.getLogger(settings.LOGGER_MODULE['ACCESS_LOG']['NAME'])
+    # 通用logger
+    general_logger = logging.getLogger(settings.LOGGER_MODULE['GENERAL_LOG']['NAME'])
+    # info logger
+    info_logger = logging.getLogger(settings.LOGGER_MODULE['INFO_LOG']['NAME'])
+else:
+    import tornado.log
+
+    access_logger = tornado.log.access_log
+    general_logger = tornado.log.app_log
+    info_logger = tornado.log.gen_log
 
 
 class _SysLogger(object):
@@ -104,3 +112,4 @@ class _SysLogger(object):
 
 
 SysLogger = _SysLogger()
+syslogger = SysLogger

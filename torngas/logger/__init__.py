@@ -37,13 +37,11 @@ def init_logger_config():
     logging.getLogger().handlers = []
     if settings.TORNADO_CONF.debug or options.log_to_stderr:
         load_stream_logger(root_logger, fmt=tornado.log.LogFormatter.DEFAULT_FORMAT)
-    from .client import SysLogger
+    from .client import syslogger
 
     if not settings.TORNADO_CONF.debug:
-        tornado.log.app_log = SysLogger
-        tornado.log.gen_log = SysLogger
-        tornado.log.access_log = SysLogger
-
-    # tornado.log.enable_pretty_logging(None, root_logger)
+        tornado.log.app_log = syslogger
+        tornado.log.gen_log = syslogger
+        tornado.log.access_log = syslogger
 
 
