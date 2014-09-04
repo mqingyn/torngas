@@ -4,6 +4,12 @@
 from functools import partial
 from tornado.util import import_object
 from tornado import gen
+
+try:
+    from tornado.concurrent import is_future
+except ImportError:
+    from torngas.utils import is_future
+    
 from tornado.log import gen_log
 import sys
 import copy
@@ -24,7 +30,6 @@ _TRES = 0x05
 _TEND = 0x06
 _TEXC = 0x07
 _TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
-
 
 
 class Manager(object):
