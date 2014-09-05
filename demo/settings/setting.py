@@ -22,8 +22,8 @@ TORNADO_CONF = {
 # 中间件  #
 # ###########
 MIDDLEWARE_CLASSES = (
-    # 'middleware.MyMiddleware1',
-    # 'middleware.MyMiddleware2',
+    'middleware.MyMiddleware1',
+    'middleware.MyMiddleware2',
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.middleware.signal.SignalMiddleware',

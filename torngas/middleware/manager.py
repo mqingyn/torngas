@@ -9,7 +9,7 @@ try:
     from tornado.concurrent import is_future
 except ImportError:
     from torngas.utils import is_future
-    
+
 from tornado.log import gen_log
 import sys
 import copy
@@ -119,7 +119,9 @@ class Manager(object):
                             *args, **kwargs)
 
                 except BaseException, ex:
-                    process_object.log_exception(*sys.exc_info())
+                    if hasattr(process_object, 'log_exception'):
+                        process_object.log_exception(*sys.exc_info())
+
 
     def clear_all(self, request):
         request.call_midds = []
