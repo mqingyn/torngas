@@ -11,7 +11,6 @@ Description:
 import tornado.locale
 from torngas.settings_manager import settings
 
-
 class HandlerMixin(object):
     _url_kwargs = {}
 
@@ -22,14 +21,15 @@ class HandlerMixin(object):
         super(HandlerMixin, self).__init__(application, request, **kwargs)
 
     def prepare(self):
-        self.application.middleware_manager.run_request_hooks(self)
-        return self.on_prepare()
+        res = self.application.middleware_fac.run_request(self)
+        self.on_prepare()
+        return res
 
     def on_prepare(self):
         pass
 
     def render_string(self, template_name, **kwargs):
-        self.application.middleware_manager.run_render_hooks(self, template_name, **kwargs)
+        self.application.middleware_fac.run_render(self, template_name, **kwargs)
         return super(HandlerMixin, self).render_string(template_name, **kwargs)
 
     def finish(self, chunk=None):
@@ -39,7 +39,7 @@ class HandlerMixin(object):
         if chunk:
             self.write(chunk)
             chunk = None
-        self.application.middleware_manager.run_response_hooks(self, self._write_buffer)
+        self.application.middleware_fac.run_response(self, self._write_buffer)
         super(HandlerMixin, self).finish(chunk)
 
     def write(self, chunk, status=None):
@@ -47,9 +47,14 @@ class HandlerMixin(object):
             self.set_status(status)
         super(HandlerMixin, self).write(chunk)
 
+    def log_exception(self, typ, value, tb):
+        """重写404请求的异常处理
+        """
+        if not self.application.middleware_fac.run_exception(self, typ, value, tb):
+            super(HandlerMixin, self).log_exception(typ, value, tb)
 
     def on_finish(self):
-        self.application.middleware_manager.run_endcall_hooks(self)
+        self.application.middleware_fac.run_endcall(self)
         self.complete_finish()
 
     def complete_finish(self):

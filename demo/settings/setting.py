@@ -148,7 +148,7 @@ LOGGER_MODULE = {
         "NAME": "tornado.torngas_customlog",  # 必要
         "FILE": os.path.join(PROJECT_PATH, "logs/torngas_custom_log.log"),  # 必要
         "ROLLOVER_WHEN": "midnight",
-        "OPEN": True,  #必要
+        "OPEN": True,  # 必要
         "LOGGER": "mylogger.logger.CustomLogger"  #必要，自定義的logger，會自動查找import
     }
 }
@@ -173,7 +173,7 @@ SESSION = {
 }
 
 
-#配置模版引擎
+# 配置模版引擎
 #引入相应的TemplateLoader即可
 #若使用自带的请给予None
 #支持mako和jinja2

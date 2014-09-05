@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8  -*-
 from torngas.utils import lazyimport
-from torngas.middleware import BaseMiddleware
 
 __author__ = 'qingyun.meng'
 
@@ -13,17 +12,20 @@ SignalMiddleware提供在程序运行至中间件call,request,response,endcall�
 signals_module = lazyimport('torngas.dispatch')
 
 
-class SignalMiddleware(BaseMiddleware):
-    def process_call(self, request):
+class SignalMiddleware(object):
+    def process_call(self, request, clear):
         signals_module.signals.call_started.send(sender=request.__class__)
 
-    def process_request(self, handler):
+
+    def process_request(self, handler, clear):
         signals_module.signals.handler_started.send(sender=handler.__class__)
 
-    def process_response(self, handler,chunk = None):
+
+    def process_response(self, handler, clear, chunk):
         signals_module.signals.handler_finished.send(sender=handler.__class__)
 
-    def process_endcall(self, handler):
+
+    def process_endcall(self, handler, clear):
         signals_module.signals.call_finished.send(sender=handler.__class__)
 
 
