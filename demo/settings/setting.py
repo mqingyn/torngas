@@ -25,7 +25,7 @@ MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.middleware.signal.SignalMiddleware',
-    'torngas.httpmodule.htt1pmodule.HttpModuleMiddleware',
+    'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
 
 )
 INSTALLED_APPS = (
