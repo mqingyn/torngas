@@ -2,12 +2,17 @@
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-24.
 
-import sys
 from tornado.util import import_object
 from tornado.web import ErrorHandler
 from torngas.settings_manager import settings
-from torngas.exception import BaseError
 from torngas.httpmodule import BaseHttpModule
+from tornado import gen
+from torngas.exception import BaseError
+
+try:
+    from tornado.concurrent import is_future
+except ImportError:
+    from torngas.utils import is_future
 
 EXCLUDE_PREFIX = '!'
 
@@ -18,24 +23,26 @@ class HttpModuleMiddleware(object):
     named_handlers = None
     non_executes_modules = {}
 
-    def _execute_module(self, handler, module, method, name=None, **kwargs):
+    def _execute_module(self, handler, clear, module, method, name=None, **kwargs):
         try:
             def run_method_():
                 if method.__name__ == "begin_response":
                     chunk = kwargs.pop("chunk__")
-                    return method(handler, chunk)
+                    return method(handler, clear, chunk)
                 elif method.__name__ == "begin_render":
                     template_name = kwargs.pop("template_name__")
-                    return method(handler, template_name, **kwargs)
-                else:
-                    return method(handler)
+                    return method(handler, clear, template_name, **kwargs)
+                elif method.__name__ == 'begin_request':
+                    return method(handler, clear)
+                elif method.__name__ == 'complete_response':
+                    return method(handler, clear)
 
             if name:
                 if name == handler.url_name__:
                     url_spec = self.named_handlers[name]
 
                     if isinstance(handler, url_spec.handler_class):
-                        run_method_()
+                        return run_method_()
             else:
                 url_name = getattr(handler, 'url_name__', None)
 
@@ -47,18 +54,16 @@ class HttpModuleMiddleware(object):
                             return
 
                 if not isinstance(handler, ErrorHandler):
-                    run_method_()
+                    return run_method_()
         except BaseException:
-            if hasattr(module, 'process_exception'):
-                return module.process_exception(handler, sys.exc_info())
-            else:
-                raise
+            raise
 
     def process_init(self, application):
         self.named_handlers = application.named_handlers
         # 为每个载入app的路由设定路由名称
 
         def check_baseclass_(cls):
+
             if BaseHttpModule not in cls.__bases__:
                 raise BaseError("http_module '%s' must inherit from the \
                 BaseHttpModule" % str(import_m))
@@ -111,29 +116,35 @@ class HttpModuleMiddleware(object):
                 except ImportError:
                     raise
 
-    def _do_all_execute(self, handler, method_name, **kwargs):
-        # if not BaseMiddleware._finish:
+    @gen.coroutine
+    def _do_all_execute(self, handler, clear, method_name, **kwargs):
+
         for c_module in self.common_modules:
-            self._execute_module(handler, c_module, getattr(c_module, method_name), **kwargs)
-            # if BaseMiddleware._finish:
-            # break
-            # if not BaseMiddleware._finish:
+
+            result = self._execute_module(handler, clear, c_module, getattr(c_module, method_name), **kwargs)
+            if is_future(result):
+                result = yield result
+            if result:
+                raise gen.Return(1)
+
         for name, r_module in self.route_modules.items():
             for md in r_module:
-                # if BaseMiddleware._finish:
-                # break
-                self._execute_module(handler, md, getattr(md, method_name), name, **kwargs)
+                result = self._execute_module(handler, clear, md, getattr(md, method_name), name, **kwargs)
+                if is_future(result):
+                    result = yield result
+                if result:
+                    raise gen.Return(1)
+
 
     def process_request(self, handler, clear):
-        self._do_all_execute(handler, 'begin_request')
+        return self._do_all_execute(handler, clear, 'begin_request')
 
-    def process_response(self, handler, chunk, clear):
-        self._do_all_execute(handler, 'begin_response', chunk__=chunk)
+    def process_response(self, handler, clear, chunk):
+        return self._do_all_execute(handler, clear, 'begin_response', chunk__=chunk)
 
-    def process_render(self, handler, template_name, clear, **kwargs):
+    def process_render(self, handler, clear, template_name, **kwargs):
         kwargs['template_name__'] = template_name
-        self._do_all_execute(handler, 'begin_render', **kwargs)
+        return self._do_all_execute(handler, clear, 'begin_render', **kwargs)
 
     def process_endcall(self, handler, clear):
-        self._do_all_execute(handler, 'complete_response')
-
+        return self._do_all_execute(handler, clear, 'complete_response')

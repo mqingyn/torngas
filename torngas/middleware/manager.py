@@ -4,16 +4,12 @@
 from functools import partial
 from tornado.util import import_object
 from tornado import gen
-from torngas.exception import BaseError
-from  tornado.ioloop import IOLoop
-
 try:
     from tornado.concurrent import is_future
 except ImportError:
     from torngas.utils import is_future
 
 from tornado.log import gen_log
-import sys
 import copy
 
 
@@ -111,18 +107,9 @@ class Manager(object):
                 if method and callable(method):
 
                     clear = partial(self.clear_all, request)
-                    if types == _TREQ:
-                        result = method(process_object, clear, *args, **kwargs)
-                        if is_future(result):
-                            result = yield result
-                            if result:
-                                break
-                    else:
-                        # 其余的中间件方法不支持future方式，为避免无意义的coroutine，将引发异常
-                        result = method(process_object, clear, *args, **kwargs)
-                        if is_future(result):
-                            raise BaseError("you can't use gen module in %s method" % midd[1])
-
+                    result = method(process_object, clear, *args, **kwargs)
+                    if is_future(result):
+                        result = yield result
                         if result:
                             break
                 else:

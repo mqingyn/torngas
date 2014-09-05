@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-26.
 import threading
-from torngas.middleware import BaseMiddleware
-
-
 class BaseHttpModule(object):
     """
     编写httpmodule需继承BaseHttpModule并实现其中任何一个方法即可
@@ -21,22 +18,16 @@ class BaseHttpModule(object):
 
         return cls.__instance
 
-    def begin_request(self, handler):
+    def begin_request(self, handler, clear):
         """
         匹配路由后，执行处理handler时调用,你可以在这里对request进行过滤后finish request
         :param handler: handler对象
+        v1.4.2:支持异步
         """
         pass
 
-    def process_exception(self, handler, exception):
-        """
-        发生异常时调用
-        :param handler: 返回handler对象
-        :param exception: 异常栈对象
-        """
-        raise
 
-    def begin_render(self, handler, template_name, **kwargs):
+    def begin_render(self, handler, clear, template_name, **kwargs):
         """
 
         :param handler: 返回handler对象
@@ -45,7 +36,7 @@ class BaseHttpModule(object):
         """
         pass
 
-    def begin_response(self, handler, chunk=None):
+    def begin_response(self, handler, clear, chunk=None):
         """
         请求结束后响应时调用，此事件在finish之前,render之后被调用，
         这里你可以对响应数据做最后的处理
@@ -54,7 +45,7 @@ class BaseHttpModule(object):
         """
         pass
 
-    def complete_response(self, handler):
+    def complete_response(self, handler, clear):
         """
         请求呈现客户端后调用
         :param handler: handler对象
