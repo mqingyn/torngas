@@ -10,6 +10,10 @@ Description:
 """
 import tornado.locale
 from torngas.settings_manager import settings
+from tornado import gen
+from tornado.concurrent import is_future
+
+
 class HandlerMixin(object):
     _url_kwargs = {}
 
@@ -19,9 +23,9 @@ class HandlerMixin(object):
             kwargs.clear()
         super(HandlerMixin, self).__init__(application, request, **kwargs)
 
+
     def prepare(self):
-        self.application.middleware_fac.run_request(self)
-        return self.on_prepare()
+        return self.application.middleware_fac.run_request(self)
 
     def on_prepare(self):
         pass

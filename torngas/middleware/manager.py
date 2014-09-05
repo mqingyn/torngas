@@ -4,6 +4,8 @@
 from functools import partial
 from tornado.util import import_object
 from tornado import gen
+from torngas.exception import BaseError
+from  tornado.ioloop import IOLoop
 
 try:
     from tornado.concurrent import is_future
@@ -87,7 +89,7 @@ class Manager(object):
         except Exception, ex:
             gen_log.error(ex)
 
-
+    @gen.coroutine
     def execute_next(self, request, types, process_object, *args, **kwargs):
         midd = None
 
@@ -104,27 +106,27 @@ class Manager(object):
         elif types == _TEXC:
             midd = ('exc_midds', 'process_exception',)
         if midd:
-            method = self._get_func(request, midd[0], midd[1])
-            if method and callable(method):
+            while 1:
+                method = self._get_func(request, midd[0], midd[1])
+                if method and callable(method):
 
-                clear = partial(self.clear_all, request)
+                    clear = partial(self.clear_all, request)
+                    if types == _TREQ:
+                        result = method(process_object, clear, *args, **kwargs)
+                        if is_future(result):
+                            result = yield result
+                            if result:
+                                break
+                    else:
+                        # 其余的中间件方法不支持future方式，为避免无意义的coroutine，将引发异常
+                        result = method(process_object, clear, *args, **kwargs)
+                        if is_future(result):
+                            raise BaseError("you can't use gen module in %s method" % midd[1])
 
-                @gen.coroutine
-                def do_for_exec():
-                    result = method(process_object, clear, *args, **kwargs)
-                    if is_future(result):
-                        result = yield result
-                    gen.Return(result)
-
-                def _middleware_future_callback(future):
-                    fut_result = future.result()
-                    if not fut_result:
-                        self.execute_next(
-                            request, types, process_object,
-                            *args, **kwargs)
-
-
-                do_for_exec().add_done_callback(_middleware_future_callback)
+                        if result:
+                            break
+                else:
+                    break
 
 
     def clear_all(self, request):
@@ -140,21 +142,22 @@ class Manager(object):
                 func.process_init(application)
 
     def run_call(self, request):
-        self.execute_next(request, _TCALL, request)
+        return self.execute_next(request, _TCALL, request)
+
 
     def run_request(self, handler):
+        return self.execute_next(handler.request, _TREQ, handler)
 
-        self.execute_next(handler.request, _TREQ, handler)
 
     def run_render(self, handler, template=None, **kwargs):
 
-        self.execute_next(handler.request, _TREN, handler, template, **kwargs)
+        return self.execute_next(handler.request, _TREN, handler, template, **kwargs)
 
     def run_response(self, handler, chunk):
-        self.execute_next(handler.request, _TRES, handler, chunk)
+        return self.execute_next(handler.request, _TRES, handler, chunk)
 
     def run_endcall(self, handler):
-        self.execute_next(handler.request, _TEND, handler)
+        return self.execute_next(handler.request, _TEND, handler)
 
     def run_exception(self, handler, typ, value, tb):
         if _EXCEPTION_LIST:
