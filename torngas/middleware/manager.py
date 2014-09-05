@@ -87,7 +87,7 @@ class Manager(object):
         except Exception, ex:
             gen_log.error(ex)
 
-    @gen.coroutine
+
     def execute_next(self, request, types, process_object, *args, **kwargs):
         midd = None
 
@@ -109,18 +109,22 @@ class Manager(object):
 
                 clear = partial(self.clear_all, request)
 
-                try:
+                @gen.coroutine
+                def do_for_exec():
                     result = method(process_object, clear, *args, **kwargs)
                     if is_future(result):
                         result = yield result
-                    if not result:
+                    gen.Return(result)
+
+                def _middleware_future_callback(future):
+                    fut_result = future.result()
+                    if not fut_result:
                         self.execute_next(
                             request, types, process_object,
                             *args, **kwargs)
 
-                except BaseException, ex:
-                    if hasattr(process_object, 'log_exception'):
-                        process_object.log_exception(*sys.exc_info())
+
+                do_for_exec().add_done_callback(_middleware_future_callback)
 
 
     def clear_all(self, request):
@@ -140,17 +144,17 @@ class Manager(object):
 
     def run_request(self, handler):
 
-        result = self.execute_next(handler.request, _TREQ, handler)
+        self.execute_next(handler.request, _TREQ, handler)
 
     def run_render(self, handler, template=None, **kwargs):
 
-        result = self.execute_next(handler.request, _TREN, handler, template, **kwargs)
+        self.execute_next(handler.request, _TREN, handler, template, **kwargs)
 
     def run_response(self, handler, chunk):
-        result = self.execute_next(handler.request, _TRES, handler, chunk)
+        self.execute_next(handler.request, _TRES, handler, chunk)
 
     def run_endcall(self, handler):
-        result = self.execute_next(handler.request, _TEND, handler)
+        self.execute_next(handler.request, _TEND, handler)
 
     def run_exception(self, handler, typ, value, tb):
         if _EXCEPTION_LIST:
