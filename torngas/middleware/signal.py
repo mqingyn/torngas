@@ -21,7 +21,7 @@ class SignalMiddleware(object):
         signals_module.signals.handler_started.send(sender=handler.__class__)
 
 
-    def process_response(self, handler, chunk, clear):
+    def process_response(self, handler, clear, chunk):
         signals_module.signals.handler_finished.send(sender=handler.__class__)
 
 

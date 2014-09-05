@@ -55,7 +55,7 @@ class SessionMiddleware(object):
         handler.session = session
 
 
-    def process_response(self, handler, chunk, clear):
+    def process_response(self, handler, clear, chunk):
         if hasattr(handler, "session"):
             handler.session.save()
             del handler.session

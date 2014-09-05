@@ -35,10 +35,11 @@ class MyMiddleware(object):
         """
         匹配路由后，执行处理handler时调用
         :param handler: handler对象
+        支持异步
         """
 
 
-    def process_render(self, handler, template_name, clear, **kwargs):
+    def process_render(self, handler, clear, template_name, **kwargs):
         """
         此方法在调用render/render_string时发生
         :param handler: handler对象
@@ -47,7 +48,7 @@ class MyMiddleware(object):
         """
 
 
-    def process_response(self, handler, chunk, clear):
+    def process_response(self, handler, clear, chunk):
         """
         请求结束后响应时调用，此方法在render之后，finish之前执行，可以对chunk做最后的封装和处理
         :param handler: handler对象
@@ -61,56 +62,3 @@ class MyMiddleware(object):
         :param handler: handler对象
         """
 
-
-class MyMiddleware2(object):
-    def process_call(self, request, clear):
-        """
-        在请求进入application时调用，参数为请求对象，此时还未匹配路由
-        您不能在此方法内finish
-        :param request: 请求对象
-        """
-        print '2 call'
-
-
-    def process_request(self, handler, clear):
-        """
-        匹配路由后，执行处理handler时调用
-        :param handler: handler对象
-        """
-        print '2 req'
-
-    def process_response(self, handler, clear, chunk):
-        # chunk = []
-        # chunk=chunk
-        chunk[:] = []
-
-        print '2 res', chunk
-
-
-class MyMiddleware1(object):
-    def process_call(self, request, clear):
-        """
-        在请求进入application时调用，参数为请求对象，此时还未匹配路由
-        您不能在此方法内finish
-        :param request: 请求对象
-        """
-
-        print '1 call'
-
-
-    def process_request(self, handler, clear):
-        """
-        匹配路由后，执行处理handler时调用
-        :param handler: handler对象
-        """
-
-        print '1 req'
-
-        # clear()
-        # handler.finish('wwwww')
-        # return 1
-
-    def process_response(self, handler, clear, chunk):
-        print '1 res', chunk
-        a = 1 / 0
-        chunk.append('123')

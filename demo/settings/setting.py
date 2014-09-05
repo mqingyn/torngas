@@ -22,13 +22,10 @@ TORNADO_CONF = {
 # 中间件  #
 # ###########
 MIDDLEWARE_CLASSES = (
-    'middleware.MyMiddleware1',
-    'middleware.MyMiddleware2',
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.middleware.signal.SignalMiddleware',
-    'torngas.middleware.exception.ExceptionMiddleware',
-    # 'torngas.httpmodule.htt1pmodule.HttpModuleMiddleware',
+    'torngas.httpmodule.htt1pmodule.HttpModuleMiddleware',
 
 )
 INSTALLED_APPS = (
