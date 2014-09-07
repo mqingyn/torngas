@@ -43,10 +43,6 @@ CACHES = {
     'dummy': {
         'BACKEND': 'torngas.cache.backends.dummy.DummyCache'
     },
-    'filebased': {
-        'BACKEND': 'torngas.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '.'
-    },
     'default_redis': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
         'LOCATION': '127.0.0.1:6379',

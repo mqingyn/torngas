@@ -42,19 +42,6 @@ if DEFAULT_CACHE_ALIAS not in settings.CACHES:
     raise ConfigError("You must define a '%s' cache" % DEFAULT_CACHE_ALIAS)
 
 
-def get_cache(alias, **kwargs):
-    """
-    Function to create a cache backend dynamically. This is flexible by design
-    to allow different use cases:
-
-    To load a backend that is pre-defined in the settings::
-
-        cache = get_cache('default')
-
-    """
-    return caches[alias]
-
-
 def _create_cache(backend, **kwargs):
     try:
         # Try to get the CACHES entry for the given backend name first
@@ -154,4 +141,3 @@ def close_caches(**kwargs):
     # cache.close is a no-op
     for cache in caches.all():
         cache.close()
-

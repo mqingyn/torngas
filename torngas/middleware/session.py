@@ -36,7 +36,7 @@ from torngas.storage import storage
 from torngas.utils import safestr
 from torngas.utils import lazyimport
 from torngas.settings_manager import settings
-from torngas.cache import get_cache
+from torngas.cache import caches
 
 cache_module = lazyimport('torngas.cache')
 rx = re.compile('^[0-9a-fA-F]+$')
@@ -47,7 +47,7 @@ class SessionMiddleware(object):
     session = None
 
     def process_init(self, application):
-        self._cachestore = get_cache(settings.SESSION.session_cache_alias)
+        self._cachestore = caches[settings.SESSION.session_cache_alias]
 
     def process_request(self, handler, clear):
         session = SessionManager(handler, self._cachestore, settings.SESSION)

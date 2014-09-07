@@ -24,7 +24,6 @@ TORNADO_CONF = {
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
-    'torngas.middleware.signal.SignalMiddleware',
     'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
 
 )
@@ -60,10 +59,6 @@ CACHES = {
     },
     'dummy': {
         'BACKEND': 'torngas.cache.backends.dummy.DummyCache'
-    },
-    'filebased': {
-        'BACKEND': 'torngas.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '.'
     },
     'default_redis': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
@@ -160,7 +155,7 @@ IPV4_ONLY = True
 
 # 开启session支持
 SESSION = {
-    'session_cache_alias': 'default',  # 'session_loccache',对应cache配置
+    'session_cache_alias': 'default_redis',  # 'session_loccache',对应cache配置
     'session_name': '__TORNADOSSID',
     'cookie_domain': '',
     'cookie_path': '/',
