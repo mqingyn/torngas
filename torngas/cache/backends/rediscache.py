@@ -101,7 +101,7 @@ class CacheConnectionPool(object):
         self._connection_pools = {}
 
     def get_connection_pool(self, host='127.0.0.1', port=6379, db=1,
-                            password=None, parser_class=None,
+                            password=None, parser_class=None, max_connections=None,
                             unix_socket_path=None):
         connection_identifier = (host, port, db, parser_class, unix_socket_path)
         if not self._connection_pools.get(connection_identifier):
@@ -113,6 +113,7 @@ class CacheConnectionPool(object):
                 'password': password,
                 'connection_class': connection_class,
                 'parser_class': parser_class,
+                'max_connections': max_connections,
             }
             if unix_socket_path is None:
                 kwargs.update({
@@ -280,7 +281,7 @@ class CacheClass(BaseCache):
             timeout = self.default_timeout
 
         # If ``value`` is not an int, then pickle it
-        #pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
+        # pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
         if not isinstance(value, int) or isinstance(value, bool):
             result = self._set(key, pickle.dumps(value, pickle.HIGHEST_PROTOCOL), int(timeout), client, _add_only)
         else:

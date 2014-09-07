@@ -10,6 +10,8 @@ Description:
 """
 from tornado.util import import_object
 from tornado.concurrent import Future
+import sys
+
 try:
     import futures
 except ImportError:
@@ -20,10 +22,12 @@ if futures is None:
 else:
     FUTURES = (futures.Future, Future)
 
+
 def is_future(x):
     return isinstance(x, FUTURES)
 
 
+import types
 import contextlib
 import itertools
 
@@ -33,6 +37,23 @@ except ImportError:
     import dummy_threading as threading
 
 iters = [list, tuple]
+PY2 = sys.version_info[0] == 2
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    string_types = str,
+    integer_types = int,
+    class_types = type,
+    text_type = str
+    binary_type = bytes
+
+    MAXSIZE = sys.maxsize
+else:
+    string_types = basestring,
+    integer_types = (int, long)
+    class_types = (type, types.ClassType)
+    text_type = unicode
+    binary_type = str
 
 
 class RWLock(object):
@@ -114,6 +135,22 @@ class RWLock(object):
             yield
         finally:
             self.writer_leaves()
+
+
+class cached_property(object):
+    """
+    Decorator that converts a method with a single self argument into a
+    property cached on the instance.
+    """
+
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, type=None):
+        if instance is None:
+            return self
+        res = instance.__dict__[self.func.__name__] = self.func(instance)
+        return res
 
 
 class LazyImport:
@@ -339,3 +376,6 @@ class IterBetter:
 
 
 iterbetter = IterBetter
+
+
+

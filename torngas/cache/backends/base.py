@@ -1,24 +1,25 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 torngas cache backend base,from django
 """
-
 from __future__ import unicode_literals
 
+import time
 import warnings
-
-from torngas.exception import BaseError
+from torngas.exception import ConfigError
 from tornado.util import import_object
 
 
-class InvalidCacheBackendError(BaseError):
+class InvalidCacheBackendError(ConfigError):
     pass
 
 
 class CacheKeyWarning(RuntimeWarning):
     pass
 
+
+# Stub class to ensure not passing in a `timeout` argument results in
+# the default timeout
+DEFAULT_TIMEOUT = object()
 
 # Memcached does not accept keys longer than this.
 MEMCACHE_MAX_KEY_LENGTH = 250
@@ -45,22 +46,18 @@ def get_key_func(key_func):
         if callable(key_func):
             return key_func
         else:
-            try:
-                key_func_module_path, key_func_name = key_func.rsplit('.', 1)
-                key_func_module = import_object(key_func_module_path)
-                return getattr(key_func_module, key_func_name)
-            except:
-                pass
+            return import_object(key_func)
     return default_key_func
 
 
 class BaseCache(object):
     def __init__(self, params):
         timeout = params.get('timeout', params.get('TIMEOUT', 300))
-        try:
-            timeout = int(timeout)
-        except (ValueError, TypeError):
-            timeout = 300
+        if timeout is not None:
+            try:
+                timeout = int(timeout)
+            except (ValueError, TypeError):
+                timeout = 300
         self.default_timeout = timeout
 
         options = params.get('OPTIONS', {})
@@ -80,6 +77,18 @@ class BaseCache(object):
         self.version = params.get('VERSION', 1)
         self.key_func = get_key_func(params.get('KEY_FUNCTION', None))
 
+    def get_backend_timeout(self, timeout=DEFAULT_TIMEOUT):
+        """
+        Returns the timeout value usable by this backend based upon the provided
+        timeout.
+        """
+        if timeout == DEFAULT_TIMEOUT:
+            timeout = self.default_timeout
+        elif timeout == 0:
+            # ticket 21147 - avoid time.time() related precision issues
+            timeout = -1
+        return None if timeout is None else time.time() + timeout
+
     def make_key(self, key, version=None):
         """Constructs the key used by all other methods. By default it
         uses the key_func to generate a key (which, by default,
@@ -94,7 +103,7 @@ class BaseCache(object):
         new_key = self.key_func(key, self.key_prefix, version)
         return new_key
 
-    def add(self, key, value, timeout=None, version=None):
+    def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         """
         Set a value in the cache if the key does not already exist. If
         timeout is given, that timeout will be used for the key; otherwise
@@ -102,30 +111,27 @@ class BaseCache(object):
 
         Returns True if the value was stored, False otherwise.
         """
-        raise NotImplementedError
+        raise NotImplementedError('subclasses of BaseCache must provide an add() method')
 
     def get(self, key, default=None, version=None):
         """
         Fetch a given key from the cache. If the key does not exist, return
         default, which itself defaults to None.
         """
-        raise NotImplementedError
+        raise NotImplementedError('subclasses of BaseCache must provide a get() method')
 
-    def set(self, key, value, timeout=None, version=None):
+    def set(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         """
         Set a value in the cache. If timeout is given, that timeout will be
         used for the key; otherwise the default cache timeout will be used.
         """
-        raise NotImplementedError
+        raise NotImplementedError('subclasses of BaseCache must provide a set() method')
 
     def delete(self, key, version=None):
         """
         Delete a key from the cache, failing silently.
         """
-        raise NotImplementedError
-
-    def __delitem__(self, key):
-        self.delete(key)
+        raise NotImplementedError('subclasses of BaseCache must provide a delete() method')
 
     def get_many(self, keys, version=None):
         """
@@ -176,7 +182,7 @@ class BaseCache(object):
         # if a subclass overrides it.
         return self.has_key(key)
 
-    def set_many(self, data, timeout=None, version=None):
+    def set_many(self, data, timeout=DEFAULT_TIMEOUT, version=None):
         """
         Set a bunch of values in the cache at once from a dict of key/value
         pairs.  For certain backends (memcached), this is much more efficient
@@ -199,7 +205,7 @@ class BaseCache(object):
 
     def clear(self):
         """Remove *all* values from the cache at once."""
-        raise NotImplementedError
+        raise NotImplementedError('subclasses of BaseCache must provide a clear() method')
 
     def validate_key(self, key):
         """
@@ -238,3 +244,7 @@ class BaseCache(object):
         the new version.
         """
         return self.incr_version(key, -delta, version)
+
+    def close(self, **kwargs):
+        """Close the cache connection"""
+        pass

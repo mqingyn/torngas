@@ -1,19 +1,18 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Memcached cache backend"""
+"Memcached cache backend"
 
 import time
-from threading import local
+import pickle
 
-from torngas.cache.backends.base import BaseCache, InvalidCacheBackendError
-
+from torngas.cache.backends.base import BaseCache, DEFAULT_TIMEOUT
+from torngas.utils import string_types
 from torngas.utils import safestr
+from torngas.utils import cached_property
 
 
 class BaseMemcachedCache(BaseCache):
     def __init__(self, server, params, library, value_not_found_exception):
         super(BaseMemcachedCache, self).__init__(params)
-        if isinstance(server, basestring):
+        if isinstance(server, string_types):
             self._servers = server.split(';')
         else:
             self._servers = server
@@ -37,12 +36,22 @@ class BaseMemcachedCache(BaseCache):
 
         return self._client
 
-    def _get_memcache_timeout(self, timeout):
+    def get_backend_timeout(self, timeout=DEFAULT_TIMEOUT):
         """
         Memcached deals with long (> 30 days) timeouts in a special
         way. Call this function to obtain a safe value for your timeout.
         """
-        timeout = timeout or self.default_timeout
+        if timeout == DEFAULT_TIMEOUT:
+            timeout = self.default_timeout
+
+        if timeout is None:
+            # Using 0 in memcache sets a non-expiring timeout.
+            return 0
+        elif int(timeout) == 0:
+            # Other cache backends treat 0 as set-and-expire. To achieve this
+            # in memcache backends, a negative timeout must be passed.
+            timeout = -1
+
         if timeout > 2592000:  # 60*60*24*30, 30 days
             # See http://code.google.com/p/memcached/wiki/FAQ
             # "You can set expire times up to 30 days in the future. After that
@@ -57,9 +66,9 @@ class BaseMemcachedCache(BaseCache):
         # Python 2 memcache requires the key to be a byte string.
         return safestr(super(BaseMemcachedCache, self).make_key(key, version))
 
-    def add(self, key, value, timeout=0, version=None):
+    def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         key = self.make_key(key, version=version)
-        return self._cache.add(key, value, self._get_memcache_timeout(timeout))
+        return self._cache.add(key, value, self.get_backend_timeout(timeout))
 
     def get(self, key, default=None, version=None):
         key = self.make_key(key, version=version)
@@ -68,16 +77,16 @@ class BaseMemcachedCache(BaseCache):
             return default
         return val
 
-    def set(self, key, value, timeout=0, version=None):
+    def set(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         key = self.make_key(key, version=version)
-        self._cache.set(key, value, self._get_memcache_timeout(timeout))
+        self._cache.set(key, value, self.get_backend_timeout(timeout))
 
     def delete(self, key, version=None):
         key = self.make_key(key, version=version)
         self._cache.delete(key)
 
     def get_many(self, keys, version=None):
-        new_keys = map(lambda x: self.make_key(x, version=version), keys)
+        new_keys = [self.make_key(x, version=version) for x in keys]
         ret = self._cache.get_multi(new_keys)
         if ret:
             _ = {}
@@ -126,12 +135,12 @@ class BaseMemcachedCache(BaseCache):
             raise ValueError("Key '%s' not found" % key)
         return val
 
-    def set_many(self, data, timeout=0, version=None):
+    def set_many(self, data, timeout=DEFAULT_TIMEOUT, version=None):
         safe_data = {}
         for key, value in data.items():
             key = self.make_key(key, version=version)
             safe_data[key] = value
-        self._cache.set_multi(safe_data, self._get_memcache_timeout(timeout))
+        self._cache.set_multi(safe_data, self.get_backend_timeout(timeout))
 
     def delete_many(self, keys, version=None):
         l = lambda x: self.make_key(x, version=version)
@@ -139,25 +148,6 @@ class BaseMemcachedCache(BaseCache):
 
     def clear(self):
         self._cache.flush_all()
-
-
-class CacheClass(BaseMemcachedCache):
-    def __init__(self, server, params):
-        import warnings
-
-        warnings.warn(
-            "memcached.CacheClass has been split into memcached.MemcachedCache and memcached.PyLibMCCache. Please update your cache backend setting.",
-            DeprecationWarning
-        )
-        try:
-            import memcache
-        except ImportError:
-            raise InvalidCacheBackendError(
-                "Memcached cache backend requires either the 'memcache' or 'cmemcache' library"
-            )
-        super(CacheClass, self).__init__(server, params,
-                                         library=memcache,
-                                         value_not_found_exception=ValueError)
 
 
 class MemcachedCache(BaseMemcachedCache):
@@ -170,6 +160,12 @@ class MemcachedCache(BaseMemcachedCache):
                                              library=memcache,
                                              value_not_found_exception=ValueError)
 
+    @property
+    def _cache(self):
+        if getattr(self, '_client', None) is None:
+            self._client = self._lib.Client(self._servers, pickleProtocol=pickle.HIGHEST_PROTOCOL)
+        return self._client
+
 
 class PyLibMCCache(BaseMemcachedCache):
     "An implementation of a cache binding using pylibmc"
@@ -177,24 +173,14 @@ class PyLibMCCache(BaseMemcachedCache):
     def __init__(self, server, params):
         import pylibmc
 
-        self._local = local()
         super(PyLibMCCache, self).__init__(server, params,
                                            library=pylibmc,
                                            value_not_found_exception=pylibmc.NotFound)
 
-    @property
+    @cached_property
     def _cache(self):
-        # PylibMC uses cache options as the 'behaviors' attribute.
-        # It also needs to use threadlocals, because some versions of
-        # PylibMC don't play well with the GIL.
-        client = getattr(self._local, 'client', None)
-        if client:
-            return client
-
         client = self._lib.Client(self._servers)
         if self._options:
             client.behaviors = self._options
-
-        self._local.client = client
 
         return client
