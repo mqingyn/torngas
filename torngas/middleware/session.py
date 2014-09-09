@@ -167,7 +167,7 @@ class SessionManager(object):
         else:
             self._set_cookie(self.config.session_name, self.sessionid, expires=-1)
             self._set_cookie(_VERIFICATION_KEY, self._generate_hmac(self.sessionid), expires=-1)
-            del self.store[self.sessionid]
+            self.store.delete(self.sessionid)
 
     def _valid_session_id(self, session_id):
         """
