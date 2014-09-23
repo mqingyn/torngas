@@ -10,7 +10,7 @@ import tornado.web
 from tornado.web import RequestHandler, HTTPError
 from torngas.mixins.handler import HandlerMixin
 from torngas.mixins.exception import UncaughtExceptionMixin
-
+from torngas.settings_manager import settings
 
 class WebHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
     def create_template_loader(self, template_path):
@@ -60,5 +60,5 @@ class ErrorHandler(UncaughtExceptionMixin, RequestHandler):
         self.set_status(404)
         raise HTTPError(404)
 
-
-tornado.web.ErrorHandler = ErrorHandler
+if not settings.TORNADO_CONF.get('default_handler_class',None):
+    tornado.web.ErrorHandler = ErrorHandler

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-24.
-
+from hashlib import md5
 from tornado.util import import_object
 from tornado.web import ErrorHandler
 from torngas.settings_manager import settings
@@ -58,6 +58,16 @@ class HttpModuleMiddleware(object):
         except BaseException:
             raise
 
+    def _class_wrap(self, handler_class, name):
+        # 防止使用同一个handler的路由出现错误，url_name会被相同的handler的被覆盖
+        scope = {}
+        class_prefix = md5("%s_%s" % (handler_class.__name__, name,)).hexdigest()
+        class_name = "%s_%s" % (handler_class.__name__, class_prefix,)
+        scope['old_' + class_name] = handler_class
+        exec "class %s(old_%s):pass" % (class_name, class_name,) in scope
+        class_ = scope[class_name]
+        return class_
+
     def process_init(self, application):
         self.named_handlers = application.named_handlers
         # 为每个载入app的路由设定路由名称
@@ -69,6 +79,7 @@ class HttpModuleMiddleware(object):
                 BaseHttpModule" % str(import_m))
 
         for k, urlspec in self.named_handlers.items():
+            urlspec.handler_class = self._class_wrap(urlspec.handler_class, k)
             urlspec.handler_class.url_name__ = k
 
         # 通用module载入
