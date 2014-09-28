@@ -38,7 +38,7 @@ class HttpModuleMiddleware(object):
                     return method(handler, clear)
 
             if name:
-                if name == handler.url_name__:
+                if hasattr(handler, 'url_name__') and name == handler.url_name__:
                     url_spec = self.named_handlers[name]
 
                     if isinstance(handler, url_spec.handler_class):
