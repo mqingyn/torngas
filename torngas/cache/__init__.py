@@ -22,10 +22,7 @@ from tornado.util import import_object
 from torngas.exception import ConfigError
 from tornado.ioloop import PeriodicCallback
 
-__all__ = [
-    'get_cache', 'cache', 'DEFAULT_CACHE_ALIAS', 'InvalidCacheBackendError',
-    'CacheKeyWarning', 'BaseCache',
-]
+
 BACKENDS = {
     'memcached': 'memcached',
     'localcache': 'localcache',

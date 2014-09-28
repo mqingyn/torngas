@@ -11,6 +11,8 @@ Description:
 import tornado.locale
 from torngas.settings_manager import settings
 from torngas.cache import close_caches
+
+
 class HandlerMixin(object):
     _url_kwargs = {}
 
@@ -55,7 +57,10 @@ class HandlerMixin(object):
 
     def on_finish(self):
         self.application.middleware_fac.run_endcall(self)
-        close_caches()
+        try:
+            close_caches()
+        except Exception, ex:
+            pass
         self.complete_finish()
 
     def complete_finish(self):
