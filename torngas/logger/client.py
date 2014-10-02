@@ -1,11 +1,5 @@
 # -*- coding: utf-8  -*-
 # !/usr/local/bin/python
-
-"""
-Created by:Shunping Jiang <shunping.jiang@autonavi.com>
-Modify by:Qingyun Meng <qingyun.meng@autonavi.com>
-Description:重构logger client
-"""
 import os
 import logging
 import logging.handlers

@@ -1,10 +1,5 @@
 # -*- coding: utf-8  -*-
 #!/usr/local/bin/python
-
-"""
-Created by:Shunping Jiang <shunping.jiang@autonavi.com>
-Description:logger server
-"""
 import logging
 import tornado.log
 from ..settings_manager import settings
