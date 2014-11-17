@@ -2,8 +2,8 @@
 ==========
 version:v1.6.0
 
-v1.6.0:支持在中间件 process_request和httpmodule模块begin_request方法内使用异步
-
+v1.5.0:支持在中间件 process_request和httpmodule模块begin_request方法内使用异步
+v1.6.0:去除logserver，不再支持logserver，重写dbalchemy，修正部分bug
 
 基于tornado的django like框架
 
