@@ -1,8 +1,8 @@
  Torngas 
 ==========
-version:v1.5.0
+version:v1.6.0
 
-v1.5.0:支持在中间件 process_request和httpmodule模块begin_request方法内使用异步
+v1.6.0:支持在中间件 process_request和httpmodule模块begin_request方法内使用异步
 
 
 基于tornado的django like框架
