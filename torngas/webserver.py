@@ -19,10 +19,7 @@ define("address", default='127.0.0.1', help='listen host,default:127.0.0.1', typ
 define("servermode", default='httpserver', help="run server mode", type=str, metavar='httpserver|logserver')
 parse_command_line()
 # 一些配置的使用必须先parse_command_line()
-from logger import init_logger_config
 from settings_manager import settings
-
-init_logger_config()
 
 
 class Server(object):

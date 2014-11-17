@@ -1,17 +1,55 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Created by mengqingyun on 14-5-22.
+"""
+中间件可以实现的方法
+
+class MyMiddleware(object):
+    编写中间件需实现其中任何一个方法即可
+    中间件的执行流程中在请求阶段，process_call,process_request，process_exception按照中间件的声明顺序执行，
+    在响应过程中，process_response，process_render和process_endcall则是按声明顺序倒序执行）
+    如果希望提前finish请求并终止当前中间件继续执行，在调用finish后需要return True
+    :clear: 如果希望接下来的所有中间件流程终止，则在方法头部调用clear()，以清空中间件的执行队列
+
+
+    def process_init(self, application):
+        :param application: 应用程序对象，此方法在tornado启动时执行一次
+
+    def process_call(self, request, clear):
+        在请求进入application时调用，参数为请求对象，此时还未匹配路由
+        您不能在此方法内finish请求
+        :param request: 请求对象
+
+
+    def process_request(self, handler, clear):
+        匹配路由后，执行处理handler时调用
+        :param handler: handler对象
+        支持异步
+
+    def process_render(self, handler, clear, template_name, **kwargs):
+        此方法在调用render/render_string时发生
+
+
+    def process_response(self, handler, clear, chunk):
+        请求结束后响应时调用，此方法在render之后，finish之前执行，可以对chunk做最后的封装和处理
+        :param handler: handler对象
+
+    def process_endcall(self, handler, clear):
+        :param handler: handler对象
+        请求结束后调用，此时已完成响应并呈现用户，一般用来处理收尾操作，清理缓存对象，断开连接等
+    def process_exception(self,handler,clear,typ, value, tb):
+        异常处理
+"""
 from functools import partial
 from tornado.util import import_object
+from tornado.log import gen_log
 from tornado import gen
+import copy
+
 try:
     from tornado.concurrent import is_future
 except ImportError:
-    from torngas.utils import is_future
-
-from tornado.log import gen_log
-import copy
-
+    from . import is_future
 
 _INIT_LIST = []
 _CALL_LIST = []
@@ -20,13 +58,7 @@ _RENDER_LIST = []
 _RESPONSE_LIST = []
 _ENDCALL_LIST = []
 _EXCEPTION_LIST = []
-_TINIT = 0x01
-_TCALL = 0x02
-_TREQ = 0x03
-_TREN = 0x04
-_TRES = 0x05
-_TEND = 0x06
-_TEXC = 0x07
+_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC = 1, 2, 3, 4, 5, 6, 7
 _TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
 
 
@@ -54,8 +86,7 @@ class Manager(object):
             _ENDCALL_LIST.append(name)
 
         if hasattr(name, 'process_exception'):
-            _EXCEPTION_LIST.append(name)
-
+            _EXCEPTION_LIST.insert(0, name)
 
     def register_all(self, names):
         if not names:
@@ -115,7 +146,6 @@ class Manager(object):
                 else:
                     break
 
-
     def clear_all(self, request):
         request.call_midds = []
         request.request_midds = []
@@ -131,13 +161,10 @@ class Manager(object):
     def run_call(self, request):
         return self.execute_next(request, _TCALL, request)
 
-
     def run_request(self, handler):
         return self.execute_next(handler.request, _TREQ, handler)
 
-
     def run_render(self, handler, template=None, **kwargs):
-
         return self.execute_next(handler.request, _TREN, handler, template, **kwargs)
 
     def run_response(self, handler, chunk):

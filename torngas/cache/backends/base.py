@@ -50,7 +50,7 @@ def get_key_func(key_func):
     return default_key_func
 
 
-class BaseCache(object):
+class CacheClient(object):
     def __init__(self, params):
         timeout = params.get('timeout', params.get('TIMEOUT', 300))
         if timeout is not None:
@@ -103,6 +103,12 @@ class BaseCache(object):
         new_key = self.key_func(key, self.key_prefix, version)
         return new_key
 
+    def close(self, **kwargs):
+        """Close the cache connection"""
+        pass
+
+
+class CacheMixin(object):
     def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         """
         Set a value in the cache if the key does not already exist. If
@@ -245,6 +251,6 @@ class BaseCache(object):
         """
         return self.incr_version(key, -delta, version)
 
-    def close(self, **kwargs):
-        """Close the cache connection"""
-        pass
+
+class BaseCache(CacheMixin, CacheClient):
+    pass

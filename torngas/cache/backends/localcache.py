@@ -1,13 +1,7 @@
 "Thread-safe in-memory cache backend."
 
 import time
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-from torngas.cache.backends.base import BaseCache, DEFAULT_TIMEOUT
+from base import BaseCache, DEFAULT_TIMEOUT
 from torngas.utils import RWLock
 
 
@@ -28,25 +22,22 @@ class LocMemCache(BaseCache):
     def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         key = self.make_key(key, version=version)
         self.validate_key(key)
-        pickled = pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
         with self._lock.writer():
             if self._has_expired(key):
-                self._set(key, pickled, timeout)
+                self._set(key, value, timeout)
                 return True
             return False
 
     def get(self, key, default=None, version=None):
         key = self.make_key(key, version=version)
         self.validate_key(key)
-        pickled = None
+        value = None
         with self._lock.reader():
             if not self._has_expired(key):
-                pickled = self._cache[key]
-        if pickled is not None:
-            try:
-                return pickle.loads(pickled)
-            except pickle.PickleError:
-                return default
+                value = self._cache[key]
+
+        if value is not None:
+            return value
 
         with self._lock.writer():
             try:
@@ -65,9 +56,8 @@ class LocMemCache(BaseCache):
     def set(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         key = self.make_key(key, version=version)
         self.validate_key(key)
-        pickled = pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
         with self._lock.writer():
-            self._set(key, pickled, timeout)
+            self._set(key, value, timeout)
 
     def incr(self, key, delta=1, version=None):
         value = self.get(key, version=version)
@@ -75,9 +65,8 @@ class LocMemCache(BaseCache):
             raise ValueError("Key '%s' not found" % key)
         new_value = value + delta
         key = self.make_key(key, version=version)
-        pickled = pickle.dumps(new_value, pickle.HIGHEST_PROTOCOL)
         with self._lock.writer():
-            self._cache[key] = pickled
+            self._cache[key] = new_value
         return new_value
 
     def has_key(self, key, version=None):

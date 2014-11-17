@@ -1,39 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-# When using TCP connections
-CACHES = {
-    'default': {
-        'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': '<host>:<port>',
-        'OPTIONS': {
-            'DB': 1,
-            'PASSWORD': 'yadayada',
-            'PARSER_CLASS': 'redis.connection.HiredisParser'
-        },
-    },
-}
-
-# When using unix domain sockets
-# Note: ``LOCATION`` needs to be the same as the ``unixsocket`` setting
-# in your redis.conf
-CACHES = {
-    'default': {
-        'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': '/path/to/socket/file',
-        'OPTIONS': {
-            'DB': 1,
-            'PASSWORD': 'yadayada',
-            'PARSER_CLASS': 'redis.connection.HiredisParser'
-        },
-    },
-}
-"""
-from torngas.cache.backends.base import BaseCache, InvalidCacheBackendError
+import sys
+from base import CacheMixin, CacheClient, InvalidCacheBackendError, DEFAULT_TIMEOUT
 from torngas.storage import SortedDict
-from torngas.utils import safestr, safeunicode
-from tornado.util import import_object
+from torngas.utils import safestr
 from torngas.exception import ConfigError
+from tornado.util import import_object
 
 try:
     import cPickle as pickle
@@ -47,8 +19,6 @@ except ImportError:
         "Redis cache backend requires the 'redis-py' library")
 from redis.connection import UnixDomainSocketConnection, Connection
 from redis.connection import DefaultParser
-
-import sys
 
 PY3 = (sys.version_info >= (3,))
 
@@ -87,7 +57,7 @@ class CacheKey(object):
         return self._key == other
 
     def __str__(self):
-        return safeunicode(self._key)
+        return safestr(self._key)
 
     def __repr__(self):
         return repr(self._key)
@@ -101,9 +71,10 @@ class CacheConnectionPool(object):
         self._connection_pools = {}
 
     def get_connection_pool(self, host='127.0.0.1', port=6379, db=1,
-                            password=None, parser_class=None, max_connections=None,
-                            unix_socket_path=None):
-        connection_identifier = (host, port, db, parser_class, unix_socket_path)
+                            password=None, parser_class=None,
+                            unix_socket_path=None, connection_pool_class=None,
+                            connection_pool_class_kwargs=None):
+        connection_identifier = (host, port, db, parser_class, unix_socket_path, connection_pool_class)
         if not self._connection_pools.get(connection_identifier):
             connection_class = (
                 unix_socket_path and UnixDomainSocketConnection or Connection
@@ -113,8 +84,8 @@ class CacheConnectionPool(object):
                 'password': password,
                 'connection_class': connection_class,
                 'parser_class': parser_class,
-                'max_connections': max_connections,
             }
+            kwargs.update(connection_pool_class_kwargs)
             if unix_socket_path is None:
                 kwargs.update({
                     'host': host,
@@ -122,23 +93,22 @@ class CacheConnectionPool(object):
                 })
             else:
                 kwargs['path'] = unix_socket_path
-            self._connection_pools[connection_identifier] = redis.ConnectionPool(**kwargs)
+            self._connection_pools[connection_identifier] = connection_pool_class(**kwargs)
         return self._connection_pools[connection_identifier]
 
 
 pool = CacheConnectionPool()
 
 
-class CacheClass(BaseCache):
+class RedisClient(CacheClient):
     def __init__(self, server, params):
         """
         Connect to Redis, and set up cache backend.
         """
-        super(CacheClass, self).__init__(params)
         self._init(server, params)
 
     def _init(self, server, params):
-
+        super(RedisClient, self).__init__(params)
         self._server = server
         self._params = params
 
@@ -160,8 +130,11 @@ class CacheClass(BaseCache):
             'port': port,
             'unix_socket_path': unix_socket_path,
         }
+
         connection_pool = pool.get_connection_pool(
             parser_class=self.parser_class,
+            connection_pool_class=self.connection_pool_class,
+            connection_pool_class_kwargs=self.connection_pool_class_kwargs,
             **kwargs
         )
         self._client = redis.Redis(
@@ -180,6 +153,34 @@ class CacheClass(BaseCache):
     @property
     def options(self):
         return self.params.get('OPTIONS', {})
+
+    @property
+    def client(self):
+        return self._client
+
+    @property
+    def connection_pool_class(self):
+        cls = self.options.get('POOL_CLASS', 'redis.ConnectionPool')
+        mod_path, cls_name = cls.rsplit('.', 1)
+        try:
+            mod = import_object(mod_path)
+            pool_class = getattr(mod, cls_name)
+        except (AttributeError, ImportError):
+            raise ConfigError("Could not find connection pool class '%s'" % cls)
+        return pool_class
+
+    @property
+    def connection_pool_class_kwargs(self):
+        default = {
+            'retry_on_timeout': True,
+            'socket_keepalive': None,
+            'socket_connect_timeout': 2,
+            'socket_timeout': 5
+        }
+        kw = self.options.get('POOL_KWARGS', {})
+        default.update(kw)
+        return default
+
 
     @property
     def db(self):
@@ -214,15 +215,42 @@ class CacheClass(BaseCache):
         self._init(**state)
 
     def make_key(self, key, version=None):
-        """
-        Returns the utf-8 encoded bytestring of the given key as a CacheKey
-        instance to be able to check if it was "made" before.
-        """
         if not isinstance(key, CacheKey):
-            key = CacheKey(key)
+            key = CacheKey(super(RedisClient, self).make_key(key, version))
         return key
 
-    def add(self, key, value, timeout=None, version=None):
+    def ping(self):
+        self.client.ping()
+
+
+class RedisCache(CacheMixin, RedisClient):
+    """
+    A subclass that is supposed to be used on Django >= 1.3.
+    """
+
+    def incr_version(self, key, delta=1, version=None):
+        """
+        Adds delta to the cache version for the supplied key. Returns the
+        new version.
+
+        Note: In Redis 2.0 you cannot rename a volitile key, so we have to move
+        the value from the old key to the new key and maintain the ttl.
+        """
+        if version is None:
+            version = self.version
+        old_key = self.make_key(key, version)
+        value = self.get(old_key, version=version)
+        ttl = self._client.ttl(old_key)
+        if value is None:
+            raise ValueError("Key '%s' not found" % key)
+        new_key = self.make_key(key, version=version + delta)
+        # TODO: See if we can check the version of Redis, since 2.2 will be able
+        # to rename volitile keys.
+        self.set(new_key, value, timeout=ttl)
+        self.delete(old_key)
+        return version + delta
+
+    def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         """
         Add a value to the cache, failing if the key already exists.
 
@@ -247,16 +275,7 @@ class CacheClass(BaseCache):
         return result
 
     def _set(self, key, value, timeout, client, _add_only=False):
-        """
-        向redis设置值
-        :param key: 键
-        :param value: 值
-        :param timeout: 过期时间
-        :param client: 连接客户端对象
-        :param _add_only: 如果为true，仅当redis中不存在键时才add，否则不作任何操作
-        :return:
-        """
-        if timeout == 0:
+        if timeout is None or timeout == 0:
             if _add_only:
                 return client.setnx(key, value)
             return client.set(key, value)
@@ -270,23 +289,24 @@ class CacheClass(BaseCache):
         else:
             return False
 
-    def set(self, key, value, timeout=None, version=None, client=None, _add_only=False):
+    def set(self, key, value, timeout=DEFAULT_TIMEOUT, version=None, client=None, _add_only=False):
         """
         Persist a value to the cache, and set an optional expiration time.
         """
         if not client:
             client = self._client
         key = self.make_key(key, version=version)
-        if timeout is None:
+        if timeout is DEFAULT_TIMEOUT:
             timeout = self.default_timeout
+        if timeout is not None:
+            timeout = int(timeout)
 
         # If ``value`` is not an int, then pickle it
-        # pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
         if not isinstance(value, int) or isinstance(value, bool):
-            result = self._set(key, pickle.dumps(value, pickle.HIGHEST_PROTOCOL), int(timeout), client, _add_only)
+            result = self._set(key, pickle.dumps(value), timeout, client, _add_only)
         else:
-            result = self._set(key, value, int(timeout), client, _add_only)
-            # result is a boolean
+            result = self._set(key, value, timeout, client, _add_only)
+        # result is a boolean
         return result
 
     def delete(self, key, version=None):
@@ -314,8 +334,15 @@ class CacheClass(BaseCache):
         """
         Unpickles the given value.
         """
-        value = safestr(value)
-        return pickle.loads(value)
+        if value and not isinstance(value, int) or isinstance(value, bool):
+            return pickle.loads(value)
+        return value
+
+    def pickle(self, value):
+
+        if value and not isinstance(value, int) or isinstance(value, bool):
+            return pickle.dumps(value, pickle.HIGHEST_PROTOCOL)
+        return value
 
     def get_many(self, keys, version=None):
         """
@@ -335,11 +362,11 @@ class CacheClass(BaseCache):
             except (ValueError, TypeError):
                 value = self.unpickle(value)
             if isinstance(value, bytes_type):
-                value = safeunicode(value)
+                value = safestr(value)
             recovered_data[map_keys[key]] = value
         return recovered_data
 
-    def set_many(self, data, timeout=None, version=None):
+    def set_many(self, data, timeout=DEFAULT_TIMEOUT, version=None):
         """
         Set a bunch of values in the cache at once from a dict of key/value
         pairs. This is much more efficient than calling set() multiple times.
@@ -364,39 +391,25 @@ class CacheClass(BaseCache):
         try:
             value = self._client.incr(key, delta)
         except redis.ResponseError:
-            value = self.get(key) + 1
+            value = self.get(key) + delta
             self.set(key, value)
         return value
 
-
-class RedisCache(CacheClass):
-    """
-    A subclass that is supposed to be used on Django >= 1.3.
-    """
-
-    def make_key(self, key, version=None):
-        if not isinstance(key, CacheKey):
-            key = CacheKey(super(CacheClass, self).make_key(key, version))
-        return key
-
-    def incr_version(self, key, delta=1, version=None):
+    def ttl(self, key, version=None):
         """
-        Adds delta to the cache version for the supplied key. Returns the
-        new version.
-
-        Note: In Redis 2.0 you cannot rename a volitle key, so we have to move
-        the value from the old key to the new key and maintain the ttl.
+        Returns the 'time-to-live' of a key.  If the key is not volitile, i.e.
+        it has not set expiration, then the value returned is None.  Otherwise,
+        the value is the number of seconds remaining.  If the key does not exist,
+        0 is returned.
         """
-        if version is None:
-            version = self.version
-        old_key = self.make_key(key, version)
-        value = self.get(old_key, version=version)
-        ttl = self._client.ttl(old_key)
-        if value is None:
-            raise ValueError("Key '%s' not found" % key)
-        new_key = self.make_key(key, version=version + delta)
-        # TODO: See if we can check the version of Redis, since 2.2 will be able
-        # to rename volitile keys.
-        self.set(new_key, value, timeout=ttl)
-        self.delete(old_key)
-        return version + delta
+        key = self.make_key(key, version=version)
+        if self._client.exists(key):
+            return self._client.ttl(key)
+        return 0
+
+    def has_key(self, key, version=None):
+        """
+        Returns True if the key is in the cache and has not expired.
+        """
+        key = self.make_key(key, version=version)
+        return self._client.exists(key)

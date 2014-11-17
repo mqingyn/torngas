@@ -4,7 +4,7 @@
 import warnings
 from tornado.web import url as urlspec
 from tornado.util import import_object
-from exception import UrlError
+from torngas.exception import UrlError
 
 
 class Url(object):
@@ -17,7 +17,7 @@ class Url(object):
         if kwargs:
             self.overall_kw = kwargs
 
-    def __call__(self, pattern='', handler='', kwargs=None, name=None):
+    def __call__(self, pattern, handler, kwargs=None, name=None):
         kw = {}
         if self.overall_kw:
             kw.update(self.overall_kw)
@@ -46,13 +46,39 @@ def route(*pattens):
 
 
 def include(pattern, handlers, prefix_name=None):
+    """
+    当你有多组url分布在不同的文件，或者你有多组url前缀不同,include可以帮你组织路由
+    eg:
+    url1.py:
+        url=Url('handler_abc')
+        URLS = route(
+            url(r'/add/','add.AddHandler'),
+            ...
+        )
+    url2.py:
+        url=Url()
+        URLS = route(
+            url(r'/list/','handler_efg.list.ListHandler'),
+            ...,
+            include('/admin','url1.URLS')
+        )
+
+    最终的url可能类似于这样：
+    url = [
+        r'/list/','handler_efg.list.ListHandler',
+        ...,
+        r'/admin/add/' , 'handler_abc.add.AddHandler',
+        ...
+
+    ]
+    app = Application(url)
+    """
     try:
         if prefix_name:
             new_name = '%s-%s' % (prefix_name, '%s')
         else:
             new_name = '%s'
-            warnings.warn("you should give a 'prefix_name' for include urls,to avoid naming conflicts")
-        if handlers and isinstance(handlers, (str,unicode,)):
+        if handlers and isinstance(handlers, str):
             handlers = import_object(handlers)
         else:
             handlers = handlers
@@ -65,11 +91,14 @@ def include(pattern, handlers, prefix_name=None):
                 if handler and isinstance(handler, urlspec):
                     patt = pattern + handler.repr_pattern \
                         .lstrip('^').lstrip('//').lstrip('/')
-                    urlspecs.append(urlspec(patt,
-                                            handler.handler_class,
-                                            kwargs=handler.kwargs,
-                                            name=new_name % handler.name
-                                            if handler.name else handler.name))
+                    urlsp = urlspec(patt,
+                                    handler.handler_class,
+                                    kwargs=handler.kwargs,
+                                    name=new_name % handler.name
+                                    if handler.name else handler.name)
+
+                    urlsp.repr_pattern = patt
+                    urlspecs.append(urlsp)
             return urlspecs
         else:
             raise UrlError('url error,it is must be an tuple or list')

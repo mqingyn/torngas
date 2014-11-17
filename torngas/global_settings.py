@@ -3,7 +3,7 @@
 import os, logging
 # ###########
 # 中间件  #
-############
+# ###########
 
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
@@ -43,17 +43,20 @@ CACHES = {
     'dummy': {
         'BACKEND': 'torngas.cache.backends.dummy.DummyCache'
     },
-    'default_redis': {
+    'rediscache': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
         'LOCATION': '127.0.0.1:6379',
-        'TIMEOUT': 3,
         'OPTIONS': {
             'DB': 0,
-            # 'PASSWORD': 'yourredispwd',
-            'PARSER_CLASS': 'redis.connection.DefaultParser'
-        },
-        'KEY_PREFIX': '',
-        'VERSION': 1
+            'PARSER_CLASS': 'redis.connection.DefaultParser',
+            'POOL_KWARGS': {
+                # timeout参数对有网络请求的库
+                # 一定要加上，不然默认的timeout都很长，阻塞了就悲剧了
+                'socket_timeout': 2,
+                'socket_connect_timeout': 2
+            },
+            'PING_INTERVAL': 120  # 定时ping redis连接池，防止被服务端断开连接（s秒）
+        }
     },
 
 }
@@ -95,18 +98,17 @@ WHITELIST = False
 LOGGER_CONFIG = {
     "use_tornadolog": False,
     "root_logger_name": 'tornado',
-    "level": 'DEBUG',
-    "use_tcp_server": False,
-    "use_tcp_buffer_handler": None,  #提供一个bufferhandler(logging.handlers.MemoryHandler的实例)实例，可以缓存log延迟发送
-    "tcp_logging_port": 9020,
-    "tcp_logging_host": 'localhost',
+    "root_level": 'INFO',
+    # 日志根目录（如果某具体日志指定路径，则自动忽略此根目录配置）
+    "root_dir": 'logs/'
 }
+
 LOGGER_MODULE = {
     # access log 访问日志统计
     "ACCESS_LOG": {
         "NAME": 'tornado.torngas_accesslog',
         "USE_PORTNO": True,  #使用本地文件输出时，用端口号区分文件名
-        "FILE": "logs/torngas_access_log.log",
+        "FILE": "torngas_access_log.log",
         "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
         "OPEN": True,
         "LOGGER": "torngas.logger.loggers.AccessLogger"
@@ -115,7 +117,7 @@ LOGGER_MODULE = {
     "GENERAL_LOG": {
         "NAME": 'tornado.torngas_generallog',
         "USE_PORTNO": True,
-        "FILE": "logs/torngas_trace_log.log",
+        "FILE": "torngas_trace_log.log",
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,
         "LOGGER": "torngas.logger.loggers.GeneralLogger"
@@ -124,7 +126,7 @@ LOGGER_MODULE = {
     "INFO_LOG": {
         "NAME": 'tornado.torngas_infolog',
         "USE_PORTNO": True,
-        "FILE": "logs/torngas_info_log.log",
+        "FILE": "torngas_info_log.log",
         "ROLLOVER_WHEN": "midnight",
         "OPEN": True,
         "LOGGER": "torngas.logger.loggers.InfoLogger"
@@ -173,7 +175,6 @@ TEMPLATE_CONFIG = {
 # 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
 DATABASE_CONNECTION = {
     'default': {
-        'kwargs': {'pool_recycle': 3600},
         'connections': [{
                             'ROLE': 'master',
                             'DRIVER': 'mysql+mysqldb',
@@ -198,12 +199,18 @@ DATABASE_CONNECTION = {
                         }]
     }
 }
-
+# 每个定时对db进行一次ping操作，防止mysql gone away
+PING_DB = 1200  # (s秒)
 # sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
-    'sqlalchemy.echo': True,
+    'sqlalchemy.connect_args': {},
+    'sqlalchemy.echo': False,
     'sqlalchemy.max_overflow': 10,
-    'sqlalchemy.echo_pool': True,
-    'sqlalchemy.pool_timeout': 10
+    'sqlalchemy.echo_pool': False,
+    'sqlalchemy.pool_timeout': 5,
+    'sqlalchemy.encoding': 'utf-8',
+    'sqlalchemy.pool_size': 100,
+    'sqlalchemy.pool_recycle': 3600,
+    'sqlalchemy.poolclass': 'QueuePool'  # 手动指定连接池类
 }
