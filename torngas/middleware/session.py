@@ -112,7 +112,6 @@ class SessionManager(object):
         self.sessionid = self._get_cookie(self.config.session_name)
 
         if self.sessionid and not self._valid_session_id(self.sessionid):
-            self.sessionid = None
             self.expired()
 
         if self.sessionid:
@@ -168,6 +167,8 @@ class SessionManager(object):
             self._set_cookie(self.config.session_name, self.sessionid, expires=-1)
             self._set_cookie(_VERIFICATION_KEY, self._generate_hmac(self.sessionid), expires=-1)
             self.store.delete(self.sessionid)
+            self.sessionid = None
+            self._killed = False
 
     def _valid_session_id(self, session_id):
         """
@@ -175,8 +176,9 @@ class SessionManager(object):
         :return:bool
         """
         if session_id:
-            session_id = session_id.split('|')[0]
-            return rx.match(session_id)
+            sess = session_id.split('|')
+            if len(sess) > 1:
+                return rx.match(sess[0]) and sess[1] == self.config.session_version
 
     def expired(self):
         """
