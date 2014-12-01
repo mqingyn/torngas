@@ -121,7 +121,7 @@ class SessionManager(object):
                 self.config.expires = expires
             self._validate_ip()
             hmac_verif = self._get_cookie(_VERIFICATION_KEY)
-            if hmac_verif != self._generate_hmac(self.sessionid):
+            if self.sessionid and hmac_verif != self._generate_hmac(self.sessionid):
                 self.expired()
 
         if not self.sessionid:
