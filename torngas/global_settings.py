@@ -234,7 +234,9 @@ PING_DB = 300  # (s秒)
 # sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
-    'sqlalchemy.connect_args': {},
+    'sqlalchemy.connect_args': {
+        'connect_timeout': 3
+    },
     'sqlalchemy.echo': False,
     'sqlalchemy.max_overflow': 10,
     'sqlalchemy.echo_pool': False,
