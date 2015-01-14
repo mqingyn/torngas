@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by mengqingyun on 14-5-22.
 """
 common handler,webhandler,apihandler
 要获得torngas的中间件等特性需继承这些handler

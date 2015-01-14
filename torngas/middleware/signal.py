@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8  -*-
-from torngas.utils import lazyimport
-
-__author__ = 'qingyun.meng'
-
 """
 Description: signal from django
 SignalMiddleware提供在程序运行至中间件call,request,response,endcall四个阶段时触发信号的能力

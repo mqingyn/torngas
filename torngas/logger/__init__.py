@@ -1,5 +1,5 @@
-# -*- coding: utf-8  -*-
-# !/usr/local/bin/python
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
 import logging
 from ..settings_manager import settings
 

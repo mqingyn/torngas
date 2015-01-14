@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by mengqingyun on 14-5-26.
 
 from tornado.escape import json_encode, json_decode
 

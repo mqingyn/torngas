@@ -1,6 +1,5 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by mengqingyun on 14-5-22.
 import warnings
 from tornado.web import url as urlspec
 from tornado.util import import_object

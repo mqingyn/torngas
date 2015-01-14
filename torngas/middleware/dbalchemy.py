@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by 'mengqingyun' on 14-10-1.
 
 """
 dbalchemy中间件，加入此中间件可以自动帮助dbalchemy模块处理连接的关闭

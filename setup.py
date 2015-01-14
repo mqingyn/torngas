@@ -4,7 +4,7 @@ setup(
     name="torngas",
     version="1.6.0",
     description="torngas based on tornado",
-    author="qingyun.meng",
+    author="mqingyn",
     url="https://github.com/mqingyn/torngas",
     license="BSD",
     packages=find_packages(),

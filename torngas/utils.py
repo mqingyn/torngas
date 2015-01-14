@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8  -*-
-
-__author__ = 'qingyun.meng'
-
 """
 Created by qingyun.meng on 202014/8/28.
 Modify by: qingyun.meng

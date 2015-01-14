@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by mengqingyun on 14-5-22.
 from tornado import web
 from tornado import version_info
 from logger.client import trace_logger

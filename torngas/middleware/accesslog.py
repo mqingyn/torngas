@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by mengqingyun on 14-5-23.
 
 """
 access log中间件，替换tornado的log_request实现插件式日志输出
