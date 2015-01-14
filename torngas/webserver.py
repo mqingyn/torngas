@@ -74,7 +74,7 @@ class Server(object):
             else:
                 sockets = bind_sockets(options.port, options.address)
 
-        http_server = tornado.httpserver.HTTPServer(self.application, **kwargs)
+        http_server = tornado.httpserver.HTTPServer(self.application, xheaders=settings.TORNADO_CONF.xheaders, **kwargs)
 
         http_server.add_sockets(sockets)
         self.print_settings_info()

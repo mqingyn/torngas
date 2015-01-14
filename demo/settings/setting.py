@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from torngas.global_settings import *
 
 PROJECT_PATH = os.path.dirname(os.path.dirname(__file__))
 # tornado全局配置
@@ -22,7 +21,6 @@ TORNADO_CONF = {
 # 中间件  #
 # ###########
 MIDDLEWARE_CLASSES = (
-    # 'torngas.middleware.dbalchemy.DBAlchemy',
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
@@ -193,7 +191,7 @@ SESSION = {
 # 配置模版引擎
 # 引入相应的TemplateLoader即可
 # 若使用自带的请给予None
-#支持mako和jinja2
+# 支持mako和jinja2
 #mako设置为torngas.template.mako_loader.MakoTemplateLoader
 #jinj2设置为torngas.template.jinja2_loader.Jinja2TemplateLoader
 #初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
