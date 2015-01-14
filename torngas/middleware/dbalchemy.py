@@ -35,7 +35,7 @@ def ping_db(conn_, ping_inteval):
     PeriodicCallback(conn_.ping_db, ping_inteval * 1000).start()
 
 
-class DBAlchemy(object):
+class DBAlchemyMiddleware(object):
     def process_init(self, application):
 
         connection_event()
