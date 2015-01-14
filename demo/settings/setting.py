@@ -102,7 +102,7 @@ WHITELIST = False
 # '127.0.0.2',
 # )
 
-#tornado日志功能配置
+# tornado日志功能配置
 LOGGER_CONFIG = {
     "use_tornadolog": False,
     "root_level": 'INFO',

@@ -1,6 +1,6 @@
 
 from torngas.handler import WebHandler
-
+from torngas import settings
 class BaseHandler(WebHandler):
     """
     do some your base things

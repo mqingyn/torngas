@@ -39,8 +39,7 @@ class _Settings(object):
                     cls._sett = import_object(os.environ[SETTINGS_MODULE_ENVIRON])
                 else:
                     raise ConfigError(
-                        'tornado.options not have "settings",You may try to use settings \
-                         before "define settings module"')
+                        'tornado.options not have "settings",You may try to use settings before "define settings module"')
             except ImportError:
                 cls._sett = global_settings
                 warnings.warn(

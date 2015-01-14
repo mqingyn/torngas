@@ -3,9 +3,8 @@
 # Created by mengqingyun on 14-5-22.
 from tornado import web
 from tornado import version_info
-from tornado.log import app_log
+from logger.client import trace_logger
 from torngas.middleware.manager import Manager
-from torngas.settings_manager import settings as config
 from tornado import httputil
 
 
@@ -14,6 +13,7 @@ class Application(web.Application):
                  default_host="",
                  transforms=None,
                  wsgi=False,
+                 middlewares=None,
                  **settings):
 
         super(Application, self).__init__(
@@ -23,8 +23,9 @@ class Application(web.Application):
             wsgi=wsgi, **settings)
 
         self.middleware_fac = Manager()
-        if hasattr(config, 'MIDDLEWARE_CLASSES') and len(config.MIDDLEWARE_CLASSES):
-            self.middleware_fac.register_all(config.MIDDLEWARE_CLASSES)
+        # if hasattr(config, 'MIDDLEWARE_CLASSES') and len(config.MIDDLEWARE_CLASSES):
+        if middlewares:
+            self.middleware_fac.register_all(middlewares)
             self.middleware_fac.run_init(self)
 
         if version_info[0] > 3:
@@ -37,7 +38,7 @@ class Application(web.Application):
                     try:
                         this.middleware_fac.run_call(self)
                     except Exception, ex:
-                        app_log.error(ex)
+                        trace_logger.error(ex)
 
             httputil.HTTPServerRequest = HttpRequest
 
@@ -49,5 +50,5 @@ class Application(web.Application):
                 return web.Application.__call__(self, request)
 
             except Exception, e:
-                app_log.error(e)
+                trace_logger.error(e)
                 raise
