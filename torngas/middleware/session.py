@@ -81,12 +81,15 @@ session_parameters = storage({
 class SessionManager(object):
     _killed = False
 
-    def __init__(self, handler, store, config=session_parameters):
+    def __init__(self, handler, store, config=None):
         self._get_cookie = handler.get_cookie
         self._set_cookie = handler.set_cookie
         self.remote_ip = handler.request.remote_ip
         self.store = store
-        self.config = storage(config)
+        self.config = storage(session_parameters)
+        if config:
+            self.config.update(config)
+
         self._data = {}
 
     def __contains__(self, key):

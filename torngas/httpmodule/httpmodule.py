@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Created by mengqingyun on 14-5-24.
+import re
 from hashlib import md5
 from tornado.util import import_object
 from tornado.web import ErrorHandler
 from torngas.settings_manager import settings
-from torngas.httpmodule import BaseHttpModule
+from torngas.logger import SysLogger
 from tornado import gen
 from torngas.exception import BaseError
-
+from . import BaseHttpModule
 try:
     from tornado.concurrent import is_future
 except ImportError:
@@ -17,11 +17,13 @@ except ImportError:
 EXCLUDE_PREFIX = '!'
 
 
+
 class HttpModuleMiddleware(object):
     common_modules = []
     route_modules = {}
     named_handlers = None
     non_executes_modules = {}
+    re_complies = {}
 
     def _execute_module(self, handler, clear, module, method, name=None, **kwargs):
         try:
@@ -38,30 +40,46 @@ class HttpModuleMiddleware(object):
                     return method(handler, clear)
 
             if name:
-                if hasattr(handler, 'url_name__') and name == handler.url_name__:
-                    url_spec = self.named_handlers[name]
+                if hasattr(handler, 'pattern__'):
+                    patt = handler.pattern__
 
-                    if isinstance(handler, url_spec.handler_class):
+                    if name == patt:
+                        url_spec = self.named_handlers.get(name, None)
+                        if url_spec:
+                            if isinstance(handler, url_spec.handler_class):
+                                return run_method_()
+                    elif handler.request.re_match_table[name]:
                         return run_method_()
+
             else:
-                url_name = getattr(handler, 'url_name__', None)
+                pattern__ = getattr(handler, 'pattern__', None)
 
-                if url_name in self.non_executes_modules:
-                    non_execute = self.non_executes_modules[handler.url_name__]
+                def check_(key):
+                    non_execute = self.non_executes_modules.get(key, [])
+                    if non_execute:
+                        for n in non_execute:
+                            if isinstance(module, n):
+                                return True
 
-                    for n in non_execute:
-                        if isinstance(module, n):
-                            return
+                if pattern__ in self.non_executes_modules:
+                    if check_(handler.pattern__): return
+
+                if handler.request.re_match_table:
+                    for key, match in handler.request.re_match_table.items():
+                        if match:
+                            if check_(key): return
 
                 if not isinstance(handler, ErrorHandler):
                     return run_method_()
-        except BaseException:
+
+        except BaseException, ex:
+            SysLogger.error(ex)
             raise
 
-    def _class_wrap(self, handler_class, name):
-        # 防止使用同一个handler的路由出现错误，url_name会被相同的handler的被覆盖
+    def _class_wrap(self, handler_class, name, url):
+        # 防止使用同一个handler的路由出现错误，pattern__会被相同的handler的被覆盖
         scope = {}
-        class_prefix = md5("%s_%s" % (handler_class.__name__, name,)).hexdigest()
+        class_prefix = md5("%s_%s_%s" % (handler_class.__name__, name, url,)).hexdigest()
         class_name = "%s_%s" % (handler_class.__name__, class_prefix,)
         scope['old_' + class_name] = handler_class
         exec "class %s(old_%s):pass" % (class_name, class_name,) in scope
@@ -76,18 +94,17 @@ class HttpModuleMiddleware(object):
 
             if BaseHttpModule not in cls.__bases__:
                 raise BaseError("http_module '%s' must inherit from the \
-                BaseHttpModule" % str(import_m))
+                Basemodule" % str(cls))
 
         for k, urlspec in self.named_handlers.items():
-            urlspec.handler_class = self._class_wrap(urlspec.handler_class, k)
-            urlspec.handler_class.url_name__ = k
+            urlspec.handler_class = self._class_wrap(urlspec.handler_class, k, urlspec.repr_pattern)
+            urlspec.handler_class.pattern__ = k
 
         # 通用module载入
         c_modules = settings.COMMON_MODULES
         if c_modules:
             for module in c_modules:
                 try:
-
                     import_m = import_object(module)
                     check_baseclass_(import_m)
                     m = import_m()
@@ -105,7 +122,6 @@ class HttpModuleMiddleware(object):
                     non_modules = []
 
                     def choice_module_(m):
-
                         if m.startswith(EXCLUDE_PREFIX):
                             import_m = import_object(m.lstrip(EXCLUDE_PREFIX))
                             check_baseclass_(import_m)
@@ -124,6 +140,7 @@ class HttpModuleMiddleware(object):
                             self.non_executes_modules[name] = non_modules
                     if name not in self.route_modules:
                         self.route_modules[name] = modules_lst
+                    self.re_complies[name] = re.compile(name)
                 except ImportError:
                     raise
 
@@ -131,7 +148,6 @@ class HttpModuleMiddleware(object):
     def _do_all_execute(self, handler, clear, method_name, **kwargs):
 
         for c_module in self.common_modules:
-
             result = self._execute_module(handler, clear, c_module, getattr(c_module, method_name), **kwargs)
             if is_future(result):
                 result = yield result
@@ -146,6 +162,12 @@ class HttpModuleMiddleware(object):
                 if result:
                     raise gen.Return(1)
 
+    def process_call(self, request, clear):
+        re_matchs = {}
+        for key, compil in self.re_complies.items():
+            re_matchs[key] = compil.search(request.path)
+
+        request.re_match_table = re_matchs
 
     def process_request(self, handler, clear):
         return self._do_all_execute(handler, clear, 'begin_request')
