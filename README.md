@@ -333,7 +333,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * **DB：**
 
-	torngas提供了对SqlAlchemy的封装。
+	torngas提供了对SqlAlchemy支持，模块`torngas.db.dbalchemy`对sqlalchemy进行了基本的封装使其更加易用。同时，torngas提供了一个简单轻量级的db模块basedb，此模块来自与web.py框架的db模块，基本的使用方式可以参考[web.py cookbook](http://webpy.org/cookbook/index.zh-cn),下面主要介绍dbalchemy模块。
 
 	数据库配置：
 
@@ -447,7 +447,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * **session：**
 
-	torngas提供一个简单的session功能，session可以使用torngas.cache下的缓存模块或实现了 `torngas.cache.backends.base.BaseCache` 的模块类作为session_store,比如你可以使用memcache或redis缓存来作为session的存储，torngas未来考虑将增加mongodb的session支持。
+	torngas提供一个简单的session功能，session可以使用torngas.cache下的缓存模块或实现了 `torngas.cache.backends.base.BaseCache` 的模块类作为session_store,比如你可以使用memcache、redis或LocalCache缓存来作为session的存储。
 	
 	首先，你需要增加中间件 `torngas.middleware.session.SessionMiddleware` 来开启对session的支持，在具体的路由handler中，可以通过handler.session获取session存储对象。
 	
