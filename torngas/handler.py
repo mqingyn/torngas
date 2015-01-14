@@ -49,7 +49,7 @@ class ApiHandler(HandlerMixin, RequestHandler):
             callback = self.get_argument('callback', 'callback')
             self.write('%s(%s);' % (callback, json.dumps(obj, ensure_ascii=ensure_ascii)))
         elif nofail:
-            self.write(json.dumps(obj, ensure_ascii=ensure_ascii))
+            self.write(obj)
         else:
             raise HttpBadRequestError('Unknown response format requested: %s' % format)
 
