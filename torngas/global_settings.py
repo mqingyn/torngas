@@ -19,7 +19,7 @@ COMMON_MODULES = (
 )
 # 路由modules，针对某个路由或某些路由起作用
 ROUTE_MODULES = {
-    # {'路由名称':['module限定名'],['!被排除的全局module限定名']}
+    # {'路由名称或正则':['module限定名','!被排除的module限定名']}
 }
 ###########
 # 缓存配置 #
@@ -97,40 +97,69 @@ WHITELIST = False
 #tornado日志功能配置
 LOGGER_CONFIG = {
     "use_tornadolog": False,
-    "root_logger_name": 'tornado',
     "root_level": 'INFO',
-    # 日志根目录（如果某具体日志指定路径，则自动忽略此根目录配置）
+    # 日志根目录（如果某具体日志filename指定路径，则自动忽略此根目录配置）
     "root_dir": 'logs/'
 }
 
-LOGGER_MODULE = {
-    # access log 访问日志统计
-    "ACCESS_LOG": {
-        "NAME": 'tornado.torngas_accesslog',
-        "USE_PORTNO": True,  #使用本地文件输出时，用端口号区分文件名
-        "FILE": "torngas_access_log.log",
-        "ROLLOVER_WHEN": "midnight",  #S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
+LOGGER = {
+    'tornado': {
         "OPEN": True,
-        "LOGGER": "torngas.logger.loggers.AccessLogger"
+        "LEVEL": "INFO",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "filename": "tornado.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 10,
+            }
+        ]
     },
-    #general log 错误，警告，和异常输出，**不要关闭这个log
-    "GENERAL_LOG": {
-        "NAME": 'tornado.torngas_generallog',
-        "USE_PORTNO": True,
-        "FILE": "torngas_trace_log.log",
-        "ROLLOVER_WHEN": "midnight",
+    'torngas.torngas_tracelog': {
         "OPEN": True,
-        "LOGGER": "torngas.logger.loggers.GeneralLogger"
+        "LEVEL": "ERROR",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "filename": "torngas_trace_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": False,
+                "backupCount": 20,
+            }
+        ]
     },
-    #info log ，info和debug类型日志输出
-    "INFO_LOG": {
-        "NAME": 'tornado.torngas_infolog',
-        "USE_PORTNO": True,
-        "FILE": "torngas_info_log.log",
-        "ROLLOVER_WHEN": "midnight",
+    'torngas.torngas_accesslog': {
         "OPEN": True,
-        "LOGGER": "torngas.logger.loggers.InfoLogger"
-    }
+        "LEVEL": "INFO",
+        "FORMATTER": '%(message)s',
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "filename": "torngas_access_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": False,
+                "backupCount": 20,
+            }
+        ]
+    },
+    'torngas.torngas_infolog': {
+        "OPEN": True,
+        "LEVEL": "INFO",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "filename": "torngas_info_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 10,
+            }
+        ]
+    },
 }
 
 IPV4_ONLY = True

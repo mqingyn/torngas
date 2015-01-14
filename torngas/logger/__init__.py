@@ -3,9 +3,7 @@
 import logging
 from ..settings_manager import settings
 
-root_logger = logging.getLogger(settings.LOGGER_CONFIG['root_logger_name'])
+root_logger = logging.getLogger('tornado')
 root_logger.setLevel(settings.LOGGER_CONFIG['root_level'])
-
+from loggers import UsePortRotatingFileHandler, CustomRotatingFileHandler,LoggerLoader
 from client import SysLogger
-
-

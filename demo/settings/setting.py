@@ -34,10 +34,12 @@ INSTALLED_APPS = (
 # 全局modules配置
 COMMON_MODULES = (
     # 'module限定名',
+
 )
 # 路由modules，针对某个路由或某些路由起作用
 ROUTE_MODULES = {
-    # '路由名称':['module限定名','!被排除的全局module限定名'],
+    # '路由名称或path正则':['module限定名','!被排除的全局module限定名'],
+    # eg: '^/user/login.*$':['utils.modules.LoginModule']
 }
 # ##########
 # 缓存配置 #
@@ -100,54 +102,72 @@ WHITELIST = False
 # '127.0.0.2',
 # )
 
-# tornado日志功能配置
+#tornado日志功能配置
 LOGGER_CONFIG = {
     "use_tornadolog": False,
-    "root_logger_name": 'tornado',
     "root_level": 'INFO',
-    # 日志根目录（如果某具体日志指定路径，则自动忽略此根目录配置）
+    # 日志根目录（如果某具体日志filename指定路径，则自动忽略此根目录配置）
     "root_dir": 'logs/'
 }
 
-
-# logserver的logger模块,可配置多个
-LOGGER_MODULE = {
-    # access log 访问日志统计
-    "ACCESS_LOG": {
-        "NAME": 'tornado.torngas_accesslog',
-        "USE_PORTNO": False,  # 使用本地文件输出时，用端口号区分文件名
-        "FILE": "torngas_access_log.log",
-        "ROLLOVER_WHEN": "midnight",  # S:second; M:minute; H:hour; D:day; W:week; midnight:midnight;
+LOGGER = {
+    'tornado': {
         "OPEN": True,
-        "LOGGER": "torngas.logger.loggers.AccessLogger"
+        "LEVEL": "INFO",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "tornado.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 10,
+            }
+        ]
     },
-    # general log 错误，警告，和异常输出，**不要关闭这个log
-    "GENERAL_LOG": {
-        "NAME": 'tornado.torngas_generallog',
-        "USE_PORTNO": False,
-        "FILE": "torngas_trace_log.log",
-        "ROLLOVER_WHEN": "midnight",
+    'torngas.torngas_tracelog': {
         "OPEN": True,
-        "LOGGER": "torngas.logger.loggers.GeneralLogger"
+        "LEVEL": "ERROR",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "torngas_trace_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": False,
+                "backupCount": 20,
+            }
+        ]
     },
-    # info log ，info和debug类型日志输出
-    "INFO_LOG": {
-        "NAME": 'tornado.torngas_infolog',
-        "USE_PORTNO": False,
-        "FILE": "torngas_info_log.log",
-        "ROLLOVER_WHEN": "midnight",
+    'torngas.torngas_accesslog': {
         "OPEN": True,
-        "LOGGER": "torngas.logger.loggers.InfoLogger"
+        "LEVEL": "INFO",
+        "FORMATTER": '%(message)s',
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "torngas_access_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": False,
+                "backupCount": 20,
+            }
+        ]
     },
-    # example custom
-    "CUSTOM_LOG": {
-        "NAME": "tornado.torngas_customlog",  # 必要
-        "USE_PORTNO": False,
-        "FILE": "torngas_custom_log.log",  # 必要
-        "ROLLOVER_WHEN": "midnight",
-        "OPEN": True,  # 必要
-        "LOGGER": "mylogger.logger.CustomLogger"  # 必要，自定義的logger，會自動查找import
-    }
+    'torngas.torngas_infolog': {
+        "OPEN": True,
+        "LEVEL": "INFO",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "torngas_info_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 10,
+            }
+        ]
+    },
 }
 
 

@@ -19,7 +19,7 @@ define("address", default='127.0.0.1', help='listen host,default:127.0.0.1', typ
 parse_command_line()
 # 一些配置的使用必须先parse_command_line()
 from settings_manager import settings
-
+from logger import SysLogger
 
 class Server(object):
     settings = settings
