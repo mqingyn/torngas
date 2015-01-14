@@ -59,6 +59,7 @@ class Server(object):
                 urls.extend(app_urls)
         else:
             raise ConfigError('load urls error,INSTALLED_APPS not found!')
+        self.urls = urls
         return self.urls
 
     def server_start(self, sockets=None, **kwargs):

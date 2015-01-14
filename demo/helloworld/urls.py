@@ -1,8 +1,8 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-from torngas.urlhelper import Url, route
+from torngas import Url, route
 
-u = Url('helloworld.views')
+u = Url('helloworld.handlers')
 urls = route(
     u(name='Index', pattern=r'/', handler='main_handler.Main')
 )
