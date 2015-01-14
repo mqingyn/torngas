@@ -54,7 +54,7 @@ import functools
 from tornado.netutil import Resolver, ThreadedResolver
 from tornado.ioloop import IOLoop
 
-Resolver.configure('tornado.netutil.ThreadedResolver', num_threads=30)
+Resolver.configure('tornado.netutil.ThreadedResolver', num_threads=10)
 
 def async_execute(fn):
     """
