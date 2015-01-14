@@ -8,7 +8,7 @@ access log中间件，替换tornado的log_request实现插件式日志输出
 from datetime import datetime
 import logging
 
-access_log = logging.getLogger('torngas.torngas_accesslog')
+access_log = logging.getLogger('torngas.accesslog')
 
 
 def log_request(handler):

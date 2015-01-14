@@ -8,9 +8,9 @@ if not settings.LOGGER_CONFIG['use_tornadolog']:
     from loggers import LoggerLoader
 
     LoggerLoader.load_logger()
-    access_logger = LoggerLoader.get_logger('torngas.torngas_accesslog')
-    trace_logger = LoggerLoader.get_logger('torngas.torngas_tracelog')
-    info_logger = LoggerLoader.get_logger('torngas.torngas_infolog')
+    access_logger = LoggerLoader.get_logger('torngas.accesslog')
+    trace_logger = LoggerLoader.get_logger('torngas.tracelog')
+    info_logger = LoggerLoader.get_logger('torngas.infolog')
 else:
     import tornado.log
 

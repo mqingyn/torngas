@@ -117,7 +117,7 @@ LOGGER = {
             }
         ]
     },
-    'torngas.torngas_tracelog': {
+    'torngas.tracelog': {
         "OPEN": True,
         "LEVEL": "ERROR",
         "HANDLERS": [
@@ -131,7 +131,7 @@ LOGGER = {
             }
         ]
     },
-    'torngas.torngas_accesslog': {
+    'torngas.accesslog': {
         "OPEN": True,
         "LEVEL": "INFO",
         "FORMATTER": '%(message)s',
@@ -146,7 +146,7 @@ LOGGER = {
             }
         ]
     },
-    'torngas.torngas_infolog': {
+    'torngas.infolog': {
         "OPEN": True,
         "LEVEL": "INFO",
         "HANDLERS": [
