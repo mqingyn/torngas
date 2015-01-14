@@ -9,7 +9,7 @@ setup(
     license="BSD",
     packages=find_packages(),
     package_data={'torngas': ['resource/exception.html']},
-    author_email="maingyn@gmail.com",
+    author_email="mqingyn@gmail.com",
     requires=['Tornado', 'futures'],
     scripts=[],
 )
