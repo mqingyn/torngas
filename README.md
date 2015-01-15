@@ -40,10 +40,8 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
         |- app
             +- myapp1
-            |   |- __init__.py
             |   |- urls.py
             |   |- handlers
-            |       |- __init__.py
             |       |- hello_china.py
             |       |- hello_usa.py
             |       |- ...
@@ -51,8 +49,9 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
             +- myapp2
             |   |- ...
             |
-            |- logs
-            |- middlewares
+            +- logs
+            |
+            +- middlewares
             |   |- ...
             |
             +- settings
