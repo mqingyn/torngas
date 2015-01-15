@@ -196,7 +196,14 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * **中间件：**
 
-	torngas实现了简单的中间件功能，其行为和功能类似于 Django 的中间件。
+	torngas实现了简单的中间件功能，其行为和功能类似于 Django 的中间件。在这里引用一张Django中间件的流程图：
+
+	
+
+	![Django中间件流程](https://docs.djangoproject.com/en/1.7/_images/middleware.svg)
+
+
+	我们可以参考这张图来理解torngas的中间件设计。
 	自定义中间件：
 
 		class MyMiddleware(object):
@@ -226,7 +233,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		        """
 		        请求结束后响应时调用，此方法在render之后，finish之前执行，可以对chunk做最后的封装和处理
 		        :param handler: handler对象
-		        :param chunk : 响应内容，chunk为携带响内容的list，不可以直接赋值，
+		        :param chunk : 响应内容，chunk为携带响内容的list，你不可以直接对chunk赋值，
 					可以通过chunk[index]来改写响应内容，或再次执行handler.write()
 		        """
 		    def process_endcall(self, handler, clear):
