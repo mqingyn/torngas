@@ -17,8 +17,26 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 ##**快速入门**
 
+* 导引：
 
-* **目录结构**：
+	* [目录结构](#user-content-目录结构)
+ 	* [settings 配置](#user-content-settings配置)
+ 	* [webserver](#user-content-webserver)
+ 	* [app](#user-content-app)
+ 	* [urls](#user-content-urls)
+ 	* [log](#user-content-log)
+ 	* [模板引擎](#user-content-模板引擎)
+ 	* [handler](#user-content-handler)
+ 	* [中间件](#user-content-中间件)
+ 	* [路由处理器](#user-content-路由处理器)
+ 	* [缓存](#user-content-缓存)
+ 	* [DB](#user-content-DB)
+ 	* [线程池异步](#user-content-异步线程池)
+ 	* [session](#user-content-session)
+ 	
+<br>
+
+* ####目录结构：
 
         |- app
             +- myapp1
@@ -61,7 +79,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		启动服务后，在浏览器中查看 `127.0.0.1:8000` ,你应该可以看到一个欢迎页面！
 
 
-* **settings配置**：
+* ####settings配置：
 	
 	在项目runserver.py中，你可以指定使用的预设值的默认配置文件，如配置文件在应用根目录app.settings下的setting.py：
 
@@ -73,7 +91,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		
 		project_path = settings.PROJECT_PATH
 
-* **webserver**:
+* ####webserver:
 	
 	最简单的server启动方式：
 		
@@ -92,7 +110,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
     	serv.load_application(application=None) # 或根据你的需求自定义Application
     	serv.server_start(sockets=None, **kwargs)
 		
-* **app**:
+* ####app:
 	
 	如上述目录结构，您可以在应用根目录下创建多个app模块，假如你建立了应用myapp1，应用目录中**必须**包含 `urls.py`。
 	同时，要加载你的应用，你需要在配置文件中 `INSTALLED_APPS` 元组中增加你的app配置，如你的应用根目录app下存在myapp1，myapp2，则需：
@@ -104,7 +122,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 	系统启动后，将自动加载myapp1,myapp2中的urls.py下的路由配置。
 
-* **urls**:
+* ####urls:
 
 	每一个app都必须包含一个urls.py的路由表文件。你可以像这样配置路由：
 
@@ -171,7 +189,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 			url(r'/user/me/?','user.MeHandler'),
 		)
 	
-* **日志：**
+* ####log：
 
 	torngas支持使用原生tornado日志模块，或torngas基于logging扩展日志，torngas默认启用扩展日志，配置文件中 `LOGGER_CONFIG` 默认设定 `use_tornadolog = False` , 如果为 `True` ,则使用tornado.log模块 。
 
@@ -181,7 +199,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 	日志配置中的日志HANDLER默认为 `torngas.logger.UsePortRotatingFileHandler` ,在多进程状态下，日志文件名将自动按照端口号区分，通过`LOGGER_CONFIG` 下 `root_dir` 来决定日志目录，若日志`HANDLERS`中filename给定绝对路径或相对路径，则忽略 root_dir 。
 
-* **模板引擎：**
+* ####模板引擎：
 
 	在配置文件 `TEMPLATE_CONFIG` 中配置模板。 其中，`template_engine` 决定使用什么模板加载器(Loader) ,默认为 None，使用自带的模板引擎。 可选择使用 mako 或 jinja2 ，*需要安装依赖库 mako或jinja2* 。
 
@@ -197,7 +215,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		
 		}
 
-* **handler：**
+* ####handler：
 	
 	如果需要使用torngas提供的功能，业务handler需要继承自 `torngas.handler.WebHandler`或 `torngas.handler.ApiHandler` .
 	
@@ -224,13 +242,13 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		{% end %}
 	
 
-* **中间件：**
+* ####中间件：
 
 	torngas实现了简单的中间件功能，其行为和功能类似于 Django 的中间件。在这里引用一张Django中间件的流程图：
 
-	
+	![Django中间件流程](https://docs.djangoproject.com/en/1.5/_images/middleware.png)
 
-	![Django中间件流程](https://docs.djangoproject.com/en/1.7/_images/middleware.svg)
+
 
 
 	我们可以参考这张图来理解torngas的中间件设计。torngas中间件遵循了类似于Django中间件的设计，但因为框架本身的差异性，torngas中间件
@@ -322,19 +340,19 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	
 
 
-* **路由模块：**
+* ####路由处理器：
 
-	中间件提供了对请求处理流程的干预能力，使得我们可以控制请求过程中的各个方面。但是我们无法从容的对特定请求的特定过程进行干预。路由模块提供了路由级别的请求处理能力。
+	中间件提供了对请求处理流程的干预能力，使得我们可以控制请求过程中的各个方面。但是我们无法从容的对特定请求的特定过程进行干预。路由处理器提供了路由级别的请求处理能力。
 	
-	需要在中间件中加入 `torngas.httpmodule.httpmodule.HttpModuleMiddleware` 启用路由模块功能。
+	需要在中间件中加入 `torngas.httpmodule.httpmodule.HttpModuleMiddleware` 启用路由处理功能。
 
-	自定义路由模块需要继承自 `torngas.httpmodule.BaseHttpModule` ,并实现 `begin_request`， `begin_render` , `begin_response` , `complete_response` 中任意一个方法即可，方法行为和功能类似中间件，同样，
+	自定义路由处理模块需要继承自 `torngas.httpmodule.BaseHttpModule` ,并实现 `begin_request`， `begin_render` , `begin_response` , `complete_response` 中任意一个方法即可，方法行为和功能类似中间件，同样，
 	`begin_request` 方法在tornado4.0以上版本支持异步调用。
 
-	路由模块配置：
+	路由处理器配置：
 
 
-	* 全局路由模块：通用路由模块会处理所有请求的对应过程。行为等同于中间件，但是不同的是，在响应阶段，处理方法同于中间件是倒序执行，而是**顺序执行**。
+	* 全局路由处理器：通用路由处理器会处理所有请求的对应过程。行为等同于中间件，但是不同的是，在响应阶段，处理方法同于中间件是倒序执行，而是**顺序执行**。
 
 
 			COMMON_MODULES = ( 
@@ -342,7 +360,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 				'httpmodule.ipauth.ipblack',
 			)
 	
-	* 特定路由模块：根据配置在具体的路由请求中使用。
+	* 特定路由处理器：根据配置在具体的路由请求中使用。
 
 			
 			ROUTE_MODULES = {
@@ -350,14 +368,14 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 			     'Index': ['!httpmodule.auth.AuthModule',]
 			}
 
-		特定路由模块为一个字典，字典的键为需要匹配的路由的名称(定义urls时指定)，或路由path的正则表达式，如上例。
+		特定路由处理器为一个字典，字典的键为需要匹配的路由的名称(定义urls时指定)，或路由path的正则表达式，如上例。
 		值为处理该路由请求的模块。
-		在请求过程中，满足匹配条件的路由模块将被在指定过程触发，根据模块实现的方法来进行相应的处理。 如果在配置模块的前面添加了 `!` 符号，将反选在`COMMON_MODULES`中同名的模块，那么在请求过程中，全局路由模块将不再匹配的路由中执行。
+		在请求过程中，满足匹配条件的路由处理器将被在指定过程触发，根据模块实现的方法来进行相应的处理。 如果在配置模块的前面添加了 `!` 符号，将反选在`COMMON_MODULES`中同名的模块，那么在请求过程中，全局路由处理器将不再匹配的路由中执行。
 
 		如上实例中，请求名为Index 的路由将不执行 `COMMON_MODULES` 中配置的 `httpmodule.auth.AuthModule` 模块，请求满足 `^/user/.*$` 正则的路由不执行 `httpmodule.ipauth.ipblack` 模块。
 
 
-* **缓存：**
+* ####缓存：
 
 	torngas支持使用memcache，redis，file作为缓存。缓存模块来自于对django.cache的包装。相关配置可参考 Django文档。
 
@@ -383,7 +401,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 		`RedisClient`提供一个原生的client属性，提供基础的，原生的redis-py功能,而`RedisCache` 继承自 `RedisClient` 是提供高层缓存使用，其实现了和 `torngas.cache.backends.memcached.MemcachedCache`相同的接口，且行为和功能一致。如果你需要一些高级的redis方法，请使用RedisClient，如果仅仅需要基础的缓存功能，使用RedisCache即可。RedisCache同样提供client属性。
 
-* **DB：**
+* ####DB：
 
 	torngas提供了对SqlAlchemy支持，模块`torngas.db.dbalchemy`对sqlalchemy进行了基本的封装使其更加易用。同时，torngas提供了一个简单轻量级的db模块basedb，此模块来自与web.py框架的db模块，基本的使用方式可以参考[web.py cookbook](http://webpy.org/cookbook/index.zh-cn),下面主要介绍dbalchemy模块。
 
@@ -473,7 +491,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	使用Sqlalchemy必须在配置中间件中加入：**torngas.middleware.dbalchemy.DBAlchemyMiddleware**
 		
 
-* **异步线程池**
+* ####异步线程池
 
 	tornado本身是异步单线程单进程框架，这样当遇到使用mysql的慢查询时，就会阻塞进程。torngas提供一个简单的方式来用线程池包装同步方法。注：新版tornado中内置了 `concurrent.run_on_executor` 装饰器，可提供同样的功能,torngas提供  `torngas.decorators.async_execute` 来方便使用线程池来异步化你的同步方法。
 
@@ -497,7 +515,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 			        return result
 
 
-* **session：**
+* ####session：
 
 	torngas提供一个简单的session功能，session可以使用torngas.cache下的缓存模块或实现了 `torngas.cache.backends.base.BaseCache` 的模块类作为session_store,比如你可以使用memcache、redis或LocalCache缓存来作为session的存储。
 	
