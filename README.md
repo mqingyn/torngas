@@ -2,14 +2,14 @@
 ===========
 
 Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发框架，tornado是一个异步非阻塞的web框架，但是由于其小巧灵活，并没有一个统一，通用的
-应用层框架解决方案。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。
+应用层框架解决方案。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。tornado 建议使用4.0以上版本。
 
 
 
 ##**框架依赖**
 
 * future
-* tornado
+* tornado>=4.0
 
 
 
@@ -196,7 +196,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	WebHandler提供了兼容mako,jinja2模板引擎加载,中间件hook的功能。并额外提供两个方法 `on_prepare` 和 `complete_finish` ,
 	这两个方法分别在 `prepare` 和 `on_finish` 方法执行结束后调用。
 	
-	同时，torngas提供了一个FlashMessageMixIn，可以配合handler实现消息闪现的功能。你的handler需要继承 `FlashMessageMixIn` ：
+	同时，torngas提供了一个 `FlashMessageMixIn` ，可以配合handler实现消息闪现的功能。你的handler需要继承 `FlashMessageMixIn` ：
 	
 		class MyHandler(FlashMessageMixIn,WebHandler):
 			
@@ -277,8 +277,9 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 				:param value:异常值信息
 				:param tb:异常堆栈
 		        """
-	编写中间件需实现其中任何一个方法即可，中间件的执行流程中在请求阶段，call,request按照中间件的声明**顺序执行**，
-    在响应过程中，exception，response，endcall和render则是按声明顺序**倒序执行**）
+	编写中间件需实现其中任何一个方法即可，中间件的执行流程中在请求阶段，`call` , `request` 按照中间件的声明**顺序执行**，
+    在响应过程中，`exception`，`response` ，`endcall` 和 `render` 则是按声明顺序**倒序执行**） , 在tornado 4.0 中，`process_request`
+    支持异步调用。
 
     在中间件中返回任意真值，如 return 1，则停止当前请求的其余中间件相同方法的执行，进入下一个中间件流程。特别是当finish请求后，需return 1，例如：
 
@@ -319,7 +320,8 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	
 	需要在中间件中加入 `torngas.httpmodule.httpmodule.HttpModuleMiddleware` 启用路由模块功能。
 
-	自定义路由模块需要继承自 `torngas.httpmodule.BaseHttpModule` ,并实现 `begin_request`， `begin_render` , `begin_response` , `complete_response` 中任意一个方法即可，方法行为和功能类似中间件。
+	自定义路由模块需要继承自 `torngas.httpmodule.BaseHttpModule` ,并实现 `begin_request`， `begin_render` , `begin_response` , `complete_response` 中任意一个方法即可，方法行为和功能类似中间件，同样，
+	`begin_request` 方法在tornado4.0以上版本支持异步调用。
 
 	路由模块配置：
 
