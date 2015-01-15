@@ -1,5 +1,5 @@
 #Torngas Web Framework
-based on tornado
+A simple app web framework based on tornado.
 
 
 version: 1.6.3
