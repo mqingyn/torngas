@@ -222,7 +222,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	WebHandler提供了兼容mako,jinja2模板引擎加载,中间件hook的功能。并额外提供两个方法 `on_prepare` 和 `complete_finish` ,
 	这两个方法分别在 `prepare` 和 `on_finish` 方法执行结束后调用。
 	
-	同时，torngas提供了一个 `FlashMessageMixIn` ，可以配合handler实现消息闪现的功能。你的handler需要继承 `FlashMessageMixIn` ：
+	同时，torngas提供了一个 `FlashMessageMixIn` ，可以配合handler实现消息闪现的功能,其作用类似flask中的flash。你的handler需要继承 `FlashMessageMixIn` ：
 	
 		class MyHandler(FlashMessageMixIn,WebHandler):
 			
