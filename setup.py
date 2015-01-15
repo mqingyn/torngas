@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     package_data={'torngas': ['resource/exception.html']},
     author_email="mqingyn@gmail.com",
-    requires=['Tornado', 'futures'],
+    requires=['tornado', 'futures'],
     scripts=[],
     include_package_data=True,
     zip_safe=True,
