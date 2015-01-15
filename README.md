@@ -30,7 +30,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
  	* [中间件](#user-content-中间件)
  	* [路由处理器](#user-content-路由处理器)
  	* [缓存](#user-content-缓存)
- 	* [DB](#user-content-DB)
+ 	* [DB&ORM](#user-content-DB&ORM)
  	* [线程池异步](#user-content-异步线程池)
  	* [session](#user-content-session)
  	
@@ -401,9 +401,9 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 		`RedisClient`提供一个原生的client属性，提供基础的，原生的redis-py功能,而`RedisCache` 继承自 `RedisClient` 是提供高层缓存使用，其实现了和 `torngas.cache.backends.memcached.MemcachedCache`相同的接口，且行为和功能一致。如果你需要一些高级的redis方法，请使用RedisClient，如果仅仅需要基础的缓存功能，使用RedisCache即可。RedisCache同样提供client属性。
 
-* ####DB：
+* ####DB&ORM：
 
-	torngas提供了对SqlAlchemy支持，模块`torngas.db.dbalchemy`对sqlalchemy进行了基本的封装使其更加易用。同时，torngas提供了一个简单轻量级的db模块basedb，此模块来自与web.py框架的db模块，基本的使用方式可以参考[web.py cookbook](http://webpy.org/cookbook/index.zh-cn),下面主要介绍dbalchemy模块。
+	torngas提供了对SqlAlchemy ORM的支持，模块`torngas.db.dbalchemy`对sqlalchemy进行了基本的封装使其更加易用。同时，torngas提供了一个简单轻量级的db模块basedb，此模块来自与web.py框架的db模块，基本的使用方式可以参考[web.py cookbook](http://webpy.org/cookbook/index.zh-cn),下面主要介绍dbalchemy模块。
 
 	数据库配置：
 
