@@ -193,6 +193,28 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	
 	如果需要使用torngas提供的功能，业务handler需要继承自 `torngas.handler.WebHandler`或 `torngas.handler.ApiHandler` .
 	
+	WebHandler提供了兼容mako,jinja2模板引擎加载,中间件hook的功能。并额外提供两个方法 `on_prepare` 和 `complete_finish` ,
+	这两个方法分别在 `prepare` 和 `on_finish` 方法执行结束后调用。
+	
+	同时，torngas提供了一个FlashMessageMixIn，可以配合handler实现消息闪现的功能。你的handler需要继承 `FlashMessageMixIn` ：
+	
+		class MyHandler(FlashMessageMixIn,WebHandler):
+			
+			def get(self):
+				self.flash("Welcome back, %s" % username, 'success')
+	
+		base.html
+		------------
+
+		{% set messages = handler.get_flashed_messages() %}
+		{% if messages %}
+		<div id="flashed">
+			{% for category, msg in messages %}
+			<span class="flash-{{ category }}">{{ msg }}</span>
+			{% end %}
+		</div>
+		{% end %}
+	
 
 * **中间件：**
 
@@ -205,6 +227,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 	我们可以参考这张图来理解torngas的中间件设计。torngas中间件遵循了类似于Django中间件的设计，但因为框架本身的差异性，torngas中间件
 	采用对RequestHandler执行流程中插入hook的方式，中间件默认没有返回值，你可以在需要的请求阶段对请求对象(request或handler)进行处理。
+	*注：要使用中间件功能，你的handler必须继承自 `torngas.handler.WebHandler` 或 `torngas.handler.ApiHandler`
 
 
 	自定义中间件：
