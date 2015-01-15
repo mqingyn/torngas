@@ -351,7 +351,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	路由处理器配置：
 
 
-	* 全局路由处理器：通用路由处理器会处理所有请求的对应过程。行为等同于中间件，但是不同的是，在响应阶段，处理方法同于中间件是倒序执行，而是**顺序执行**。
+	* 全局路由处理器：通用路由处理器会处理所有请求的对应过程。行为等同于中间件，但是不同的是，在响应阶段，处理方法不同于中间件是倒序执行，而是**顺序执行**，同时需要注意的是，全局路由处理器总是优先于特定路由处理器之前执行。
 
 
 			COMMON_MODULES = ( 
@@ -359,7 +359,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 				'httpmodule.ipauth.ipblack',
 			)
 	
-	* 特定路由处理器：根据配置在具体的路由请求中使用。
+	* 特定路由处理器：根据配置在具体的路由请求中使用，格式为 `'正则path或路由name':['module1','!module2',]`。
 
 			
 			ROUTE_MODULES = {
