@@ -203,7 +203,10 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	![Django中间件流程](https://docs.djangoproject.com/en/1.7/_images/middleware.svg)
 
 
-	我们可以参考这张图来理解torngas的中间件设计。
+	我们可以参考这张图来理解torngas的中间件设计。torngas中间件遵循了类似于Django中间件的设计，但因为框架本身的差异性，torngas中间件
+	采用对RequestHandler执行流程中插入hook的方式，中间件默认没有返回值，你可以在需要的请求阶段对请求对象(request或handler)进行处理。
+
+
 	自定义中间件：
 
 		class MyMiddleware(object):
