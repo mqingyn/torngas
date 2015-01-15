@@ -19,7 +19,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * 导引：
 
-	* [目录结构](#user-content-目录结构)
+	* [目录结构](#user-content-目录结构示例)
  	* [settings 配置](#user-content-settings配置)
  	* [webserver](#user-content-webserver)
  	* [app](#user-content-app)
@@ -36,7 +36,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
  	
 <br>
 
-* ####目录结构：
+* ####目录结构示例：
 
         |- app
             +- myapp1
