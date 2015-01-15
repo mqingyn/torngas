@@ -36,7 +36,7 @@ class MyMiddleware(object):
     def process_endcall(self, handler, clear):
         :param handler: handler对象
         请求结束后调用，此时已完成响应并呈现用户，一般用来处理收尾操作，清理缓存对象，断开连接等
-    def process_exception(self,handler,clear,typ, value, tb):
+    def process_exception(self,handler, clear, typ, value, tb):
         异常处理
 """
 from functools import partial

@@ -235,6 +235,15 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		        :param handler: handler对象
 		        """
 	
+			def process_exception(self,handler, clear, typ, value, tb):
+		        """
+		        请求过程引发异常时调用，你可以通过这个方法捕获在请求过程中的未捕获异常
+				如果没有中间件实现此方法，则调用tornado RequestHandler.log_exception方法。
+		        :param handler: handler对象
+				:param typ: 等同RequestHandler.log_exception的参数，异常类型值和异常堆栈信息
+				:param value:异常值信息
+				:param tb:异常堆栈
+		        """
 	编写中间件需实现其中任何一个方法即可，中间件的执行流程中在请求阶段，call,request按照中间件的声明**顺序执行**，
     在响应过程中，exception，response，endcall和render则是按声明顺序**倒序执行**）
 
@@ -465,3 +474,22 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		    'secret_key': 'fLjUfxqXtfNoIldA0A0J',
 		    'session_version': 'EtdHjDO1'
 		}
+
+	session使用：
+		torngas会为每个session会话在cookies生成一个TORNADOid和一个VERIFSSID,切必须两个同时被验证通过才能表示会话是有效的。你可以像这样读写session：
+		
+			class LoginHandler(WebHandler):
+				def get(self,uid):
+					self.session['userid'] = uid
+					self.set_expire(3600 * 24 * 30) #30天
+
+			class AuthHandler(WebHandler):
+				def get(self,uid):
+					uid = self.session['userid']
+
+			class LogoutHandler(WebHandler):
+				def get(self,uid):
+					del self.session['userid']
+
+	
+		
