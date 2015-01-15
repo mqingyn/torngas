@@ -52,7 +52,13 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
             +- runserver.py
                 
 
-   	 具体见demo
+  * helloworld :
+	
+		你可以参考demo目录下的 `helloworld` 项目示例，并运行：
+		
+			python demo/runserver.py --address=0.0.0.0 --port=8000 --settings=settings.setting
+
+		启动服务后，在浏览器中查看 `127.0.0.1:8000` ,你应该可以看到一个欢迎页面！
 
 
 * **settings配置**：
