@@ -13,7 +13,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 ##**安装**
 
-	PIP: `pip install torngas`
+ * **pip**:  `pip install torngas`
 
 ##**快速入门**
 
