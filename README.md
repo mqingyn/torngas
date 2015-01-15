@@ -11,7 +11,9 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 * future
 * tornado>=4.0
 
+##**安装**
 
+	PIP: `pip install torngas`
 
 ##**快速入门**
 
@@ -19,7 +21,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 * **目录结构**：
 
         |- app
-            |- myapp1
+            +- myapp1
             |   |- __init__.py
             |   |- urls.py
             |   |- handlers
@@ -28,26 +30,26 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
             |       |- hello_usa.py
             |       |- ...
             |          
-            |- myapp2
+            +- myapp2
             |   |- ...
             |
             |- logs
             |- middlewares
             |   |- ...
             |
-            |- settings
+            +- settings
             |   |- settings.py
             |   |- settings_online.py
             |
-            |- httpmodules
+            +- httpmodules
             |   |- ...
             |
-            |- templates
+            +- templates
             |   |- ...
             |
-            |- statics
-                |- ...
-            |- runserver.py
+            +- statics
+            |   |- ...
+            +- runserver.py
                 
 
    	 具体见demo
