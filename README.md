@@ -379,7 +379,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * ####缓存：
 
-	torngas支持使用memcache，redis，file作为缓存。缓存模块来自于对django.cache的包装。相关配置可参考 Django文档。
+	torngas支持使用memcache，redis，file，localcache作为缓存。缓存模块主要抽取自django.cache，相关配置可参考 Django文档，redis是新增支持。
 
 	* redis缓存模块配置，例如：
 	
