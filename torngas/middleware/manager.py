@@ -177,4 +177,9 @@ class Manager(object):
             self.execute_next(handler.request, _TEXC, handler, typ, value, tb)
             return True
 
+    def catch_middleware_exc(self, middle_result):
+        exc_info = middle_result.exc_info()
+        if exc_info:
+            raise exc_info[1]
+
 

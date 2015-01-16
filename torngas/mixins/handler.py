@@ -28,7 +28,8 @@ class HandlerMixin(object):
         pass
 
     def render_string(self, template_name, **kwargs):
-        self.application.middleware_fac.run_render(self, template_name, **kwargs)
+        render_return = self.application.middleware_fac.run_render(self, template_name, **kwargs)
+        self.application.middleware_fac.catch_middleware_exc(render_return)
         return super(HandlerMixin, self).render_string(template_name, **kwargs)
 
     def finish(self, chunk=None):
@@ -38,7 +39,8 @@ class HandlerMixin(object):
         if chunk:
             self.write(chunk)
             chunk = None
-        self.application.middleware_fac.run_response(self, self._write_buffer)
+        finish_return = self.application.middleware_fac.run_response(self, self._write_buffer)
+        self.application.middleware_fac.catch_middleware_exc(finish_return)
         super(HandlerMixin, self).finish(chunk)
 
     def write(self, chunk, status=None):
@@ -53,7 +55,8 @@ class HandlerMixin(object):
             super(HandlerMixin, self).log_exception(typ, value, tb)
 
     def on_finish(self):
-        self.application.middleware_fac.run_endcall(self)
+        complate_return = self.application.middleware_fac.run_endcall(self)
+        self.application.middleware_fac.catch_middleware_exc(complate_return)
         try:
             close_caches()
         except Exception, ex:
@@ -68,4 +71,3 @@ class HandlerMixin(object):
             return None
 
         return tornado.locale.get(settings.TRANSLATIONS_CONF.locale_default)
-

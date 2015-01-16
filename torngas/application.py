@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import traceback
 from tornado import web
 from tornado import version_info
 from logger.client import trace_logger
@@ -22,7 +23,6 @@ class Application(web.Application):
             wsgi=wsgi, **settings)
 
         self.middleware_fac = Manager()
-        # if hasattr(config, 'MIDDLEWARE_CLASSES') and len(config.MIDDLEWARE_CLASSES):
         if middlewares:
             self.middleware_fac.register_all(middlewares)
             self.middleware_fac.run_init(self)
@@ -35,9 +35,10 @@ class Application(web.Application):
                     super(HttpRequest, self).__init__(*args, **kwargs)
                     this.middleware_fac.set_request(self)
                     try:
-                        this.middleware_fac.run_call(self)
-                    except Exception, ex:
-                        trace_logger.error(ex)
+                        result = this.middleware_fac.run_call(self)
+                        this.middleware_fac.catch_middleware_exc(result)
+                    except Exception:
+                        trace_logger.error(traceback.format_exc())
 
             httputil.HTTPServerRequest = HttpRequest
 

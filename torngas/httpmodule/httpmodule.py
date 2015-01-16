@@ -5,7 +5,6 @@ from hashlib import md5
 from tornado.util import import_object
 from tornado.web import ErrorHandler
 from torngas.settings_manager import settings
-from torngas.logger import SysLogger
 from tornado import gen
 from torngas.exception import BaseError
 from . import BaseHttpModule
@@ -62,7 +61,7 @@ class HttpModuleMiddleware(object):
                 if pattern__ in self.non_executes_modules:
                     if check_(handler.pattern__): return
 
-                if handler.request.re_match_table:
+                if hasattr(handler.request, 're_match_table') and handler.request.re_match_table:
                     for key, match in handler.request.re_match_table.items():
                         if match:
                             if check_(key): return
@@ -71,7 +70,6 @@ class HttpModuleMiddleware(object):
                     return run_method_()
 
         except BaseException, ex:
-            SysLogger.error(ex)
             raise
 
     def _class_wrap(self, handler_class, name, url):
