@@ -1,6 +1,10 @@
 #Torngas Web Framework
 A simple app web framework based on tornado.
 
+[![Latest Version](https://pypip.in/version/torngas/badge.svg)](https://pypi.python.org/pypi/torngas/)
+[![Downloads](https://pypip.in/download/torngas/badge.svg)](https://pypi.python.org/pypi/torngas/)
+[![Supported Python versions](https://pypip.in/py_versions/torngas/badge.svg)](https://pypi.python.org/pypi/torngas/)
+[![License](https://pypip.in/license/torngas/badge.svg)](https://pypi.python.org/pypi/torngas/)
 [![Build Status](https://travis-ci.org/mqingyn/torngas.svg?branch=master)](https://travis-ci.org/mqingyn/torngas)
 
 version: `1.6.5`
