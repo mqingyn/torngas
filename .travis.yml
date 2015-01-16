@@ -8,12 +8,10 @@
         - TORNADO=4.0.2
     install:
         - pip install -q tornado==$TORNADO
-        - pip install pep8
         - pip install https://github.com/dcramer/pyflakes/tarball/master
         - pip install -r requirements.txt --use-mirrors
         - pip install -q -e .
     before_script:
-        - pep8 --exclude=migrations --ignore=E501,E225 torngas
         - pyflakes -x W torngas
     script:
         - python setup.py test
