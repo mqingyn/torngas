@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="torngas",
-    version="1.6.4",
+    version="1.6.5",
     description="torngas based on tornado",
     long_description="torngas is based on tornado,django like web framework.",
     keywords='python torngas django tornado',
