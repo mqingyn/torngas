@@ -36,6 +36,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
  	* [DB&ORM](#user-content-dborm)
  	* [线程池异步](#user-content-异步线程池)
  	* [session](#user-content-session)
+ 	* [signal信号](#user-content-signal)
  	
 <br>
 
@@ -563,5 +564,36 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 				def get(self,uid):
 					del self.session['userid']
 
+* ####signal:
+
+	信号组件提供信号的注册与通知处理能力，我们可以在任何地方注册事件，也可以在你希望的任何时候触发事件。在信号触发时，将调用接收信号的callback，进行相关业务逻辑处理。
 	
+	torngas提供了几个与请求过程相关的信号，这几个信号通过信号中间件触发。他们分别是 `call_started` ,`handler_started` , `handler_response` , `call_finished` , `handler_render` ,触发事件分别对应中间件 `process_call` , `process_request` , `process_response` , `process_endcall` , `process_render` 几个过程 。
+
+	使用：
 		
+		from torngas.signal import call_started,handler_render
+
+		class MyService(object):
+
+			#通过装饰器来注册事件回调
+		    @receiver(call_started)
+		    def callback(**kwargs):
+		        """do something..."""
+
+		def callback(**kwargs):
+    		print kwargs
+
+		# 通过调用信号connect方法注册事件回调
+		handler_render.connect(callback)
+
+	事件回调函数接收一个 `**kwargs` 参数，在事件触发时，kwargs包含事件的 signal对象，事件源的class，事件参数等。
+
+	自定义信号事件：
+
+		from dispatch import Signal
+			
+		my_event = Signal(providing_args=["args1"])
+
+		#事件触发
+		my_event.send(sender=somesender.__class__, args1=arg)
