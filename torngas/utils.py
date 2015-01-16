@@ -4,7 +4,6 @@
 import sys
 from tornado.util import import_object
 from tornado.concurrent import Future
-from tornado import concurrent
 from tornado import ioloop
 
 try:
@@ -380,6 +379,6 @@ def sleep(seconds):
     :param seconds:
     :return:
     """
-    future = concurrent.Future()
+    future = Future()
     ioloop.IOLoop.current().call_later(seconds, lambda: future.set_result(None))
     return future
