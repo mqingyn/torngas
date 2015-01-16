@@ -9,7 +9,7 @@ from ..settings_manager import settings
 from tornado.util import import_object
 from tornado.options import options
 
-if settings.TORNADO_CONF['debug']:
+if settings.DEBUG:
     DEFAULT_FORMAT = LogFormatter.DEFAULT_FORMAT
 else:
     DEFAULT_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
@@ -48,7 +48,7 @@ class LoggerLoader(object):
 
             if is_open:
                 cls.load_handler(logger, v)
-                if not settings.TORNADO_CONF['debug']:
+                if not settings.DEBUG:
                     logger.propagate = 0
                 else:
                     if options.log_to_stderr is False:
@@ -79,7 +79,7 @@ class LoggerLoader(object):
                 handler_module = import_object(module)
                 handler = handler_module(**handl)
                 log_formatter = LogFormatter(fmt=log_conf.get("FORMATTER", DEFAULT_FORMAT),
-                                             color=settings.TORNADO_CONF['debug'])
+                                             color=settings.DEBUG)
                 handler.setFormatter(log_formatter)
                 if level:
                     handler.setLevel(level)

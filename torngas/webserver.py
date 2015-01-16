@@ -38,6 +38,8 @@ class Server(object):
                 raise BaseError("urls not found.")
             from torngas.application import Application
 
+            tornado_conf = settings.TORNADO_CONF
+            tornado_conf['debug'] = settings.DEBUG
             self.application = Application(handlers=self.urls,
                                            default_host='',
                                            transforms=None, wsgi=False,
@@ -73,8 +75,12 @@ class Server(object):
                 sockets = bind_sockets(options.port, options.address, family=socket.AF_INET)
             else:
                 sockets = bind_sockets(options.port, options.address)
+        try:
+            xheaders = settings.XHEADERS
+        except:
+            xheaders = True
 
-        http_server = tornado.httpserver.HTTPServer(self.application, xheaders=settings.TORNADO_CONF.xheaders, **kwargs)
+        http_server = tornado.httpserver.HTTPServer(self.application, xheaders=xheaders, **kwargs)
 
         http_server.add_sockets(sockets)
         self.print_settings_info()
@@ -83,12 +89,11 @@ class Server(object):
 
     def print_settings_info(self):
 
-        if settings.TORNADO_CONF.debug:
+        if settings.DEBUG:
             print 'tornado version: %s' % tornado.version
             print 'load middleware:'
             for middl in settings.MIDDLEWARE_CLASSES:
                 print ' -', str(middl)
-            print 'debug open: %s' % settings.TORNADO_CONF.debug
             print 'locale support: %s' % settings.TRANSLATIONS
             print 'load apps:'
             for app in settings.INSTALLED_APPS:

@@ -2,21 +2,23 @@
 # -*- coding: utf-8 -*-
 import os
 
-#tornado全局配置
+DEBUG = True
+
+XHEADERS = True
+
+# tornado全局配置
 TORNADO_CONF = {
     "static_path": "static",
     "xsrf_cookies": True,
-    "debug": True,
-    "xheaders": True,
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
     "template_path": os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates'),
-    #安全起见，可以定期生成新的cookie 秘钥，生成方法：
-    #base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
+    # 安全起见，可以定期生成新的cookie 秘钥，生成方法：
+    # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 }
 
 # ###########
-# 中间件  #
+# 中间件     #
 # ###########
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
@@ -76,10 +78,10 @@ CACHES = {
 
 
 #################
-#本地化翻译文件地址#
+# 本地化翻译文件地址#
 #################
 
-TRANSLATIONS = False  #是否开启国际化
+TRANSLATIONS = False  # 是否开启国际化
 TRANSLATIONS_CONF = {
     'translations_dir': os.path.join(os.path.dirname(__file__), 'translations'),
     'locale_default': 'zh_CN',
@@ -87,7 +89,7 @@ TRANSLATIONS_CONF = {
 }
 
 
-#白名单未开启，如需使用，请用元祖列出白名单ip
+# 白名单未开启，如需使用，请用元祖列出白名单ip
 WHITELIST = False
 #######
 # WHITELIST = (

@@ -6,38 +6,23 @@
 
 
 class MyMiddleware(object):
-    """
-    编写中间件需实现其中任何一个方法即可
-    中间件的执行流程中在请求阶段，call,request按照中间件的声明顺序执行，
-    在响应过程中，exception，response，endcall和render则是按声明顺序倒序执行）
-
-    :param do_next: 如果希望中间件继续下一个中间件方法的执行，则必须在结尾调用此方法，一般来说这是必须的
-    :clear: 如果希望以下的所有中间件流程终止，则在方法头部调用此方法，以清空中间件的执行队列
-            与next不同，clear会导致其余的中间件方法在该请求中**全部失效**，而不调用next()只会导致所有中间件的当前方法失效
-
-    """
-
     def process_init(self, application):
         """
         :param application: 应用程序对象，此方法在tornado启动时执行一次
         """
-        pass
 
     def process_call(self, request, clear):
         """
-        在请求进入application时调用，参数为请求对象，此时还未匹配路由
-        您不能在此方法内finish
+        在请求request对象创建时，参数为请求对象，此时还未匹配路由handler
         :param request: 请求对象
         """
 
-
     def process_request(self, handler, clear):
         """
-        匹配路由后，执行处理handler时调用
+        匹配路由后，执行处理handler时调用,**支持异步**
         :param handler: handler对象
-        支持异步
-        """
 
+        """
 
     def process_render(self, handler, clear, template_name, **kwargs):
         """
@@ -47,14 +32,13 @@ class MyMiddleware(object):
         :param kwargs: 模板参数
         """
 
-
     def process_response(self, handler, clear, chunk):
         """
         请求结束后响应时调用，此方法在render之后，finish之前执行，可以对chunk做最后的封装和处理
         :param handler: handler对象
-        :param chunk : 响应内容
+        :param chunk : 响应内容，chunk为携带响内容的list，你不可以直接对chunk赋值，
+            可以通过chunk[index]来改写响应内容，或再次执行handler.write()
         """
-
 
     def process_endcall(self, handler, clear):
         """
@@ -62,3 +46,12 @@ class MyMiddleware(object):
         :param handler: handler对象
         """
 
+    def process_exception(self, handler, clear, typ, value, tb):
+        """
+        请求过程引发异常时调用，你可以通过这个方法捕获在请求过程中的未捕获异常
+        如果没有中间件实现此方法，则调用tornado RequestHandler.log_exception方法。
+        :param handler: handler对象
+        :param typ: 等同RequestHandler.log_exception的参数，异常类型值和异常堆栈信息
+        :param value:异常值信息
+        :param tb:异常堆栈
+        """

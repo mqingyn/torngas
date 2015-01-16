@@ -1,29 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8  -*-
 """
-Description: signal from django
-SignalMiddleware提供在程序运行至中间件call,request,response,endcall四个阶段时触发信号的能力
+SignalMiddleware提供在程序运行至中间件call,request,response,endcall,render几个阶段时触发信号的能力
 
 """
-from torngas.dispatch import signals
+from torngas.signal import *
 
 
 class SignalMiddleware(object):
     def process_call(self, request, clear):
-        signals.call_started.send(sender=request.__class__)
-
+        call_started.send(sender=request.__class__, request=request)
 
     def process_request(self, handler, clear):
-        signals.handler_started.send(sender=handler.__class__)
-
+        handler_started.send(sender=handler.__class__, handler=handler)
 
     def process_response(self, handler, clear, chunk):
-        signals.handler_finished.send(sender=handler.__class__)
-
+        handler_response.send(sender=handler.__class__, handler=handler, chunk=chunk)
 
     def process_endcall(self, handler, clear):
-        signals.call_finished.send(sender=handler.__class__)
+        call_finished.send(sender=handler.__class__, handler=handler)
 
-
-if __name__ == '__main__':
-    pass
+    def process_render(self, handler, clear, template_name, **kwargs):
+        handler_render.send(sender=handler.__class__, handler=handler, template_name=template_name, kwargs=kwargs)

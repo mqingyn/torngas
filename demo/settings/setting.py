@@ -3,12 +3,17 @@
 import os
 
 PROJECT_PATH = os.path.dirname(os.path.dirname(__file__))
+
+# 启用调试模式
+DEBUG = False
+
+# 开启tornado xheaders
+XHEADERS = True
+
 # tornado全局配置
 TORNADO_CONF = {
     "static_path": "static",
     "xsrf_cookies": True,
-    "debug": True,
-    "xheaders": True,
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
     "template_path": os.path.join(PROJECT_PATH, 'templates'),
@@ -16,29 +21,31 @@ TORNADO_CONF = {
     # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 }
 
-
 # ###########
-# 中间件  #
+# 中间件     #
 # ###########
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
     'torngas.middleware.session.SessionMiddleware',
     'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
-
 )
+
 INSTALLED_APPS = (
     'helloworld',
 )
+
 # 全局modules配置
 COMMON_MODULES = (
     # 'module限定名',
 
 )
+
 # 路由modules，针对某个路由或某些路由起作用
 ROUTE_MODULES = {
     # '路由名称或path正则':['module限定名','!被排除的全局module限定名'],
     # eg: '^/user/login.*$':['utils.modules.LoginModule']
 }
+
 # ##########
 # 缓存配置 #
 # ##########
@@ -78,19 +85,15 @@ CACHES = {
     },
 }
 
-
 # ################
 # 本地化翻译文件地址#
 # ################
-
 TRANSLATIONS = False  # 是否开启国际化
 TRANSLATIONS_CONF = {
     'translations_dir': os.path.join(PROJECT_PATH, 'translations'),
     'locale_default': 'zh_CN',
     'use_accept_language': True
 }
-
-
 
 # 白名单未开启，如需使用，请用元祖列出白名单ip
 WHITELIST = False
@@ -168,10 +171,7 @@ LOGGER = {
     },
 }
 
-
-# #######
 IPV4_ONLY = True
-
 
 # 开启session支持
 SESSION = {
@@ -187,26 +187,24 @@ SESSION = {
     'session_version': 'EtdHjDO1'
 }
 
-
 # 配置模版引擎
 # 引入相应的TemplateLoader即可
 # 若使用自带的请给予None
 # 支持mako和jinja2
-#mako设置为torngas.template.mako_loader.MakoTemplateLoader
-#jinj2设置为torngas.template.jinja2_loader.Jinja2TemplateLoader
-#初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
+# mako设置为torngas.template.mako_loader.MakoTemplateLoader
+# jinj2设置为torngas.template.jinja2_loader.Jinja2TemplateLoader
+# 初始化参数请参照jinja的Environment或mako的TemplateLookup,不再详细给出
 TEMPLATE_CONFIG = {
     'template_engine': None,
-    #模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
-    'filesystem_checks': True,  #通用选项
-    'cache_directory': '../_tmpl_cache',  #模版编译文件目录,通用选项
-    'collection_size': 50,  #暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
-    'cache_size': 0,  #类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
+    # 模版路径由torngas.handler中commonhandler重写，无需指定，模版将存在于每个应用的根目录下
+    'filesystem_checks': True,  # 通用选项
+    'cache_directory': '../_tmpl_cache',  # 模版编译文件目录,通用选项
+    'collection_size': 50,  # 暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
+    'cache_size': 0,  # 类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
     'format_exceptions': False,  #格式化异常输出，mako专用
     'autoescape': False  #默认转义设定，jinja2专用
 
 }
-
 
 # 数据库连接字符串，
 # 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
@@ -236,8 +234,10 @@ DATABASE_CONNECTION = {
                         }]
     }
 }
+
 # 每个定时对db进行一次ping操作，防止mysql gone away
-PING_DB = 1200  # (s秒)
+PING_DB = 300  # (s秒)
+
 # sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
