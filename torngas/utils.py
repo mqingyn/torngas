@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8  -*-
-"""
-Created by qingyun.meng on 202014/8/28.
-Modify by: qingyun.meng
-Description: 
-"""
+
+import sys
 from tornado.util import import_object
 from tornado.concurrent import Future
-import sys
+from tornado import concurrent
+from tornado import ioloop
 
 try:
     import futures
@@ -375,4 +373,13 @@ class IterBetter:
 iterbetter = IterBetter
 
 
-
+def sleep(seconds):
+    """
+    async sleep .
+    yield sleep(5)
+    :param seconds:
+    :return:
+    """
+    future = concurrent.Future()
+    ioloop.IOLoop.current().call_later(seconds, lambda: future.set_result(None))
+    return future
