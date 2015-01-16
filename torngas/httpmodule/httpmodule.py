@@ -9,13 +9,13 @@ from torngas.logger import SysLogger
 from tornado import gen
 from torngas.exception import BaseError
 from . import BaseHttpModule
+
 try:
     from tornado.concurrent import is_future
 except ImportError:
     from torngas.utils import is_future
 
 EXCLUDE_PREFIX = '!'
-
 
 
 class HttpModuleMiddleware(object):
@@ -116,23 +116,30 @@ class HttpModuleMiddleware(object):
         # 路由级module载入
         r_modules = settings.ROUTE_MODULES
         if r_modules:
+            def choice_module_(m):
+                if m.startswith("%sall" % EXCLUDE_PREFIX):
+                    if c_modules:
+                        for cs in self.common_modules:
+                            cls_type = cs.__class__
+                            if cls_type not in non_modules:
+                                non_modules.append(cls_type)
+
+                elif m.startswith(EXCLUDE_PREFIX):
+                    import_m = import_object(m.lstrip(EXCLUDE_PREFIX))
+                    check_baseclass_(import_m)
+                    if import_m not in non_modules:
+                        non_modules.append(import_m)
+                else:
+                    import_m = import_object(m)
+                    check_baseclass_(import_m)
+                    inst_import_m = import_m()
+                    if inst_import_m not in modules_lst:
+                        modules_lst.append(inst_import_m)
+
             for name, r_mods in r_modules.items():
                 try:
                     modules_lst = []
                     non_modules = []
-
-                    def choice_module_(m):
-                        if m.startswith(EXCLUDE_PREFIX):
-                            import_m = import_object(m.lstrip(EXCLUDE_PREFIX))
-                            check_baseclass_(import_m)
-                            if import_m not in non_modules:
-                                non_modules.append(import_m)
-                        else:
-                            import_m = import_object(m)
-                            check_baseclass_(import_m)
-                            inst_import_m = import_m()
-                            if inst_import_m not in modules_lst:
-                                modules_lst.append(inst_import_m)
 
                     [choice_module_(m) for m in r_mods]
                     if non_modules:

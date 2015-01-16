@@ -31,7 +31,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
  	* [模板引擎](#user-content-模板引擎)
  	* [handler](#user-content-handler)
  	* [中间件](#user-content-中间件)
- 	* [路由处理器](#user-content-路由处理器)
+ 	* [HTTP处理器](#user-content-http处理器)
  	* [缓存](#user-content-缓存)
  	* [DB&ORM](#user-content-dborm)
  	* [线程池异步](#user-content-异步线程池)
@@ -342,19 +342,19 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	
 
 
-* ####路由处理器：
+* ####HTTP处理器：
 
-	中间件提供了对请求处理流程的干预能力，使得我们可以控制请求过程中的各个方面。但是我们无法从容的对特定请求的特定过程进行干预。路由处理器提供了路由级别的请求处理能力。
+	中间件提供了对请求处理流程的干预能力，使得我们可以控制请求过程中的各个方面。但是我们无法从容的对特定请求的特定过程进行干预。HTTP处理器提供了路由级别的请求处理能力。HTTP处理器分为两种： `全局处理器` 和 `路由处理器` 。
 	
-	需要在中间件中加入 `torngas.httpmodule.httpmodule.HttpModuleMiddleware` 启用路由处理功能。
+	你需要在中间件中加入 `torngas.httpmodule.httpmodule.HttpModuleMiddleware` 启用路由处理功能。
 
-	自定义路由处理模块需要继承自 `torngas.httpmodule.BaseHttpModule` ,并实现 `begin_request`， `begin_render` , `begin_response` , `complete_response` 中任意一个方法即可，方法行为和功能类似中间件，同样，
+	自定义HTTP处理器模块需要继承自 `torngas.httpmodule.BaseHttpModule` ,并实现 `begin_request`， `begin_render` , `begin_response` , `complete_response` 中任意一个方法即可，方法行为和功能类似中间件，同样，
 	`begin_request` 方法在tornado4.0以上版本支持异步调用。
 
-	路由处理器配置：
+	HTTP处理器配置：
 
 
-	* 全局路由处理器：通用路由处理器会处理所有请求的对应过程。行为等同于中间件，但是不同的是，在响应阶段，处理方法不同于中间件是倒序执行，而是**顺序执行**，同时需要注意的是，全局路由处理器总是优先于特定路由处理器之前执行。
+	* 全局处理器：通用路由处理器会处理所有请求的对应过程。行为等同于中间件，但是不同的是，在响应阶段，处理方法不同于中间件是倒序执行，而是**顺序执行**，同时需要注意的是，全局处理器总是优先于路由处理器之前执行。
 
 
 			COMMON_MODULES = ( 
@@ -362,7 +362,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 				'httpmodule.ipauth.ipblack',
 			)
 	
-	* 特定路由处理器：根据配置在具体的路由请求中使用，格式为 `'正则path或路由name':['module1','!module2',]`。
+	* 路由处理器：根据配置在具体的路由请求中使用，格式为 `'正则path或路由name':['module1','!module2',]`。
 
 			
 			ROUTE_MODULES = {
@@ -370,9 +370,18 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 			     'Index': ['!httpmodule.auth.AuthModule',]
 			}
 
-		特定路由处理器为一个字典，字典的键为需要匹配的路由的名称(定义urls时指定)，或路由path的正则表达式，如上例。
+		路由处理器为一个字典，字典的键为需要匹配的路由的名称(定义urls时指定)，或路由path的正则表达式，如上例。
 		值为处理该路由请求的模块。
-		在请求过程中，满足匹配条件的路由处理器将被在指定过程触发，根据模块实现的方法来进行相应的处理。 如果在配置模块的前面添加了 `!` 符号，将反选在`COMMON_MODULES`中同名的模块，那么在请求过程中，全局路由处理器将不再匹配的路由中执行。
+		在请求过程中，满足匹配条件的路由处理器将被在指定过程触发，根据模块实现的方法来进行相应的处理。 如果在配置模块的前面添加了 `!` 符号，将反选在`COMMON_MODULES`中同名的模块，那么在请求过程中，全局处理器将不再匹配的路由中执行。
+		
+		* 当你需要对某个路由禁用全部的COMMON_MODULES模块处理器时，你不需要写很多！，你只需要配置一条 `!all` 即可：
+			
+				ROUTE_MODULES = {
+				     '^/user/.*$':['httpmodule.loginmodule','!all',],
+				}
+			`!all` 将会禁用COMMON_MODULES定义的全部处理器。由于 `COMMON_MODULES` 总是优先于路由处理器顺序执行，通过`!all`可以让你在 `ROUTE_MODULES` 中个性化你的路由处理器执行顺序，而其他的路由处理器配置不受影响。
+
+			注： 在路由处理器配置中添加 `!` 符号的处理器，必须存在于 `COMMON_MODULES` 中，否则将引起异常。
 
 		如上实例中，请求名为Index 的路由将不执行 `COMMON_MODULES` 中配置的 `httpmodule.auth.AuthModule` 模块，请求满足 `^/user/.*$` 正则的路由不执行 `httpmodule.ipauth.ipblack` 模块。
 
