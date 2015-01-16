@@ -43,20 +43,15 @@ from functools import partial
 from tornado.util import import_object
 from tornado.log import gen_log
 from tornado import gen
-import copy
+from copy import copy
 
 try:
     from tornado.concurrent import is_future
 except ImportError:
-    from . import is_future
+    from ..utils import is_future
 
-_INIT_LIST = []
-_CALL_LIST = []
-_REQUEST_LIST = []
-_RENDER_LIST = []
-_RESPONSE_LIST = []
-_ENDCALL_LIST = []
-_EXCEPTION_LIST = []
+_INIT_LIST, _CALL_LIST, _REQUEST_LIST, _RENDER_LIST = [], [], [], []
+_RESPONSE_LIST, _ENDCALL_LIST, _EXCEPTION_LIST, = [], [], []
 _TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC = 1, 2, 3, 4, 5, 6, 7
 _TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
 
@@ -95,13 +90,12 @@ class Manager(object):
             self.register(midd_class)
 
     def set_request(self, request):
-        c = copy.copy
-        request.call_midds = c(_CALL_LIST)
-        request.request_midds = c(_REQUEST_LIST)
-        request.render_midds = c(_RENDER_LIST)
-        request.response_midds = c(_RESPONSE_LIST)
-        request.end_midds = c(_ENDCALL_LIST)
-        request.exc_midds = c(_EXCEPTION_LIST)
+        request.call_midds = copy(_CALL_LIST)
+        request.request_midds = copy(_REQUEST_LIST)
+        request.render_midds = copy(_RENDER_LIST)
+        request.response_midds = copy(_RESPONSE_LIST)
+        request.end_midds = copy(_ENDCALL_LIST)
+        request.exc_midds = copy(_EXCEPTION_LIST)
 
     def _get_func(self, request, m, func):
         try:
