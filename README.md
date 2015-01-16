@@ -2,7 +2,7 @@
 A simple app web framework based on tornado.
 
 
-version: 1.6.4
+version: `1.6.4`
 
 Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发框架，tornado是一个异步非阻塞的web框架，但是由于其小巧灵活，并没有一个统一，通用的
 应用层框架解决方案。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。tornado 建议使用4.0以上版本。
@@ -12,7 +12,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 ##**框架依赖**
 
 * future
-* tornado>=4.0
+* tornado
 
 ##**安装**
 
