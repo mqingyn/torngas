@@ -576,7 +576,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 		class MyService(object):
 
-			#通过装饰器来注册事件回调
+			# 通过装饰器来注册事件回调
 		    @receiver(call_started)
 		    def callback(**kwargs):
 		        """do something..."""
@@ -595,5 +595,5 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 			
 		my_event = Signal(providing_args=["args1"])
 
-		#事件触发
+		# 事件触发
 		my_event.send(sender=somesender.__class__, args1=arg)
