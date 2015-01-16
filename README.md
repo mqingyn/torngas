@@ -1,6 +1,7 @@
 #Torngas Web Framework
 A simple app web framework based on tornado.
 
+[![Build Status](https://travis-ci.org/mqingyn/torngas.svg?branch=master)](https://travis-ci.org/mqingyn/torngas)
 
 version: `1.6.5`
 
