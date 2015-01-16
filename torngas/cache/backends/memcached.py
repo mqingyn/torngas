@@ -79,7 +79,8 @@ class BaseMemcachedCache(BaseCache):
 
     def set(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         key = self.make_key(key, version=version)
-        self._cache.set(key, value, self.get_backend_timeout(timeout))
+        if not self._cache.set(key, value, self.get_backend_timeout(timeout)):
+            self._cache.delete(key)
 
     def delete(self, key, version=None):
         key = self.make_key(key, version=version)

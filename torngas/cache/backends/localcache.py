@@ -127,9 +127,3 @@ class LocMemCache(BaseCache):
                     self._cache.pop(key)
                     self._expire_info.pop(key)
 
-                    # For backwards compatibility
-
-
-# For backwards compatibility
-class CacheClass(LocMemCache):
-    pass
