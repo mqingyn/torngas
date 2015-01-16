@@ -2,7 +2,7 @@
 A simple app web framework based on tornado.
 
 
-version: 1.6.3
+version: 1.6.4
 
 Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发框架，tornado是一个异步非阻塞的web框架，但是由于其小巧灵活，并没有一个统一，通用的
 应用层框架解决方案。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。tornado 建议使用4.0以上版本。
@@ -374,12 +374,12 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		值为处理该路由请求的模块。
 		在请求过程中，满足匹配条件的路由处理器将被在指定过程触发，根据模块实现的方法来进行相应的处理。 如果在配置模块的前面添加了 `!` 符号，将反选在`COMMON_MODULES`中同名的模块，那么在请求过程中，全局处理器将不再匹配的路由中执行。
 		
-		* 当你需要对某个路由禁用全部的COMMON_MODULES模块处理器时，你不需要写很多！，你只需要配置一条 `!all` 即可：
+		* 当你需要对某个路由禁用全部的 `COMMON_MODULES` 模块处理器时，你不需要写很多！，你只需要配置一条 `!all` 即可：
 			
 				ROUTE_MODULES = {
 				     '^/user/.*$':['httpmodule.loginmodule','!all',],
 				}
-			`!all` 将会禁用COMMON_MODULES定义的全部处理器。由于 `COMMON_MODULES` 总是优先于路由处理器顺序执行，通过`!all`可以让你在 `ROUTE_MODULES` 中个性化你的路由处理器执行顺序，而其他的路由处理器配置不受影响。
+			`!all` 将会禁用 `COMMON_MODULES` 定义的全部处理器。由于 `COMMON_MODULES` 总是优先于路由处理器顺序执行，通过`!all`可以让你在 `ROUTE_MODULES` 中个性化你的路由处理器执行顺序，而其他的路由处理器配置不受影响。
 
 			注： 在路由处理器配置中添加 `!` 符号的处理器，必须存在于 `COMMON_MODULES` 中，否则将引起异常。
 
