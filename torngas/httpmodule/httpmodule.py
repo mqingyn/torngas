@@ -29,11 +29,9 @@ class HttpModuleMiddleware(object):
         try:
             def run_method_():
                 if method.__name__ == "begin_response":
-                    chunk = kwargs.pop("chunk__")
-                    return method(handler, clear, chunk)
+                    return method(handler, clear, kwargs.pop("chunk", None))
                 elif method.__name__ == "begin_render":
-                    template_name = kwargs.pop("template_name__")
-                    return method(handler, clear, template_name, **kwargs)
+                    return method(handler, clear, **kwargs)
                 elif method.__name__ == 'begin_request':
                     return method(handler, clear)
                 elif method.__name__ == 'complete_response':
@@ -180,11 +178,10 @@ class HttpModuleMiddleware(object):
         return self._do_all_execute(handler, clear, 'begin_request')
 
     def process_response(self, handler, clear, chunk):
-        return self._do_all_execute(handler, clear, 'begin_response', chunk__=chunk)
+        return self._do_all_execute(handler, clear, 'begin_response', chunk=chunk)
 
     def process_render(self, handler, clear, template_name, **kwargs):
-        kwargs['template_name__'] = template_name
-        return self._do_all_execute(handler, clear, 'begin_render', **kwargs)
+        return self._do_all_execute(handler, clear, 'begin_render', template_name=template_name, **kwargs)
 
     def process_endcall(self, handler, clear):
         return self._do_all_execute(handler, clear, 'complete_response')
