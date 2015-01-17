@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from torngas import Url, route
 
-u = Url('helloworld.handlers',abc='abc')
+u = Url('helloworld.handlers')
 urls = route(
-    u(name='Index', pattern=r'/', handler='main_handler.Main')
+    u(name='Index', pattern=r'/?', handler='main_handler.Main')
 )
 
