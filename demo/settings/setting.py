@@ -5,7 +5,7 @@ import os
 PROJECT_PATH = os.path.dirname(os.path.dirname(__file__))
 
 # 启用调试模式
-DEBUG = False
+DEBUG = True
 
 # 开启tornado xheaders
 XHEADERS = True
@@ -201,8 +201,8 @@ TEMPLATE_CONFIG = {
     'cache_directory': '../_tmpl_cache',  # 模版编译文件目录,通用选项
     'collection_size': 50,  # 暂存入内存的模版项，可以提高性能，mako选项,详情见mako文档
     'cache_size': 0,  # 类似于mako的collection_size，设定为-1为不清理缓存，0则每次都会重编译模板
-    'format_exceptions': False,  #格式化异常输出，mako专用
-    'autoescape': False  #默认转义设定，jinja2专用
+    'format_exceptions': False,  # 格式化异常输出，mako专用
+    'autoescape': False  # 默认转义设定，jinja2专用
 
 }
 
@@ -210,28 +210,27 @@ TEMPLATE_CONFIG = {
 # 元祖，每组为n个数据库连接，有且只有一个master，可配与不配slave
 DATABASE_CONNECTION = {
     'default': {
-        'connections': [{
-                            'ROLE': 'master',
-                            'DRIVER': 'mysql+mysqldb',
-                            'UID': 'root',
-                            'PASSWD': '',
-                            'HOST': '',
-                            'PORT': 3306,
-                            'DATABASE': '',
-                            'QUERY': {"charset": "utf8"}
-
-                        },
-                        {
-                            'ROLE': 'slave',
-                            'DRIVER': 'mysql+mysqldb',
-                            'UID': 'root',
-                            'PASSWD': '',
-                            'HOST': '',
-                            'PORT': 3306,
-                            'DATABASE': '',
-                            'QUERY': {"charset": "utf8"}
-
-                        }]
+        'connections': [
+            {
+                'ROLE': 'master',
+                'DRIVER': 'mysql+mysqldb',
+                'UID': 'root',
+                'PASSWD': '',
+                'HOST': '',
+                'PORT': 3306,
+                'DATABASE': 'test',
+                'QUERY': {"charset": "utf8"}
+            },
+            {
+                'ROLE': 'slave',
+                'DRIVER': 'mysql+mysqldb',
+                'UID': 'root',
+                'PASSWD': '',
+                'HOST': '',
+                'PORT': 3306,
+                'DATABASE': 'test',
+                'QUERY': {"charset": "utf8"}
+            }]
     }
 }
 
@@ -242,6 +241,7 @@ PING_DB = 300  # (s秒)
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
     'sqlalchemy.connect_args': {
+        # mysqldb connect args
         'connect_timeout': 3
     },
     'sqlalchemy.echo': False,

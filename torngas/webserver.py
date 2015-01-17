@@ -44,7 +44,7 @@ class Server(object):
                                            default_host='',
                                            transforms=None, wsgi=False,
                                            middlewares=settings.MIDDLEWARE_CLASSES,
-                                           **settings.TORNADO_CONF)
+                                           **tornado_conf)
         else:
             self.application = application
 

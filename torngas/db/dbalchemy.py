@@ -1,11 +1,10 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-基于sqlalchemy的数据库组件，提供全局连接，配置管理，主从库支持，目前仅支持单主多从
+基于sqlalchemy的数据库组件，提供全局连接，配置管理，主从库支持，目前支持单主多从
 connection config eg:
 DATABASE_CONNECTION = {
     'default': {
-        'kwargs': {'pool_recycle': 3600},
         'connections': [{
                             'ROLE': 'master',
                             'DRIVER': 'mysql+mysqldb',
@@ -41,7 +40,7 @@ from ..utils import string_types
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker, Query
 from sqlalchemy.engine import url
-from ..logger.client import SysLogger
+from ..logger.client import trace_logger
 from tornado.util import import_object
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from ..decorators.async_execute import async_execute
@@ -154,7 +153,7 @@ class DBConfigParser(object):
         try:
             config = settings.SQLALCHEMY_CONFIGURATION
         except ConfigError, ex:
-            SysLogger.warning("SQLALCHEMY_CONFIGURATION not found,using default sqlalchemy configuration")
+            trace_logger.warning("SQLALCHEMY_CONFIGURATION not found,using default sqlalchemy configuration")
             config = _BASE_SQLALCHEMY_CONFIGURATION
 
         poolclass_conf = _SQLALCHEMY_PREFIX + 'poolclass'
@@ -205,10 +204,7 @@ class _Connector(object):
 
 class BaseQuery(Query):
     def paginate(self, page, per_page=20, default=None):
-        """Returns `per_page` items from page `page`.  By default it will
-        abort with 404 if no items were found and the page was larger than
-        1.  This behavor can be disabled by setting `error_out` to `False`.
-
+        """Returns `per_page` items from page `page`.
         Returns an :class:`Pagination` object.
         """
         if page < 1:
@@ -284,9 +280,6 @@ class ConnBase(object):
         ping db ,to prevent mysql sql gone away
         :return:
         """
-        pass
-
-    def create_db(self, *args, **kwargs):
         pass
 
 
@@ -376,10 +369,18 @@ class SQLAlchemy(ConnBase):
                 slave.execute(ping)
                 slave.remove()
         except Exception, ex:
-            SysLogger.error('ping mysql error:' + ex.message)
+            trace_logger.error('ping mysql error:' + ex.message)
 
     def create_db(self):
+
+        if not self._master_engine.echo:
+            self._master_engine.echo = True
         Model.metadata.create_all(self._master_engine)
+
+    def drop_db(self):
+        if not self._master_engine.echo:
+            self._master_engine.echo = True
+        Model.metadata.drop_all(self._master_engine)
 
 
 def get_connector(conn_class_):
@@ -394,7 +395,6 @@ Connector = get_connector(SQLAlchemy)
 
 class Pagination(object):
     """
-    从flask-sqlalchemy弄下来的分页组件
     Internal helper class returned by :meth:`BaseQuery.paginate`.  You
     can also construct it from any other SQLAlchemy query object if you are
     working with other libraries.  Additionally it is possible to pass `None`
@@ -484,10 +484,10 @@ class Pagination(object):
         last = 0
         for num in xrange(1, self.pages + 1):
             if num <= left_edge or \
-                    (num > self.page - left_current - 1 and \
-                                 num < self.page + right_current) or \
+                    (num > self.page - left_current - 1 and
+                             num < self.page + right_current) or \
                             num > self.pages - right_edge:
                 if last + 1 != num:
                     yield None
-                yield num
-                last = num
+            yield num
+            last = num
