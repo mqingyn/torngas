@@ -6,8 +6,6 @@ A simple app web framework based on tornado.
 [![Supported Python versions](https://pypip.in/py_versions/torngas/badge.svg?style=flat)](https://pypi.python.org/pypi/torngas/)
 [![License](https://pypip.in/license/torngas/badge.svg?style=flat)](https://pypi.python.org/pypi/torngas/)
 [![Development Status](https://pypip.in/status/torngas/badge.svg?style=flat)](https://pypi.python.org/pypi/torngas/)
-
-
 [![Build Status](https://travis-ci.org/mqingyn/torngas.svg?branch=master)](https://travis-ci.org/mqingyn/torngas)
 
 Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发框架，tornado是一个异步非阻塞的web框架，但是由于其小巧灵活，并没有一个统一，通用的
