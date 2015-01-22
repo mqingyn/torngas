@@ -147,7 +147,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 	*version 1.6.7 add* :
 
-	`server.load_all` ：如果你希望控制一些细节，但是又不想写很多load_xxx() , `load_all()` 会是更好的选择。 
+	`server.load_all` ：如果你希望控制一些细节，但是又希望更简单的启动服务 , `load_all()` 会是更好的选择。 
 
 		serv = Server()
 		serv.load_all(application=MyApp,no_keep_alive=True,backlog=512)
