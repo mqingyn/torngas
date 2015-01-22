@@ -158,7 +158,9 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 	`parse_command`: Server对象的 `parse_command` 方法的作用等同于 tornado 中的 `parse_command_line` 同时为你初始化 log日志配置,你必须放在 `define` 语句之后调用，否则定义的参数将不起作用。
 		
+	>你可能注意到 `start` 方法，这个方法类似于ioloop.start ,同时在debug模式下打印一些基础启动信息。 `server_start` 还会帮你处理httpserver的加载。所以，当你使用server_start时，不需要在调用 `start`方法或 `ioloop.start()`。
 
+	>当你使用 `load_all` 来载入 `application` 和  `httpserver` 时，使用 `start` 是更好的选择 。
 		
 * ####app:
 	
