@@ -21,9 +21,11 @@ define("address", default='0.0.0.0', help='listen host,default:0.0.0.0', type=st
 
 
 class Server(object):
-    def __init__(self):
+    def __init__(self, ioloop=None):
         self.urls = []
         self.application = None
+        self.httpserver = None
+        self.ioloop = ioloop
 
     def load_application(self, application=None):
         """
@@ -82,8 +84,7 @@ class Server(object):
         self.urls = urls
         return self.urls
 
-
-    def server_start(self, sockets=None, **kwargs):
+    def load_httpserver(self, sockets=None, **kwargs):
         if not sockets:
             from tornado.netutil import bind_sockets
 
@@ -101,9 +102,20 @@ class Server(object):
         http_server = tornado.httpserver.HTTPServer(self.application, xheaders=xheaders, **kwargs)
 
         http_server.add_sockets(sockets)
+        self.httpserver = http_server
+        return self.httpserver
+
+    def server_start(self, sockets=None, **kwargs):
+        self.load_httpserver(sockets, **kwargs)
+        self.start()
+
+    def start(self):
         self.print_settings_info()
 
-        tornado.ioloop.IOLoop.instance().start()
+        if not self.ioloop:
+            self.ioloop = tornado.ioloop.IOLoop.instance()
+
+        self.ioloop.start()
 
 
     def print_settings_info(self):
