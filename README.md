@@ -98,6 +98,11 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		
 		project_path = settings.PROJECT_PATH
 
+	*version 1.6.7 add* :
+	
+	`DEBUG`: 控制应用是否处于debug状态，等同于 tornado的debug参数。  
+	`XHEADERS`： 控制是否开启httpserver的 xheaders。你不用再额外传递一个xheader参数。
+
 * ####webserver:
 	
 	最简单的server启动方式：
@@ -112,14 +117,52 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		define("your_arg", default='default', help='your command args', type=str)
 		
 		serv = Server()
-		serv.parse_command()
+		serv.parse_command() #你必须调用parse_command()来处理tornado options,否则无法加载配置
 		serv.load_urls()
     	serv.load_application(application=None) # 或根据你的需求自定义Application
     	serv.server_start(sockets=None, **kwargs)
+
+	很多情况下，我们希望对Application对象进行个性化的处理，通常，我们习惯于实现一个Application子类：
+
+	*version 1.6.7 add*:
+
+		from torngas.application import Application
+	
+		class MyApp(Application):
+			"""your custom code"""
+
+		Server().load_application(MyApp)
+		...
+
+	`load_application` 接收一个 `torngas.applicatoin.Application` 类实例或其子类
+
+	>如果要使用torngas的全部功能，你的自定义 `application` 不能直接继承于 `tornado.web.Application` 。
+
+
+		
+
+	>Server对象的 `server_start`，`load_all` 以及 `torngas.run` 支持自定义的 `httpserver` 参数
+	>        
+	>        Server().server_start(no_keep_alive=True,backlog=512)
+
+	*version 1.6.7 add* :
+
+	`server.load_all` ：如果你希望控制一些细节，但是又不想写很多load_xxx() , `load_all()` 会是更好的选择。 
+
+		serv = Server()
+		serv.load_all(application=MyApp,no_keep_alive=True,backlog=512)
+		serv.start()
+	
+	>与 `server_start` 不同的是，load_all，以及 `torngas.run` 会帮你自动 `parse_command`,处理tornado.options ,所以不需要手动调用它。其他方式你需要手动调用 `parse_command` 。
+
+
+	`parse_command`: Server对象的 `parse_command` 方法的作用等同于 tornado 中的 `parse_command_line` 同时为你初始化 log日志配置,你必须放在 `define` 语句之后调用，否则定义的参数将不起作用。
+		
+
 		
 * ####app:
 	
-	如上述目录结构，您可以在应用根目录下创建多个app模块，假如你建立了应用myapp1，应用目录中**必须**包含 `urls.py`。
+	如顶述目录结构，您可以在应用根目录下创建多个app模块，假如你建立了应用myapp1，应用目录中**必须**包含 `urls.py`。
 	同时，要加载你的应用，你需要在配置文件中 `INSTALLED_APPS` 元组中增加你的app配置，如你的应用根目录app下存在myapp1，myapp2，则需：
 
 		INSTALLED_APPS = (
@@ -205,6 +248,33 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		SysLogger.error("this is a error.")
 
 	日志配置中的日志HANDLER默认为 `torngas.logger.UsePortRotatingFileHandler` ,在多进程状态下，日志文件名将自动按照端口号区分，通过`LOGGER_CONFIG` 下 `root_dir` 来决定日志目录，若日志`HANDLERS`中filename给定绝对路径或相对路径，则忽略 root_dir 。
+	
+	你可以自定义你的日志配置，或新增日志，你只需要在LOGGER配置中加入类似段落：
+
+		    'torngas.tracelog': {
+		        "OPEN": True,
+		        "LEVEL": "ERROR",
+		        "HANDLERS": [{
+				                "module": "torngas.logger.UsePortRotatingFileHandler",#自动区分tornado端口号
+				                "filename": "torngas_trace_log.log",
+				                "when": "midnight",
+				                "encoding": "utf-8",
+				                "delay": False,
+				                "backupCount": 20,
+								"level":"ERROR"
+				            }]
+	
+	
+	  日志配置为键值对，`'logger_name': {}` 的格式。键为日志logger名, 值为配置字典。
+
+	 `OPEN`: 控制日志是否开启  
+	 `LEVEL`: 日志级别  
+	 `HANDLERS`: 为日志handler列表，支持配置多个日志handler，`module` 为handler类限定名，`level` 为此handler的记录级别。
+
+	 >你可以为每一个日志logger定义多个不同级别的 handler。
+	 
+	 除此之外其他的handler构造参数通过字典传入。如上的 when , delay 等。
+	
 
 * ####模板引擎：
 
@@ -386,7 +456,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 				}
 			`!all` 将会禁用 `COMMON_MODULES` 定义的全部处理器。由于 `COMMON_MODULES` 总是优先于路由处理器顺序执行，通过`!all`可以让你在 `ROUTE_MODULES` 中个性化你的路由处理器执行顺序，而其他的路由处理器配置不受影响。
 
-			注： 在路由处理器配置中添加 `!` 符号的处理器，必须存在于 `COMMON_MODULES` 中，否则将引起异常。
+			>注： 在路由处理器配置中添加 `!` 符号的处理器，必须存在于 `COMMON_MODULES` 中，否则将引起异常。
 
 		如上实例中，请求名为Index 的路由将不执行 `COMMON_MODULES` 中配置的 `httpmodule.auth.AuthModule` 模块，请求满足 `^/user/.*$` 正则的路由不执行 `httpmodule.ipauth.ipblack` 模块。
 
@@ -494,17 +564,17 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 	* 查询：如上，Model对象的`Q`属性提供一个默认简单的查询对象，你可以像这样 `User.Q.filter(User.name='jack').all()` 。
 	也可以像这样：`User.session.query(User)` 使用session属性创建查询对象。
 	
-	当存在主从数据库时，执行增删改操作需要指明使用主库的会话对象： `session = User.session.using_master()`
+	>当存在主从数据库时，执行增删改操作需要指明使用主库的会话对象： `session = User.session.using_master()`
 
 	* 分页：
 
-		query = User.Q.all()
-        pagelist_obj = query.paginate(page=1, per_page=10, default=None)
-		total = pagelist_obj.total
-		page = pagelist_obj.page
-		items = pagelist_obj.items
+			query = User.Q.all()  
+	        pagelist_obj = query.paginate(page=1, per_page=10, default=None)  
+			total = pagelist_obj.total  
+			page = pagelist_obj.page  
+			items = pagelist_obj.items
 
-	使用Sqlalchemy必须在配置中间件中加入：**torngas.middleware.dbalchemy.DBAlchemyMiddleware**
+	>使用Sqlalchemy必须在配置中间件中加入：**torngas.middleware.dbalchemy.DBAlchemyMiddleware**
 		
 
 * ####异步线程池
