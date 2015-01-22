@@ -106,14 +106,17 @@ class Server(object):
         return self.httpserver
 
     def server_start(self, sockets=None, **kwargs):
-        self.load_httpserver(sockets, **kwargs)
+        if not self.httpserver:
+            self.load_httpserver(sockets, **kwargs)
+
         self.start()
 
     def load_all(self, application=None, sockets=None, **kwargs):
         self.parse_command()
         self.load_urls()
         self.load_application(application)
-        self.load_httpserver(sockets, **kwargs)
+        if not self.httpserver:
+            self.load_httpserver(sockets, **kwargs)
 
 
     def start(self):
