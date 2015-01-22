@@ -109,6 +109,13 @@ class Server(object):
         self.load_httpserver(sockets, **kwargs)
         self.start()
 
+    def load_all(self, application=None, sockets=None, **kwargs):
+        self.parse_command()
+        self.load_urls()
+        self.load_application(application)
+        self.load_httpserver(sockets, **kwargs)
+
+
     def start(self):
         self.print_settings_info()
 
@@ -140,7 +147,5 @@ class Server(object):
 
 def run(application=None, sockets=None, **kwargs):
     server = Server()
-    server.parse_command()
-    server.load_urls()
-    server.load_application(application)
-    server.server_start(sockets=None, **kwargs)
+    server.load_all(application=None, sockets=None, **kwargs)
+    server.start()
