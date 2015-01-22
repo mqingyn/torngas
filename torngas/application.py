@@ -3,7 +3,7 @@
 import traceback
 from tornado import web
 from tornado import version_info
-from logger.client import trace_logger
+from logger import SysLogger
 from torngas.middleware.manager import Manager
 from tornado import httputil
 
@@ -38,7 +38,7 @@ class Application(web.Application):
                         result = this.middleware_fac.run_call(self)
                         this.middleware_fac.catch_middleware_exc(result)
                     except Exception:
-                        trace_logger.error(traceback.format_exc())
+                        SysLogger.trace_logger.error(traceback.format_exc())
 
             httputil.HTTPServerRequest = HttpRequest
 
@@ -50,5 +50,5 @@ class Application(web.Application):
                 return web.Application.__call__(self, request)
 
             except Exception, e:
-                trace_logger.error(e)
+                SysLogger.trace_logger.error(e)
                 raise

@@ -8,8 +8,10 @@ import tornado.options
 import tornado.web
 from tornado.options import define, options, parse_command_line
 from tornado.util import import_object
-from torngas.exception import ConfigError, BaseError
+from torngas.exception import ConfigError, ArgumentError, UrlError
+from torngas.application import Application
 from settings_manager import settings
+from torngas.logger import SysLogger
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -24,7 +26,11 @@ class Server(object):
         self.application = None
 
     def load_application(self, application=None):
+        """
 
+        :type application: torngas.application.Application subclass or instance
+        :return:
+        """
         if settings.TRANSLATIONS:
             try:
                 from tornado import locale
@@ -34,24 +40,36 @@ class Server(object):
                 warnings.warn('locale dir load failure,maybe your config file is not set correctly.')
 
         if not application:
-            if not self.urls:
-                raise BaseError("urls not found.")
-            from torngas.application import Application
-
-            tornado_conf = settings.TORNADO_CONF
-            tornado_conf['debug'] = settings.DEBUG
-            self.application = Application(handlers=self.urls,
-                                           default_host='',
-                                           transforms=None, wsgi=False,
-                                           middlewares=settings.MIDDLEWARE_CLASSES,
-                                           **tornado_conf)
-        else:
+            self._install_application(application)
+        elif isinstance(application, Application):
             self.application = application
+        elif issubclass(application, Application):
+            self._install_application(application)
+        else:
+            raise ArgumentError('need torngas.application.Application instance object or subclass.')
 
         tmpl = settings.TEMPLATE_CONFIG.template_engine
         self.application.tmpl = import_object(tmpl) if tmpl else None
 
         return self.application
+
+    def _install_application(self, application):
+        if not self.urls:
+            raise UrlError("urls not found.")
+        if application:
+            app_class = application
+        else:
+            app_class = Application
+
+        tornado_conf = settings.TORNADO_CONF
+
+        tornado_conf['debug'] = settings.DEBUG
+        self.application = app_class(handlers=self.urls,
+                                     default_host='',
+                                     transforms=None, wsgi=False,
+                                     middlewares=settings.MIDDLEWARE_CLASSES,
+                                     **tornado_conf)
+
 
     def load_urls(self):
         urls = []
@@ -64,8 +82,8 @@ class Server(object):
         self.urls = urls
         return self.urls
 
-    def server_start(self, sockets=None, **kwargs):
 
+    def server_start(self, sockets=None, **kwargs):
         if not sockets:
             from tornado.netutil import bind_sockets
 
@@ -87,8 +105,8 @@ class Server(object):
 
         tornado.ioloop.IOLoop.instance().start()
 
-    def print_settings_info(self):
 
+    def print_settings_info(self):
         if settings.DEBUG:
             print 'tornado version: %s' % tornado.version
             print 'load middleware:'
@@ -102,8 +120,10 @@ class Server(object):
             print 'template engine: %s' % settings.TEMPLATE_CONFIG.template_engine
             print 'server started. development server at http://%s:%s/' % (options.address, options.port)
 
+
     def parse_command(self):
         parse_command_line()
+        SysLogger.parse_logger()
 
 
 def run(application=None, sockets=None, **kwargs):

@@ -9,10 +9,66 @@ from ..settings_manager import settings
 from tornado.util import import_object
 from tornado.options import options
 
-if settings.DEBUG:
-    DEFAULT_FORMAT = LogFormatter.DEFAULT_FORMAT
-else:
-    DEFAULT_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
+DEFAULT_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
+DEFAULT_LOGGER_CONFIG = {
+    'tornado': {
+        "OPEN": True,
+        "LEVEL": "INFO",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "tornado.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 10,
+            }
+        ]
+    },
+    'torngas.tracelog': {
+        "OPEN": True,
+        "LEVEL": "ERROR",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "torngas_trace_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 20,
+            }
+        ]
+    },
+    'torngas.accesslog': {
+        "OPEN": True,
+        "LEVEL": "INFO",
+        "FORMATTER": '%(message)s',
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "torngas_access_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": False,
+                "backupCount": 20,
+            }
+        ]
+    },
+    'torngas.infolog': {
+        "OPEN": True,
+        "LEVEL": "INFO",
+        "HANDLERS": [
+            {
+                "module": "torngas.logger.UsePortRotatingFileHandler",
+                "filename": "torngas_info_log.log",
+                "when": "midnight",
+                "encoding": "utf-8",
+                "delay": True,
+                "backupCount": 10,
+            }
+        ]
+    },
+}
 
 
 class CustomRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
@@ -36,12 +92,16 @@ class UsePortRotatingFileHandler(CustomRotatingFileHandler):
         super(UsePortRotatingFileHandler, self).__init__(filename, when, interval, backupCount, encoding, delay,
                                                          utc)
 
+
 class LoggerLoader(object):
     loggers = {}
 
     @classmethod
     def load_logger(cls):
-        log_config = settings.LOGGER
+        log_config = DEFAULT_LOGGER_CONFIG
+        if 'LOGGER' in settings:
+            log_config.update(settings.LOGGER)
+
         for k, v in log_config.items():
             is_open = v.get('OPEN')
             logger = logging.getLogger(k)
@@ -71,6 +131,10 @@ class LoggerLoader(object):
 
     @classmethod
     def load_handler(cls, logger, log_conf):
+        global DEFAULT_FORMAT
+        if settings.DEBUG:
+            DEFAULT_FORMAT = LogFormatter.DEFAULT_FORMAT
+
         for handl in log_conf['HANDLERS']:
             module = handl.pop("module", None)
             level = handl.pop("level", None)
