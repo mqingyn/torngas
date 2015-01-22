@@ -330,7 +330,8 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 	我们可以参考这张图来理解torngas的中间件设计。torngas中间件遵循了类似于Django中间件的设计，但因为框架本身的差异性，torngas中间件
 	采用对RequestHandler执行流程中插入hook的方式，中间件默认没有返回值，你可以在需要的请求阶段对请求对象(request或handler)进行处理。
-	*注：要使用中间件功能，你的handler必须继承自 `torngas.handler.WebHandler` 或 `torngas.handler.ApiHandler`
+	
+	>*注：要使用中间件功能，你的handler必须继承自 `torngas.handler.WebHandler` 或 `torngas.handler.ApiHandler`
 
 
 	自定义中间件：
@@ -579,7 +580,9 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * ####异步线程池
 
-	tornado本身是异步单线程单进程框架，这样当遇到使用mysql的慢查询时，就会阻塞进程。torngas提供一个简单的方式来用线程池包装同步方法。注：新版tornado中内置了 `concurrent.run_on_executor` 装饰器，可提供同样的功能,torngas提供  `torngas.decorators.async_execute` 来方便使用线程池来异步化你的同步方法。
+	tornado本身是异步单线程单进程框架，这样当遇到使用mysql的慢查询时，就会阻塞进程。torngas提供一个简单的方式来用线程池包装同步方法。
+
+	>注：新版tornado中内置了 `concurrent.run_on_executor` 装饰器，可提供同样的功能,torngas提供  `torngas.decorators.async_execute` 来方便使用线程池来异步化你的同步方法。
 
 			from torngas.decorators.async_execute import async_execute
 			class Test(Base):

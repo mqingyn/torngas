@@ -3,7 +3,7 @@
 import os
 from tornado.options import define, options
 from torngas.webserver import Server
-
+from tornado.ioloop import IOLoop
 define("runmode", default='runserver', help='run mode, runserver|syncdb', type=str)
 
 os.environ.setdefault('TORNGAS_APP_SETTINGS', 'settings.setting')
@@ -16,7 +16,7 @@ if __name__ == '__main__':
      run()
     """
 
-    server = Server()
+    server = Server(IOLoop.instance())
     server.parse_command()
 
     if options.runmode == 'syncdb':
@@ -26,6 +26,8 @@ if __name__ == '__main__':
     elif options.runmode == 'runserver':
         server.load_urls()
         server.load_application()
-        server.server_start()
+        server.load_httpserver()
+        server.start()
+        # server.server_start()
     else:
         exit(0)
