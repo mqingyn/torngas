@@ -40,7 +40,7 @@ from ..utils import string_types
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import scoped_session, sessionmaker, Query
 from sqlalchemy.engine import url
-from ..logger.client import trace_logger
+from ..logger import SysLogger
 from tornado.util import import_object
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from ..decorators.async_execute import async_execute
@@ -153,7 +153,7 @@ class DBConfigParser(object):
         try:
             config = settings.SQLALCHEMY_CONFIGURATION
         except ConfigError, ex:
-            trace_logger.warning("SQLALCHEMY_CONFIGURATION not found,using default sqlalchemy configuration")
+            SysLogger.warning("SQLALCHEMY_CONFIGURATION not found,using default sqlalchemy configuration")
             config = _BASE_SQLALCHEMY_CONFIGURATION
 
         poolclass_conf = _SQLALCHEMY_PREFIX + 'poolclass'
@@ -369,7 +369,7 @@ class SQLAlchemy(ConnBase):
                 slave.execute(ping)
                 slave.remove()
         except Exception, ex:
-            trace_logger.error('ping mysql error:' + ex.message)
+            SysLogger.error('ping mysql error:' + ex.message)
 
     def create_db(self):
 

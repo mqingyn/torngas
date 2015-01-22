@@ -10,7 +10,7 @@ from tornado.ioloop import PeriodicCallback
 from sqlalchemy import exc
 from sqlalchemy import event
 from sqlalchemy.pool import Pool
-from ..logger.client import trace_logger
+from ..logger import SysLogger
 from ..settings_manager import settings
 
 connection = Connector.conn_pool
@@ -25,7 +25,7 @@ def connection_event():
         try:
             cursor.execute("SELECT 1")
         except:
-            trace_logger.error('database pool has gone away')
+            SysLogger.error('database pool has gone away')
             raise exc.DisconnectionError()
         cursor.close()
 
