@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 __author__ = 'mqingyn'
-__version__ = '1.6.6'
+__version__ = '1.6.7'
 
 version = tuple(map(int, __version__.split('.')))
 
