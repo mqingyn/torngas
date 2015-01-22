@@ -4,13 +4,6 @@ import os
 from tornado.options import define, options
 from torngas.webserver import Server
 
-from torngas.application import Application
-
-
-class My(Application):
-    pass
-
-
 define("runmode", default='runserver', help='run mode, runserver|syncdb', type=str)
 
 os.environ.setdefault('TORNGAS_APP_SETTINGS', 'settings.setting')
@@ -32,7 +25,7 @@ if __name__ == '__main__':
         syncdb()
     elif options.runmode == 'runserver':
         server.load_urls()
-        server.load_application(My)
+        server.load_application()
         server.server_start()
     else:
         exit(0)
