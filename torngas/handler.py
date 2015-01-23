@@ -6,8 +6,8 @@ common handler,webhandler,apihandler
 """
 import json
 from tornado.web import RequestHandler
-from torngas.mixins.handler import HandlerMixin
-from torngas.mixins.exception import UncaughtExceptionMixin
+from mixins.handler import HandlerMixin
+from mixins.exception import UncaughtExceptionMixin
 from exception import HttpBadRequestError, Http404
 
 

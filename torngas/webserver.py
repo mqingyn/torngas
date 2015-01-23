@@ -8,11 +8,11 @@ import tornado.options
 import tornado.web
 from tornado.options import define, options, parse_command_line
 from tornado.util import import_object
-from torngas.exception import ConfigError, ArgumentError, UrlError
-from torngas.application import Application
+from exception import ConfigError, ArgumentError, UrlError
+from application import Application
 from settings_manager import settings
-from torngas.logger import SysLogger
-from torngas.handler import ErrorHandler
+from logger import SysLogger
+from handler import ErrorHandler
 reload(sys)
 sys.setdefaultencoding('utf-8')
 define("port", default=8000, help="run server on it", type=int)

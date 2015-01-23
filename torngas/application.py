@@ -4,7 +4,7 @@ import traceback
 from tornado import web
 from tornado import version_info
 from logger import SysLogger
-from torngas.middleware.manager import Manager
+from middleware.manager import Manager
 from tornado import httputil
 
 
