@@ -26,6 +26,7 @@ class Server(object):
         self.application = None
         self.httpserver = None
         self.ioloop = ioloop
+        self.is_parselogger = False
 
     def load_application(self, application=None):
         """
@@ -120,6 +121,9 @@ class Server(object):
 
 
     def start(self):
+        if not self.is_parselogger:
+            self.parse_logger()
+
         self.print_settings_info()
 
         if not self.ioloop:
@@ -145,7 +149,11 @@ class Server(object):
 
     def parse_command(self):
         parse_command_line()
+        self.parse_logger()
+
+    def parse_logger(self):
         SysLogger.parse_logger()
+        self.is_parselogger = True
 
 
 def run(application=None, sockets=None, **kwargs):
