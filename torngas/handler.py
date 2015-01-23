@@ -21,9 +21,8 @@ class WebHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
 
 
 class ApiHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
-
-    def get_format(self):
-        format = self.get_argument('format', None)
+    def get_format(self, params_name="format"):
+        format = self.get_argument(params_name, None)
         if not format:
             accept = self.request.headers.get('Accept')
             if accept:
