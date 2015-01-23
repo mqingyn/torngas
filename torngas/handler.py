@@ -34,14 +34,16 @@ class ApiHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
             format = format.lower()
         return format or 'json'
 
-    def write_api(self, obj=None, nofail=False, ensure_ascii=True):
+    def write_api(self, obj=None, nofail=False, fmt=None, ensure_ascii=True):
         if not obj:
             obj = {}
-        format = self.get_format()
-        if format == 'json':
+        if not fmt:
+            fmt = self.get_format()
+
+        if fmt == 'json':
             self.set_header("Content-Type", "application/json; charset=UTF-8")
             self.write(json.dumps(obj, ensure_ascii=ensure_ascii))
-        elif format == 'jsonp':
+        elif fmt == 'jsonp':
             self.set_header("Content-Type", "application/javascript")
             callback = self.get_argument('callback', 'callback')
             self.write('%s(%s);' % (callback, json.dumps(obj, ensure_ascii=ensure_ascii)))
