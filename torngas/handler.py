@@ -34,7 +34,7 @@ class ApiHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
             format = format.lower()
         return format or 'json'
 
-    def write_api(self, obj=None, nofail=False, fmt=None, ensure_ascii=True):
+    def write_api(self, obj=None, nofail=False, ensure_ascii=True, fmt=None):
         if not obj:
             obj = {}
         if not fmt:
