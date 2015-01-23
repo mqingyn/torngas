@@ -111,7 +111,7 @@ LOGGER = {
         "LEVEL": "INFO",
         "HANDLERS": [
             {
-                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "module": "torngas.logger.UsePortRotatingFileHandler",
                 "filename": "tornado.log",
                 "when": "midnight",
                 "encoding": "utf-8",
@@ -125,11 +125,11 @@ LOGGER = {
         "LEVEL": "ERROR",
         "HANDLERS": [
             {
-                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "module": "torngas.logger.UsePortRotatingFileHandler",
                 "filename": "torngas_trace_log.log",
                 "when": "midnight",
                 "encoding": "utf-8",
-                "delay": False,
+                "delay": True,
                 "backupCount": 20,
             }
         ]
@@ -140,7 +140,7 @@ LOGGER = {
         "FORMATTER": '%(message)s',
         "HANDLERS": [
             {
-                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "module": "torngas.logger.UsePortRotatingFileHandler",
                 "filename": "torngas_access_log.log",
                 "when": "midnight",
                 "encoding": "utf-8",
@@ -154,7 +154,7 @@ LOGGER = {
         "LEVEL": "INFO",
         "HANDLERS": [
             {
-                "module": "torngas.logger.loggers.UsePortRotatingFileHandler",
+                "module": "torngas.logger.UsePortRotatingFileHandler",
                 "filename": "torngas_info_log.log",
                 "when": "midnight",
                 "encoding": "utf-8",

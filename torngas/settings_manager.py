@@ -29,20 +29,23 @@ class _Settings(object):
 
     @classmethod
     def settings_object(cls):
+
         if not hasattr(cls, '_sett'):
+            cls._sett = global_settings
             try:
                 sett_obj = import_object(options.settings)
-                cls._sett = sett_obj
+                cls._sett.__dict__.update(sett_obj.__dict__)
             except AttributeError:
                 if os.environ.get(SETTINGS_MODULE_ENVIRON, None):
-                    cls._sett = import_object(os.environ[SETTINGS_MODULE_ENVIRON])
+                    sett_obj = import_object(os.environ[SETTINGS_MODULE_ENVIRON])
+                    cls._sett.__dict__.update(sett_obj.__dict__)
                 else:
                     raise ConfigError(
                         'tornado.options not have "settings",You may try to use settings before "define settings module"')
             except ImportError:
                 cls._sett = global_settings
                 warnings.warn(
-                    'settings file import error, using global_settings.')
+                    'settings file import error.')
 
         return cls._sett
 

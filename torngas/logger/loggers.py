@@ -8,67 +8,9 @@ from tornado.log import LogFormatter
 from ..settings_manager import settings
 from tornado.util import import_object
 from tornado.options import options
-
+from torngas.global_settings import LOGGER
 DEFAULT_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
-DEFAULT_LOGGER_CONFIG = {
-    'tornado': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "tornado.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
-    },
-    'torngas.tracelog': {
-        "OPEN": True,
-        "LEVEL": "ERROR",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_trace_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 20,
-            }
-        ]
-    },
-    'torngas.accesslog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "FORMATTER": '%(message)s',
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_access_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": False,
-                "backupCount": 20,
-            }
-        ]
-    },
-    'torngas.infolog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_info_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
-    },
-}
+
 
 
 class CustomRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
@@ -98,7 +40,7 @@ class LoggerLoader(object):
 
     @classmethod
     def load_logger(cls):
-        log_config = DEFAULT_LOGGER_CONFIG
+        log_config = LOGGER
         if 'LOGGER' in settings:
             log_config.update(settings.LOGGER)
 
