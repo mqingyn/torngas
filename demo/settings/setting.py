@@ -17,6 +17,7 @@ TORNADO_CONF = {
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
     "template_path": os.path.join(PROJECT_PATH, 'templates'),
+    "default_handler_class":'torngas.handler.ErrorHandler',
     # 安全起见，可以定期生成新的cookie 秘钥，生成方法：
     # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 }

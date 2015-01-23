@@ -12,7 +12,7 @@ from torngas.exception import ConfigError, ArgumentError, UrlError
 from torngas.application import Application
 from settings_manager import settings
 from torngas.logger import SysLogger
-
+from torngas.handler import ErrorHandler
 reload(sys)
 sys.setdefaultencoding('utf-8')
 define("port", default=8000, help="run server on it", type=int)
@@ -65,6 +65,12 @@ class Server(object):
             app_class = Application
 
         tornado_conf = settings.TORNADO_CONF
+        if 'default_handler_class' in tornado_conf and \
+                isinstance(tornado_conf['default_handler_class'], basestring):
+            tornado_conf['default_handler_class'] = import_object(tornado_conf['default_handler_class'])
+
+        else:
+            tornado_conf['default_handler_class'] = ErrorHandler
 
         tornado_conf['debug'] = settings.DEBUG
         self.application = app_class(handlers=self.urls,

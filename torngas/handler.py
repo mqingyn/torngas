@@ -5,11 +5,9 @@ common handler,webhandler,apihandler
 要获得torngas的中间件等特性需继承这些handler
 """
 import json
-import tornado.web
-from tornado.web import RequestHandler, HTTPError
+from tornado.web import RequestHandler
 from torngas.mixins.handler import HandlerMixin
 from torngas.mixins.exception import UncaughtExceptionMixin
-from torngas.settings_manager import settings
 from exception import HttpBadRequestError, Http404
 
 
@@ -22,7 +20,8 @@ class WebHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
             return loader(template_path)
 
 
-class ApiHandler(HandlerMixin, RequestHandler):
+class ApiHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
+
     def get_format(self):
         format = self.get_argument('format', None)
         if not format:
@@ -60,7 +59,3 @@ class ErrorHandler(UncaughtExceptionMixin, RequestHandler):
     def prepare(self):
         super(ErrorHandler, self).prepare()
         raise Http404()
-
-
-if not settings.TORNADO_CONF.get('default_handler_class', None):
-    tornado.web.ErrorHandler = ErrorHandler

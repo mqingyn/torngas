@@ -26,6 +26,9 @@ class UncaughtExceptionMixin(object):
                 return ''
 
         if not self.application.settings.get('debug', False):
+            if hasattr(self, 'exception_response'):
+                # 如果handler存在此属性，将返回属性内容
+                return self.exception_response
             full_message = kwargs.get('exception', None)
             if not full_message or unicode(full_message) == '':
                 full_message = 'Server error.'
