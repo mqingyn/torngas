@@ -172,10 +172,11 @@ class RedisClient(CacheClient):
     @property
     def connection_pool_class_kwargs(self):
         default = {
-            'retry_on_timeout': True,
+            'retry_on_timeout': False,
             'socket_keepalive': None,
             'socket_connect_timeout': 2,
-            'socket_timeout': 5
+            'socket_timeout': 3,
+            'max_connections': 2 ** 10 * 10
         }
         kw = self.options.get('POOL_KWARGS', {})
         default.update(kw)
