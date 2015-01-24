@@ -206,7 +206,7 @@ class RedisClient(CacheClient):
             mod = import_object(mod_path)
             parser_class = getattr(mod, cls_name)
         except (AttributeError, ImportError):
-            raise ConfigError("Could not find parser class '%s'" % parser_class)
+            raise ConfigError("Could not find parser class '%s'" % cls)
         return parser_class
 
     def __getstate__(self):
