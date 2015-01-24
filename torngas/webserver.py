@@ -163,5 +163,5 @@ class Server(object):
 
 def run(application=None, sockets=None, **kwargs):
     server = Server()
-    server.load_all(application=None, sockets=None, **kwargs)
+    server.load_all(application, sockets, **kwargs)
     server.start()
