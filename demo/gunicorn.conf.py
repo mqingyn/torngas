@@ -19,7 +19,7 @@ os.environ.setdefault('TORNGAS_APP_SETTINGS', 'settings.setting')
 # worker_class - The type of workers to use. The default
 # async class should handle most 'normal' types of work
 # loads. You'll want to read http://gunicorn/deployment.hml
-#       for information on when you might want to choose one
+# for information on when you might want to choose one
 #       of the other worker classes.
 #
 #       An string referring to a 'gunicorn.workers' entry point
