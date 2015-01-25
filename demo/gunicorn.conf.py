@@ -60,7 +60,7 @@ worker_class = 'tornado'
 timeout = 30
 max_requests = 0
 graceful_timeout = 30
-# keepalive = 2
+keepalive = 2
 
 #
 #   spew - Install a trace function that spews every line of Python
