@@ -12,11 +12,9 @@ from exception import ConfigError, ArgumentError, UrlError
 from application import Application
 from settings_manager import settings
 from logger import SysLogger
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
-define("port", default=8000, help="run server on it", type=int)
-define("settings", help="setting module name", type=str)
-define("address", default='0.0.0.0', help='listen host,default:0.0.0.0', type=str)
 
 
 class Server(object):
@@ -27,12 +25,34 @@ class Server(object):
         self.ioloop = ioloop
         self.is_parselogger = False
 
+    def _patch_httpserver(self):
+        """
+        重写httpserver的xheader配置，让gunicorn可以加载xheaders设置
+        :return:
+        """
+        httpserver = sys.modules["tornado.httpserver"]
+        try:
+            xhs = settings.XHEADERS
+        except:
+            xhs = True
+
+        class TorngasHTTPServer(httpserver.HTTPServer):
+            def __init__(self, request_callback, xheaders=xhs, **kwargs):
+                super(TorngasHTTPServer, self).__init__(request_callback,
+                                                        xheaders=xheaders,
+                                                        **kwargs)
+
+
+        httpserver.HTTPServer = TorngasHTTPServer
+        sys.modules["tornado.httpserver"] = httpserver
+
     def load_application(self, application=None):
         """
 
         :type application: torngas.application.Application subclass or instance
         :return:
         """
+        self._patch_httpserver()
         if settings.TRANSLATIONS:
             try:
                 from tornado import locale
@@ -78,7 +98,6 @@ class Server(object):
                                      middlewares=settings.MIDDLEWARE_CLASSES,
                                      **tornado_conf)
 
-
     def load_urls(self):
         urls = []
         if settings.INSTALLED_APPS:
@@ -100,12 +119,8 @@ class Server(object):
                 sockets = bind_sockets(options.port, options.address, family=socket.AF_INET)
             else:
                 sockets = bind_sockets(options.port, options.address)
-        try:
-            xheaders = settings.XHEADERS
-        except:
-            xheaders = True
 
-        http_server = tornado.httpserver.HTTPServer(self.application, xheaders=xheaders, **kwargs)
+        http_server = tornado.httpserver.HTTPServer(self.application, **kwargs)
 
         http_server.add_sockets(sockets)
         self.httpserver = http_server
@@ -124,7 +139,6 @@ class Server(object):
         if not self.httpserver:
             self.load_httpserver(sockets, **kwargs)
 
-
     def start(self):
         if not self.is_parselogger:
             self.parse_logger()
@@ -135,7 +149,6 @@ class Server(object):
             self.ioloop = tornado.ioloop.IOLoop.instance()
 
         self.ioloop.start()
-
 
     def print_settings_info(self):
         if settings.DEBUG:
@@ -151,12 +164,29 @@ class Server(object):
             print 'template engine: %s' % settings.TEMPLATE_CONFIG.template_engine
             print 'server started. development server at http://%s:%s/' % (options.address, options.port)
 
-
-    def parse_command(self):
-        parse_command_line()
+    def parse_command(self, args=None, final=True):
+        """
+        解析命令行参数，解析logger配置
+        :return:
+        """
+        self.define()
+        parse_command_line(args, final)
         self.parse_logger()
 
+    def define(self):
+        """
+        定义命令行参数,你可以自定义很多自己的命令行参数，或重写此方法覆盖默认参数
+        :return:
+        """
+        define("port", default=8000, help="run server on it", type=int)
+        define("settings", help="setting module name", type=str)
+        define("address", default='0.0.0.0', help='listen host,default:0.0.0.0', type=str)
+
     def parse_logger(self):
+        """
+        加载logger配置，如果使用gunicorn，你需要手动调用加载
+        :return:
+        """
         SysLogger.parse_logger()
         self.is_parselogger = True
 
