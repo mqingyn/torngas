@@ -58,15 +58,13 @@ CACHES = {
     'dummy': {
         'BACKEND': 'torngas.cache.backends.dummy.DummyCache'
     },
-    'rediscache': {
+    'default_redis': {
         'BACKEND': 'torngas.cache.backends.rediscache.RedisCache',
         'LOCATION': '127.0.0.1:6379',
         'OPTIONS': {
             'DB': 0,
             'PARSER_CLASS': 'redis.connection.DefaultParser',
             'POOL_KWARGS': {
-                # timeout参数对有网络请求的库
-                # 一定要加上，不然默认的timeout都很长，阻塞了就悲剧了
                 'socket_timeout': 2,
                 'socket_connect_timeout': 2
             },

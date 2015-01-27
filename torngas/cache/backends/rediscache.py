@@ -35,8 +35,6 @@ def python_2_unicode_compatible(klass):
 
     To support Python 2 and 3 with a single code base, define a __str__ method
     returning text and apply this decorator to the class.
-
-    Backported from Django 1.5+.
     """
     if not PY3:
         klass.__unicode__ = klass.__str__
@@ -225,9 +223,6 @@ class RedisClient(CacheClient):
 
 
 class RedisCache(CacheMixin, RedisClient):
-    """
-    A subclass that is supposed to be used on Django >= 1.3.
-    """
 
     def incr_version(self, key, delta=1, version=None):
         """

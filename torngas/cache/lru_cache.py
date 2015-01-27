@@ -5,7 +5,6 @@ except ImportError:
     # backport of Python's 3.3 lru_cache, written by Raymond Hettinger and
     # licensed under MIT license, from:
     # <http://code.activestate.com/recipes/578078-py26-and-py30-backport-of-python-33s-lru-cache/>
-    # Should be removed when Django only supports Python 3.2 and above.
 
     from collections import namedtuple
     from functools import update_wrapper
@@ -24,9 +23,9 @@ except ImportError:
             return self.hashvalue
 
     def _make_key(args, kwds, typed,
-                 kwd_mark = (object(),),
-                 fasttypes = {int, str, frozenset, type(None)},
-                 sorted=sorted, tuple=tuple, type=type, len=len):
+                  kwd_mark=(object(),),
+                  fasttypes={int, str, frozenset, type(None)},
+                  sorted=sorted, tuple=tuple, type=type, len=len):
         'Make a cache key from optionally typed positional and keyword arguments'
         key = args
         if kwds:
@@ -63,23 +62,23 @@ except ImportError:
         """
 
         # Users should only access the lru_cache through its public API:
-        #       cache_info, cache_clear, and f.__wrapped__
+        # cache_info, cache_clear, and f.__wrapped__
         # The internals of the lru_cache are encapsulated for thread safety and
         # to allow the implementation to change (including a possible C version).
 
         def decorating_function(user_function):
 
             cache = dict()
-            stats = [0, 0]                  # make statistics updateable non-locally
-            HITS, MISSES = 0, 1             # names for the stats fields
+            stats = [0, 0]  # make statistics updateable non-locally
+            HITS, MISSES = 0, 1  # names for the stats fields
             make_key = _make_key
-            cache_get = cache.get           # bound method to lookup key or return None
-            _len = len                      # localize the global len() function
-            lock = RLock()                  # because linkedlist updates aren't threadsafe
-            root = []                       # root of the circular doubly linked list
-            root[:] = [root, root, None, None]      # initialize by pointing to self
-            nonlocal_root = [root]                  # make updateable non-locally
-            PREV, NEXT, KEY, RESULT = 0, 1, 2, 3    # names for the link fields
+            cache_get = cache.get  # bound method to lookup key or return None
+            _len = len  # localize the global len() function
+            lock = RLock()  # because linkedlist updates aren't threadsafe
+            root = []  # root of the circular doubly linked list
+            root[:] = [root, root, None, None]  # initialize by pointing to self
+            nonlocal_root = [root]  # make updateable non-locally
+            PREV, NEXT, KEY, RESULT = 0, 1, 2, 3  # names for the link fields
 
             if maxsize == 0:
 
@@ -94,7 +93,7 @@ except ImportError:
                 def wrapper(*args, **kwds):
                     # simple caching without ordering or size limit
                     key = make_key(args, kwds, typed)
-                    result = cache_get(key, root)   # root used here as a unique not-found sentinel
+                    result = cache_get(key, root)  # root used here as a unique not-found sentinel
                     if result is not root:
                         stats[HITS] += 1
                         return result
