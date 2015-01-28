@@ -263,10 +263,7 @@ class RedisCache(CacheMixin, RedisClient):
         value = self._client.get(key)
         if value is None:
             return default
-        try:
-            result = int(value)
-        except (ValueError, TypeError):
-            result = self.unpickle(value)
+        result = self.unpickle(value)
         return result
 
     def _set(self, key, value, timeout, client, _add_only=False):
@@ -352,10 +349,7 @@ class RedisCache(CacheMixin, RedisClient):
         for key, value in zip(new_keys, results):
             if value is None:
                 continue
-            try:
-                value = int(value)
-            except (ValueError, TypeError):
-                value = self.unpickle(value)
+            value = self.unpickle(value)
             if isinstance(value, bytes_type):
                 value = safestr(value)
             recovered_data[map_keys[key]] = value
