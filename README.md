@@ -676,3 +676,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 		# 事件触发
 		my_event.send(sender=somesender.__class__, args1=arg)
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mqingyn/torngas/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
