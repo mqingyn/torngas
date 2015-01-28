@@ -135,7 +135,7 @@ class RedisClient(CacheClient):
             connection_pool_class_kwargs=self.connection_pool_class_kwargs,
             **kwargs
         )
-        self._client = redis.Redis(
+        self._client = redis.StrictRedis(
             connection_pool=connection_pool,
             **kwargs
         )
@@ -223,7 +223,6 @@ class RedisClient(CacheClient):
 
 
 class RedisCache(CacheMixin, RedisClient):
-
     def incr_version(self, key, delta=1, version=None):
         """
         Adds delta to the cache version for the supplied key. Returns the
@@ -281,7 +280,7 @@ class RedisCache(CacheMixin, RedisClient):
                 if added:
                     client.expire(key, timeout)
                 return added
-            return client.setex(key, value, timeout)
+            return client.setex(key, timeout, value)
         else:
             return False
 
