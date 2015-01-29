@@ -40,7 +40,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
  	* [db&orm](#user-content-dborm)
  	* [线程池异步](#user-content-异步线程池)
  	* [session](#user-content-session)
- 	* [signal信号](#user-content-signal)
+ 	* [signal](#user-content-signal)
  	
 <br>
 
