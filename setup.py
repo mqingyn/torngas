@@ -25,7 +25,6 @@ setup(
     ],
     scripts=[],
     include_package_data=True,
-    zip_safe=True,
     install_requires=[
         'futures',
     ],
