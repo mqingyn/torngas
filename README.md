@@ -37,10 +37,10 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
  	* [中间件](#user-content-中间件)
  	* [HTTP处理器](#user-content-http处理器)
  	* [缓存](#user-content-缓存)
- 	* [DB&ORM](#user-content-dborm)
+ 	* [db&orm](#user-content-dborm)
  	* [线程池异步](#user-content-异步线程池)
  	* [session](#user-content-session)
- 	* [signal信号](#user-content-signal)
+ 	* [signal](#user-content-signal)
  	
 <br>
 
