@@ -74,13 +74,15 @@ class HttpModuleMiddleware(object):
 
     def _class_wrap(self, handler_class, name, url):
         # 防止使用同一个handler的路由出现错误，pattern__会被相同的handler的被覆盖
-        scope = {}
-        class_prefix = md5("%s_%s_%s" % (handler_class.__name__, name, url,)).hexdigest()
-        class_name = "%s_%s" % (handler_class.__name__, class_prefix,)
-        scope['old_' + class_name] = handler_class
-        exec "class %s(old_%s):pass" % (class_name, class_name,) in scope
-        class_ = scope[class_name]
-        return class_
+        # 用type元类生成一个新的handler_class
+        prefix = md5("%s_%s_%s" % (handler_class.__name__, name, url,)).hexdigest()
+        new_classname = "%s_%s" % (handler_class.__name__, prefix,)
+        wrap_class = type(new_classname,
+                          (handler_class,),
+                          {
+                              '__module__': handler_class.__module__
+                          })
+        return wrap_class
 
     def process_init(self, application):
         self.named_handlers = application.named_handlers
