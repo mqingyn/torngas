@@ -38,10 +38,7 @@ def log_request(handler):
 
 class AccessLogMiddleware(object):
     def process_init(self, application):
-        def _(__):
-            pass
-
-        application.settings['log_function'] = _
+        application.settings['log_function'] = lambda _: None
 
     def process_endcall(self, handler, clear):
         log_request(handler)

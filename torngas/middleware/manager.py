@@ -58,6 +58,14 @@ _TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
 
 class Manager(object):
     _call_object = None
+    _call_mapper = {
+        _TCALL: ('call_midds', 'process_call',),
+        _TREQ: ('request_midds', 'process_request',),
+        _TREN: ('render_midds', 'process_render',),
+        _TRES: ('response_midds', 'process_response',),
+        _TEND: ('end_midds', 'process_endcall',),
+        _TEXC: ('exc_midds', 'process_exception',)
+    }
 
     def register(self, name):
         if isinstance(name, (str, unicode,)):
@@ -111,29 +119,20 @@ class Manager(object):
 
     @gen.coroutine
     def execute_next(self, request, types, process_object, *args, **kwargs):
-        midd = None
 
-        if types == _TCALL:
-            midd = ('call_midds', 'process_call',)
-        elif types == _TREQ:
-            midd = ('request_midds', 'process_request',)
-        elif types == _TREN:
-            midd = ('render_midds', 'process_render',)
-        elif types == _TRES:
-            midd = ('response_midds', 'process_response',)
-        elif types == _TEND:
-            midd = ('end_midds', 'process_endcall',)
-        elif types == _TEXC:
-            midd = ('exc_midds', 'process_exception',)
+        midd = self._call_mapper.get(types, None)
+
         if midd:
             while 1:
                 method = self._get_func(request, midd[0], midd[1])
-                if method and callable(method):
 
+                if method and callable(method):
                     clear = partial(self.clear_all, request)
                     result = method(process_object, clear, *args, **kwargs)
+
                     if is_future(result):
                         result = yield result
+
                         if result:
                             break
                 else:
