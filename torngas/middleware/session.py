@@ -34,11 +34,9 @@ except ImportError:
 
 from torngas.storage import storage
 from torngas.utils import safestr
-from torngas.utils import lazyimport
 from torngas.settings_manager import settings
 from torngas.cache import caches
 
-cache_module = lazyimport('torngas.cache')
 rx = re.compile('^[0-9a-fA-F]+$')
 
 
@@ -54,7 +52,6 @@ class SessionMiddleware(object):
         session.load_session()
         handler.session = session
 
-
     def process_response(self, handler, clear, chunk):
         if hasattr(handler, "session"):
             handler.session.save()
@@ -63,7 +60,6 @@ class SessionMiddleware(object):
 
 _DAY1 = 24 * 60 * 60
 _DAY30 = _DAY1 * 30
-_VERIFICATION_KEY = '__VERIFSSID'
 
 session_parameters = storage({
     'session_name': '__TORNADOSSID',
@@ -123,9 +119,6 @@ class SessionManager(object):
                 self._data.update(_data)
                 self.config.expires = expires
             self._validate_ip()
-            hmac_verif = self._get_cookie(_VERIFICATION_KEY)
-            if self.sessionid and hmac_verif != self._generate_hmac(self.sessionid):
-                self.expired()
 
         if not self.sessionid:
             self.sessionid = self._create_sessionid()
@@ -158,17 +151,11 @@ class SessionManager(object):
                 path=self.config.cookie_path,
                 secure=secure,
                 httponly=httponly)
-            self._set_cookie(_VERIFICATION_KEY, self._generate_hmac(self.sessionid),
-                             domain=self.config.cookie_domain or '',
-                             expires=set_expire,
-                             path=self.config.cookie_path,
-                             secure=secure,
-                             httponly=httponly)
+
             self.store.set(self.sessionid, (expires, self._data), cache_expires)
 
         else:
             self._set_cookie(self.config.session_name, self.sessionid, expires=-1)
-            self._set_cookie(_VERIFICATION_KEY, self._generate_hmac(self.sessionid), expires=-1)
             self.store.delete(self.sessionid)
             self.sessionid = None
             self._killed = False
@@ -198,9 +185,6 @@ class SessionManager(object):
         session_id = sha1("%s%s%s%s" % (rand, now, safestr(self.remote_ip), secret_key))
         session_id = session_id.hexdigest()
         return str(session_id).upper() + '|' + self.config.session_version
-
-    def _generate_hmac(self, session_id):
-        return hmac.new(session_id, self.config.secret_key, hashlib.sha1).hexdigest()
 
     def _validate_ip(self):
         if self.sessionid and self._data.get('remote_ip', None) != self.remote_ip:
