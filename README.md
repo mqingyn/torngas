@@ -624,7 +624,7 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		}
 
 	session使用：
-		torngas会为每个session会话在cookies生成一个TORNADOid和一个VERIFSSID,切必须两个同时被验证通过才能表示会话是有效的。你可以像这样读写session：
+		你可以像这样读写session：
 		
 			class LoginHandler(WebHandler):
 				def get(self,uid):
