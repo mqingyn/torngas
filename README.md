@@ -579,7 +579,8 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 
 * ####异步线程池
 
-	tornado本身是异步单线程单进程框架，这样当遇到使用mysql的慢查询时，就会阻塞进程。torngas提供一个简单的方式来用线程池包装同步方法。
+	tornado本身是异步单线程单进程框架，这样当遇到使用mysql的慢查询时，就会阻塞进程。torngas提供一个简单的方式来用线程池包装同步方法。通过配置文件设定
+	`THREADS_NUM` 数量来决定线程池的最大线程数，默认为cpu_count。
 
 	>注：新版tornado中内置了 `concurrent.run_on_executor` 装饰器，可提供同样的功能,torngas提供  `torngas.decorators.async_execute` 来方便使用线程池来异步化你的同步方法。
 
@@ -596,8 +597,6 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 			    @async_execute
 			    def dosomething(self,a,b):
 			        # 这里可能耗时很久
-			        # 同步的方法无论如何都不会毫无代价的变成异步，
-			        # 该装饰器为此模拟了异步操作，但注意：这是用线程池模拟的
 			        # something...
 			        result='return'
 			        return result
