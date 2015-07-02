@@ -98,12 +98,12 @@ class Manager(object):
             self.register(midd_class)
 
     def set_request(self, request):
-        request.call_midds = copy(_CALL_LIST)
-        request.request_midds = copy(_REQUEST_LIST)
-        request.render_midds = copy(_RENDER_LIST)
-        request.response_midds = copy(_RESPONSE_LIST)
-        request.end_midds = copy(_ENDCALL_LIST)
-        request.exc_midds = copy(_EXCEPTION_LIST)
+        request.call_midds = copy(_CALL_LIST) if _CALL_LIST else []
+        request.request_midds = copy(_REQUEST_LIST) if _REQUEST_LIST else []
+        request.render_midds = copy(_RENDER_LIST) if _RENDER_LIST else []
+        request.response_midds = copy(_RESPONSE_LIST) if _RESPONSE_LIST else []
+        request.end_midds = copy(_ENDCALL_LIST) if _ENDCALL_LIST else []
+        request.exc_midds = copy(_EXCEPTION_LIST) if _EXCEPTION_LIST else []
 
     def _get_func(self, request, m, func):
         try:
@@ -117,8 +117,24 @@ class Manager(object):
         except Exception, ex:
             gen_log.error(ex)
 
-    @gen.coroutine
     def execute_next(self, request, types, process_object, *args, **kwargs):
+
+        midd = self._call_mapper.get(types, None)
+
+        if midd and getattr(request, midd[0], None):
+            while 1:
+                method = self._get_func(request, midd[0], midd[1])
+
+                if method and callable(method):
+                    clear = partial(self.clear_all, request)
+                    result = method(process_object, clear, *args, **kwargs)
+                    if result:
+                        break
+                else:
+                    break
+
+    @gen.coroutine
+    def execute_next_for_async(self, request, types, process_object, *args, **kwargs):
 
         midd = self._call_mapper.get(types, None)
 
@@ -129,12 +145,10 @@ class Manager(object):
                 if method and callable(method):
                     clear = partial(self.clear_all, request)
                     result = method(process_object, clear, *args, **kwargs)
-
                     if is_future(result):
                         result = yield result
-
-                        if result:
-                            break
+                    if result:
+                        break
                 else:
                     break
 
@@ -154,7 +168,8 @@ class Manager(object):
         return self.execute_next(request, _TCALL, request)
 
     def run_request(self, handler):
-        return self.execute_next(handler.request, _TREQ, handler)
+        if handler.request.request_midds:
+            return self.execute_next_for_async(handler.request, _TREQ, handler)
 
     def run_render(self, handler, template=None, **kwargs):
         return self.execute_next(handler.request, _TREN, handler, template, **kwargs)
@@ -171,8 +186,7 @@ class Manager(object):
             return True
 
     def catch_middleware_exc(self, middle_result):
-        exc_info = middle_result.exc_info()
-        if exc_info:
-            raise exc_info[1]
-
-
+        if middle_result:
+            exc_info = middle_result.exc_info()
+            if exc_info:
+                raise exc_info[1]

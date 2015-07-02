@@ -149,8 +149,20 @@ class HttpModuleMiddleware(object):
                 except ImportError:
                     raise
 
-    @gen.coroutine
     def _do_all_execute(self, handler, clear, method_name, **kwargs):
+        for c_module in self.common_modules:
+            result = self._execute_module(handler, clear, c_module, getattr(c_module, method_name), **kwargs)
+            if result:
+                return 1
+
+        for name, r_module in self.route_modules.items():
+            for md in r_module:
+                result = self._execute_module(handler, clear, md, getattr(md, method_name), name, **kwargs)
+                if result:
+                    return 1
+
+    @gen.coroutine
+    def _do_all_execute_forasync(self, handler, clear, method_name, **kwargs):
 
         for c_module in self.common_modules:
             result = self._execute_module(handler, clear, c_module, getattr(c_module, method_name), **kwargs)
@@ -175,7 +187,7 @@ class HttpModuleMiddleware(object):
         request.re_match_table = re_matchs
 
     def process_request(self, handler, clear):
-        return self._do_all_execute(handler, clear, 'begin_request')
+        return self._do_all_execute_forasync(handler, clear, 'begin_request')
 
     def process_response(self, handler, clear, chunk):
         return self._do_all_execute(handler, clear, 'begin_response', chunk=chunk)
