@@ -49,12 +49,15 @@ class Test(Base):
         return result
 """
 
-
 import functools
 from tornado.netutil import Resolver, ThreadedResolver
 from tornado.ioloop import IOLoop
+from ..settings_manager import settings
+from multiprocessing import cpu_count
 
-Resolver.configure('tornado.netutil.ThreadedResolver', num_threads=10)
+Resolver.configure('tornado.netutil.ThreadedResolver',
+                   num_threads=settings.THREADS_NUM if 'THREADS_NUM' in settings else cpu_count())
+
 
 def async_execute(fn):
     """
@@ -68,8 +71,9 @@ def async_execute(fn):
         future = thread_resolver.executor.submit(fn, self, *args, **kwargs)
         if callback:
             IOLoop.current().add_future(future,
-                                    lambda future: callback(future.result()))
+                                        lambda future: callback(future.result()))
         return future
+
     return wrapper
 
 
