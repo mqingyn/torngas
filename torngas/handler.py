@@ -5,13 +5,29 @@ common handler,webhandler,apihandler
 要获得torngas的中间件等特性需继承这些handler
 """
 import json
+import tornado.locale
 from tornado.web import RequestHandler
-from mixins.handler import HandlerMixin
+from settings_manager import settings
 from mixins.exception import UncaughtExceptionMixin
 from exception import HttpBadRequestError, Http404
+from torngas.cache import close_caches
 
 
-class WebHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
+class _HandlerPatch(RequestHandler):
+    def get_user_locale(self):
+        if settings.TRANSLATIONS_CONF.use_accept_language:
+            return None
+
+        return tornado.locale.get(settings.TRANSLATIONS_CONF.locale_default)
+
+    def on_finish(self):
+        try:
+            close_caches()
+        except:
+            pass
+
+
+class WebHandler(UncaughtExceptionMixin, _HandlerPatch):
     def create_template_loader(self, template_path):
         loader = self.application.tmpl
         if loader is None:
@@ -20,7 +36,7 @@ class WebHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
             return loader(template_path)
 
 
-class ApiHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
+class ApiHandler(UncaughtExceptionMixin, _HandlerPatch):
     def get_format(self, params_name="format"):
         format = self.get_argument(params_name, None)
         if not format:
@@ -53,10 +69,17 @@ class ApiHandler(UncaughtExceptionMixin, HandlerMixin, RequestHandler):
             raise HttpBadRequestError('Unknown response format requested: %s' % format)
 
 
-class ErrorHandler(UncaughtExceptionMixin, RequestHandler):
+class ErrorHandler(UncaughtExceptionMixin, _HandlerPatch):
     def initialize(self, *args, **kwargs):
         pass
 
     def prepare(self):
         super(ErrorHandler, self).prepare()
         raise Http404()
+
+
+if settings.MIDDLEWARE_CLASSES:
+    from mixins.miiddleware import MiddlewareHandlerMixin
+
+    WebHandler.__bases__ = (MiddlewareHandlerMixin,) + WebHandler.__bases__
+    ApiHandler.__bases__ = (MiddlewareHandlerMixin,) + ApiHandler.__bases__

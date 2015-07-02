@@ -57,7 +57,6 @@ _TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
 
 
 class Manager(object):
-    _call_object = None
     _call_mapper = {
         _TCALL: ('call_midds', 'process_call',),
         _TREQ: ('request_midds', 'process_request',),
@@ -97,13 +96,15 @@ class Manager(object):
         for midd_class in names:
             self.register(midd_class)
 
+    copylist = staticmethod(lambda lb: copy(lb) if lb else [])
+
     def set_request(self, request):
-        request.call_midds = copy(_CALL_LIST) if _CALL_LIST else []
-        request.request_midds = copy(_REQUEST_LIST) if _REQUEST_LIST else []
-        request.render_midds = copy(_RENDER_LIST) if _RENDER_LIST else []
-        request.response_midds = copy(_RESPONSE_LIST) if _RESPONSE_LIST else []
-        request.end_midds = copy(_ENDCALL_LIST) if _ENDCALL_LIST else []
-        request.exc_midds = copy(_EXCEPTION_LIST) if _EXCEPTION_LIST else []
+        request.call_midds = self.copylist(_CALL_LIST)
+        request.request_midds = self.copylist(_REQUEST_LIST)
+        request.render_midds = self.copylist(_RENDER_LIST)
+        request.response_midds = self.copylist(_RESPONSE_LIST)
+        request.end_midds = self.copylist(_ENDCALL_LIST)
+        request.exc_midds = self.copylist(_EXCEPTION_LIST)
 
     def _get_func(self, request, m, func):
         try:
@@ -118,7 +119,6 @@ class Manager(object):
             gen_log.error(ex)
 
     def execute_next(self, request, types, process_object, *args, **kwargs):
-
         midd = self._call_mapper.get(types, None)
 
         if midd and getattr(request, midd[0], None):
@@ -135,7 +135,6 @@ class Manager(object):
 
     @gen.coroutine
     def execute_next_for_async(self, request, types, process_object, *args, **kwargs):
-
         midd = self._call_mapper.get(types, None)
 
         if midd:

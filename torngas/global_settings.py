@@ -22,8 +22,6 @@ TORNADO_CONF = {
 # ###########
 MIDDLEWARE_CLASSES = (
     'torngas.middleware.accesslog.AccessLogMiddleware',
-    'torngas.middleware.session.SessionMiddleware',
-    'torngas.middleware.signal.SignalMiddleware',
     'torngas.httpmodule.httpmodule.HttpModuleMiddleware',
 )
 INSTALLED_APPS = (

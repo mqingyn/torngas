@@ -35,8 +35,7 @@ class Application(web.Application):
                     super(HttpRequest, self).__init__(*args, **kwargs)
                     this.middleware_fac.set_request(self)
                     try:
-                        result = this.middleware_fac.run_call(self)
-                        this.middleware_fac.catch_middleware_exc(result)
+                        this.middleware_fac.run_call(self)
                     except Exception:
                         SysLogger.trace_logger.error(traceback.format_exc())
 
