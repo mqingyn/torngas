@@ -16,16 +16,11 @@ class Test(Base):
     def get(self):
         a=''
         b=''
-        #支持使用gen的task模块来同步化异步调用
         result = yield self.dosomething(a, b)
         self.finish(result)
 
     @async_execute
     def dosomething(self,a,b):
-        # 这里可能耗时很久
-        #callback参数不会在这里有任何调用，这个耗时方法本身并没有异步，
-        #同步的方法无论如何都不会毫无代价的变成异步，
-        #该装饰器为此模拟了异步操作，但注意：这是用线程池模拟的
         # something...
         result='return'
         return result
