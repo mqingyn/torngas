@@ -94,72 +94,43 @@ WHITELIST = False
 # )
 
 #tornado日志功能配置
-LOGGER_CONFIG = {
-    "use_tornadolog": False,
-    "root_level": 'INFO',
-    # 日志根目录（如果某具体日志filename指定路径，则自动忽略此根目录配置）
-    "root_dir": 'logs/'
-}
-
-LOGGER = {
-    'tornado': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "tornado.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
+LOGGING_DIR = 'logs/'
+LOGGING = (
+    {
+        'name': 'tornado',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'tornado.log'
     },
-    'torngas.tracelog': {
-        "OPEN": True,
-        "LEVEL": "ERROR",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_trace_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 20,
-            }
-        ]
+    {
+        'name': 'torngas.tracelog',
+        'level': 'ERROR',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'formatter': '%(message)s',
+        'filename': 'torngas_trace_log.log'
     },
-    'torngas.accesslog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "FORMATTER": '%(message)s',
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_access_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": False,
-                "backupCount": 20,
-            }
-        ]
+    {
+        'name': 'torngas.accesslog',
+        'level': 'INFO',
+        'log_to_stderr': True,
+        'when': 'midnight',
+        'interval': 1,
+        'formatter': '%(message)s',
+        'filename': 'torngas_access_log.log'
     },
-    'torngas.infolog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_info_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
-    },
-}
+    {
+        'name': 'torngas.infolog',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'torngas_info_log.log'
+    }
+)
 
 IPV4_ONLY = True
 

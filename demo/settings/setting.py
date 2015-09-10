@@ -17,7 +17,7 @@ TORNADO_CONF = {
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
     "template_path": os.path.join(PROJECT_PATH, 'templates'),
-    "default_handler_class":'torngas.handler.ErrorHandler',
+    "default_handler_class": 'torngas.handler.ErrorHandler',
     # 安全起见，可以定期生成新的cookie 秘钥，生成方法：
     # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 }
@@ -104,73 +104,44 @@ WHITELIST = False
 # '127.0.0.2',
 # )
 
-# tornado日志功能配置
-LOGGER_CONFIG = {
-    "use_tornadolog": False,
-    "root_level": 'INFO',
-    # 日志根目录（如果某具体日志filename指定路径，则自动忽略此根目录配置）
-    "root_dir": 'logs/'
-}
-
-LOGGER = {
-    'tornado': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "tornado.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
+# 简化tornado日志功能配置,上一版本过于囧长
+LOGGING_DIR = 'logs/'
+LOGGING = (
+    {
+        'name': 'tornado',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'tornado.log'
     },
-    'torngas.tracelog': {
-        "OPEN": True,
-        "LEVEL": "ERROR",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_trace_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": False,
-                "backupCount": 20,
-            }
-        ]
+    {
+        'name': 'torngas.tracelog',
+        'level': 'ERROR',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'formatter': '%(message)s',
+        'filename': 'torngas_trace_log.log'
     },
-    'torngas.accesslog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "FORMATTER": '%(message)s',
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_access_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": False,
-                "backupCount": 20,
-            }
-        ]
+    {
+        'name': 'torngas.accesslog',
+        'level': 'INFO',
+        'log_to_stderr': True,
+        'when': 'midnight',
+        'interval': 1,
+        'formatter': '%(message)s',
+        'filename': 'torngas_access_log.log'
     },
-    'torngas.infolog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_info_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
+    {
+        'name': 'torngas.infolog',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'torngas_info_log.log'
     },
-}
+)
 
 IPV4_ONLY = True
 
