@@ -180,7 +180,6 @@ class RedisClient(CacheClient):
         default.update(kw)
         return default
 
-
     @property
     def db(self):
         _db = self.params.get('db', self.options.get('DB', 1))
@@ -223,6 +222,10 @@ class RedisClient(CacheClient):
 
 
 class RedisCache(CacheMixin, RedisClient):
+
+    def validate_key(self, key):
+        pass
+
     def incr_version(self, key, delta=1, version=None):
         """
         Adds delta to the cache version for the supplied key. Returns the

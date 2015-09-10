@@ -72,4 +72,4 @@ class _SysLogger(object):
         return partial(self.trace_logger.exception)
 
 
-SysLogger = _SysLogger()
+SysLogger = syslogger = _SysLogger()

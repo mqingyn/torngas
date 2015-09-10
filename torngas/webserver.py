@@ -152,17 +152,13 @@ class Server(object):
 
     def print_settings_info(self):
         if settings.DEBUG:
-            print 'tornado version: %s' % tornado.version
-            print 'load middleware:'
-            for middl in settings.MIDDLEWARE_CLASSES:
-                print ' -', str(middl)
-            print 'locale support: %s' % settings.TRANSLATIONS
-            print 'load apps:'
+            print('tornado version: %s' % tornado.version)
+            print('locale support: %s' % settings.TRANSLATIONS)
+            print('load apps:')
             for app in settings.INSTALLED_APPS:
-                print ' -', str(app)
-            print 'IPV4_Only: %s' % settings.IPV4_ONLY
-            print 'template engine: %s' % settings.TEMPLATE_CONFIG.template_engine
-            print 'server started. development server at http://%s:%s/' % (options.address, options.port)
+                print(' - %s' % str(app))
+            print('template engine: %s' % (settings.TEMPLATE_CONFIG.template_engine or 'default'))
+            print('server started. development server at http://%s:%s/' % (options.address, options.port))
 
     def parse_command(self, args=None, final=True):
         """
