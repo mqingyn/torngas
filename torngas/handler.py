@@ -4,13 +4,15 @@
 common handler,webhandler,apihandler
 要获得torngas的中间件等特性需继承这些handler
 """
-import json
+import json, functools
 import tornado.locale
 from tornado.web import RequestHandler
+from tornado import stack_context
 from settings_manager import settings
 from mixins.exception import UncaughtExceptionMixin
 from exception import HttpBadRequestError, Http404
 from torngas.cache import close_caches
+from utils import ThreadlocalLikeRequestContext
 
 
 class _HandlerPatch(RequestHandler):
@@ -25,6 +27,12 @@ class _HandlerPatch(RequestHandler):
             close_caches()
         except:
             pass
+
+    def _execute(self, transforms, *args, **kwargs):
+        current_context = {'request': self.request}
+
+        with stack_context.StackContext(functools.partial(ThreadlocalLikeRequestContext, **current_context)):
+            return super(_HandlerPatch, self)._execute(transforms, *args, **kwargs)
 
 
 class WebHandler(UncaughtExceptionMixin, _HandlerPatch):

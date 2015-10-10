@@ -5,7 +5,7 @@ import sys
 from tornado.util import import_object
 from tornado.concurrent import Future
 from tornado import ioloop
-
+from tornado.util import ObjectDict
 try:
     import futures
 except ImportError:
@@ -382,3 +382,38 @@ def sleep(seconds):
     future = Future()
     ioloop.IOLoop.current().call_later(seconds, lambda: future.set_result(None))
     return future
+
+class ThreadlocalLikeRequestContext(object):
+    """
+    通过request_context.data,可以在任意位置访问当前请求的request对象，
+    以达到类似多线程wsgi程序中全局threadlocal request的目的。
+    eg：current_request = request_context.request
+    """
+
+    _state = threading.local()
+    _state.data = ObjectDict({})
+
+    class __metaclass__(type):
+        @property
+        def data(cls):
+            if not hasattr(cls._state, 'data'):
+               return ObjectDict({})
+            return ObjectDict(cls._state.data)
+
+        @property
+        def request(cls):
+            return cls.data.get('request')
+
+    def __init__(self, **data):
+        self._data = data
+
+    def __enter__(self):
+        self._prev_data = self.__class__.data
+        self.__class__._state.data = self._data
+
+    def __exit__(self, *exc):
+        self.__class__._state.data = self._prev_data
+        del self._prev_data
+        return False
+
+request_context = ThreadlocalLikeRequestContext
