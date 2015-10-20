@@ -26,7 +26,7 @@ def connection_event():
             cursor.execute("SELECT 1")
         except:
             SysLogger.error('database pool has gone away')
-            raise exc.DisconnectionError()
+            connection_proxy._pool.dispose()
         cursor.close()
 
 
