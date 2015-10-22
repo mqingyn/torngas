@@ -206,9 +206,10 @@ DATABASE_CONNECTION = {
     }
 }
 
-# 每个定时对db进行一次ping操作，防止mysql gone away
+# 每个定时对db进行一次ping操作，防止mysql gone away,设置0为关闭
 PING_DB = 300  # (s秒)
-
+# 每次取出ping多少个连接
+PING_CONN_COUNT = 5
 # sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
@@ -221,7 +222,7 @@ SQLALCHEMY_CONFIGURATION = {
     'sqlalchemy.echo_pool': False,
     'sqlalchemy.pool_timeout': 5,
     'sqlalchemy.encoding': 'utf-8',
-    'sqlalchemy.pool_size': 100,
+    'sqlalchemy.pool_size': 5,
     'sqlalchemy.pool_recycle': 3600,
     'sqlalchemy.poolclass': 'QueuePool'  # 手动指定连接池类
 }

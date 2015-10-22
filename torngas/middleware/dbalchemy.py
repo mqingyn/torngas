@@ -7,6 +7,7 @@ dbalchemy中间件，加入此中间件可以自动帮助dbalchemy模块处理�
 
 from ..db.dbalchemy import Connector
 from tornado.ioloop import PeriodicCallback
+from tornado.gen import coroutine
 from sqlalchemy import exc
 from sqlalchemy import event
 from sqlalchemy.pool import Pool
@@ -31,21 +32,27 @@ def connection_event():
 
 
 def ping_db(conn_, ping_inteval):
-    PeriodicCallback(conn_.ping_db, ping_inteval * 1000).start()
+    @coroutine
+    def ping_func():
+        yield [conn_.ping_db() for _ in range(settings.PING_CONN_COUNT if 'PING_CONN_COUNT' in settings else 5)]
 
+    PeriodicCallback(ping_func, ping_inteval * 1000).start()
 
 class DBAlchemyMiddleware(object):
     def process_init(self, application):
 
-        connection_event()
-        # 定时ping数据库，防止mysql go away，定时检测防丢
-        interval = settings.PING_DB
-        if interval > 0:
-            for k, conn in connection.items():
-                ping_db(conn, interval)
+        if settings.PING_DB:
+            connection_event()
+            # 定时ping数据库，防止mysql go away，定时检测防丢
+            interval = settings.PING_DB
+            if interval > 0:
+                for k, conn in connection.items():
+                    ping_db(conn, interval)
 
     def process_endcall(self, handler, clear):
         for k, conn in connection.items():
             if hasattr(conn, 'remove'):
                 callable(conn.remove) and conn.remove()
+
+
 
