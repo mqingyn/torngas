@@ -16,13 +16,8 @@ sessioin过期策略分为三种情形：
 """
 import os
 import time
-import hmac
 import re
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 try:
     import hashlib
 
