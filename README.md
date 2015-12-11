@@ -3,10 +3,9 @@ A simple app web framework based on tornado.
 
 [![Build Status](https://travis-ci.org/mqingyn/torngas.svg?branch=master)](https://travis-ci.org/mqingyn/torngas)
 
-###version:1.7.4
+###version:1.8.0
 
-Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发框架，tornado是一个异步非阻塞的web框架，但是由于其小巧灵活，并没有一个统一，通用的
-应用层框架解决方案。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。tornado 建议使用4.0以上版本,torngas暂不支持基于WSGI的应用。
+Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框架。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。tornado 建议使用4.0以上版本,注意：torngas不支持基于WSGI的应用。
 
 
 
@@ -239,40 +238,28 @@ Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的应用开发
 		)
 	
 * ####log：
+    ###### version add:1.8.0  
+	torngas支持使用原生tornado日志模块，或torngas基于logging扩展日志，torngas默认启用扩展日志代替tornado默认的log，除非`--disable_log＝False` ,则启用tornado.log模块 。
 
-	torngas支持使用原生tornado日志模块，或torngas基于logging扩展日志，torngas默认启用扩展日志，配置文件中 `LOGGER_CONFIG` 默认设定 `use_tornadolog = False` , 如果为 `True` ,则使用tornado.log模块 。
-
-		from torngas.logger import SysLogger
+		from torngas.logger import syslogger
 		
-		SysLogger.error("this is a error.")
+		syslogger.error("this is a error.")
 
-	日志配置中的日志HANDLER默认为 `torngas.logger.UsePortRotatingFileHandler` ,在多进程状态下，日志文件名将自动按照端口号区分，通过`LOGGER_CONFIG` 下 `root_dir` 来决定日志目录，若日志`HANDLERS`中filename给定绝对路径或相对路径，则忽略 root_dir 。
+	日志配置中的默认日志HANDLER默认为 `torngas.logger.ProcessLogTimedFileHandler` ,此handler支持在多进程状态下安全的写入日志文件，如需日志文件名按照端口号区分，通过设置 `--log_port_prefix＝true` , `--logging_dir` 如果设定， 配置文件中的 `LOGGING_DIR` 将被忽略。 
 	
-	你可以自定义你的日志配置，或新增日志，你只需要在LOGGER配置中加入类似段落：
+	你可以自定义你的日志配置，或新增日志，你只需要在LOGGING配置中加入类似段落：
 
-		    'torngas.tracelog': {
-		        "OPEN": True,
-		        "LEVEL": "ERROR",
-		        "HANDLERS": [{
-				                "module": "torngas.logger.UsePortRotatingFileHandler",#自动区分tornado端口号
-				                "filename": "torngas_trace_log.log",
-				                "when": "midnight",
-				                "encoding": "utf-8",
-				                "delay": False,
-				                "backupCount": 20,
-								"level":"ERROR"
-				            }]
+		        {
+        'name': 'tornado',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'tornado.log'
+        },
 	
-	
-	  日志配置为键值对，`'logger_name': {}` 的格式。键为日志logger名, 值为配置字典。
+	> 注：请保留默认的几个日志配置。
 
-	 `OPEN`: 控制日志是否开启  
-	 `LEVEL`: 日志级别  
-	 `HANDLERS`: 为日志handler列表，支持配置多个日志handler，`module` 为handler类限定名，`level` 为此handler的记录级别。
-
-	 >你可以为每一个日志logger定义多个不同级别的 handler。
-	 
-	 除此之外其他的handler构造参数通过字典传入。如上的 when , delay 等。
 	
 
 * ####模板引擎：

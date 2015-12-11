@@ -19,6 +19,9 @@ class LocMemCache(BaseCache):
         self._expire_info = _expire_info.setdefault(name, {})
         self._lock = _locks.setdefault(name, RWLock())
 
+    def validate_key(self, key):
+        pass
+
     def add(self, key, value, timeout=DEFAULT_TIMEOUT, version=None):
         key = self.make_key(key, version=version)
         self.validate_key(key)

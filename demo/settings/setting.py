@@ -17,7 +17,7 @@ TORNADO_CONF = {
     "login_url": '/login',
     "cookie_secret": "bXZ/gDAbQA+zaTxdqJwxKa8OZTbuZE/ok3doaow9N4Q=",
     "template_path": os.path.join(PROJECT_PATH, 'templates'),
-    "default_handler_class":'torngas.handler.ErrorHandler',
+    "default_handler_class": 'torngas.handler.ErrorHandler',
     # 安全起见，可以定期生成新的cookie 秘钥，生成方法：
     # base64.b64encode(uuid.uuid4().bytes + uuid.uuid4().bytes)
 }
@@ -104,73 +104,44 @@ WHITELIST = False
 # '127.0.0.2',
 # )
 
-# tornado日志功能配置
-LOGGER_CONFIG = {
-    "use_tornadolog": False,
-    "root_level": 'INFO',
-    # 日志根目录（如果某具体日志filename指定路径，则自动忽略此根目录配置）
-    "root_dir": 'logs/'
-}
-
-LOGGER = {
-    'tornado': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "tornado.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
+# 简化tornado日志功能配置,上一版本过于囧长
+LOGGING_DIR = 'logs/'
+LOGGING = (
+    {
+        'name': 'tornado',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'tornado.log'
     },
-    'torngas.tracelog': {
-        "OPEN": True,
-        "LEVEL": "ERROR",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_trace_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": False,
-                "backupCount": 20,
-            }
-        ]
+    {
+        'name': 'torngas.tracelog',
+        'level': 'ERROR',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'formatter': '%(message)s',
+        'filename': 'torngas_trace_log.log'
     },
-    'torngas.accesslog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "FORMATTER": '%(message)s',
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_access_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": False,
-                "backupCount": 20,
-            }
-        ]
+    {
+        'name': 'torngas.accesslog',
+        'level': 'INFO',
+        'log_to_stderr': True,
+        'when': 'midnight',
+        'interval': 1,
+        'formatter': '%(message)s',
+        'filename': 'torngas_access_log.log'
     },
-    'torngas.infolog': {
-        "OPEN": True,
-        "LEVEL": "INFO",
-        "HANDLERS": [
-            {
-                "module": "torngas.logger.UsePortRotatingFileHandler",
-                "filename": "torngas_info_log.log",
-                "when": "midnight",
-                "encoding": "utf-8",
-                "delay": True,
-                "backupCount": 10,
-            }
-        ]
+    {
+        'name': 'torngas.infolog',
+        'level': 'INFO',
+        'log_to_stderr': False,
+        'when': 'midnight',
+        'interval': 1,
+        'filename': 'torngas_info_log.log'
     },
-}
+)
 
 IPV4_ONLY = True
 
@@ -235,9 +206,10 @@ DATABASE_CONNECTION = {
     }
 }
 
-# 每个定时对db进行一次ping操作，防止mysql gone away
+# 每个定时对db进行一次ping操作，防止mysql gone away,设置0为关闭
 PING_DB = 300  # (s秒)
-
+# 每次取出ping多少个连接
+PING_CONN_COUNT = 5
 # sqlalchemy配置，列出部分，可自行根据sqlalchemy文档增加配置项
 # 该配置项对所有连接全局共享
 SQLALCHEMY_CONFIGURATION = {
@@ -250,7 +222,7 @@ SQLALCHEMY_CONFIGURATION = {
     'sqlalchemy.echo_pool': False,
     'sqlalchemy.pool_timeout': 5,
     'sqlalchemy.encoding': 'utf-8',
-    'sqlalchemy.pool_size': 100,
+    'sqlalchemy.pool_size': 5,
     'sqlalchemy.pool_recycle': 3600,
     'sqlalchemy.poolclass': 'QueuePool'  # 手动指定连接池类
 }

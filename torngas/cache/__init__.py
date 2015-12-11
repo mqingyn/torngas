@@ -80,6 +80,12 @@ class CacheHandler(object):
         cache = _create_cache(alias)
         if hasattr(cache, 'clear_expires'):
             PeriodicCallback(cache.clear_expires, 1000 * 1800).start()
+
+        if hasattr(cache, 'ping'):
+            op = cache.options.get('PING_INTERVAL', None)
+            if op:
+                PeriodicCallback(cache.ping, 1000 * int(op)).start()
+
         self._caches.caches[alias] = cache
         return cache
 

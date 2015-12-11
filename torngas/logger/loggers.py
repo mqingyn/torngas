@@ -1,94 +1,73 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
+import os, time
+from glob import glob
 import logging
-import warnings
 import logging.handlers
-from tornado.log import LogFormatter
-from ..settings_manager import settings
-from tornado.util import import_object
-from tornado.options import options
-from torngas.global_settings import LOGGER
-DEFAULT_FORMAT = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s'
 
 
-
-class CustomRotatingFileHandler(logging.handlers.TimedRotatingFileHandler):
+class ProcessLogTimedFileHandler(logging.handlers.TimedRotatingFileHandler):
     def __init__(self, filename, when='h', interval=1, backupCount=20, encoding=None, delay=False, utc=False):
-        dir_name, file_name = os.path.split(filename)
-        if not dir_name:
-            root_dir = settings.LOGGER_CONFIG['root_dir']
-            filename = os.path.join(root_dir, file_name)
-
-        super(CustomRotatingFileHandler, self).__init__(filename, when, interval, backupCount, encoding, delay,
-                                                        utc)
-
-
-class UsePortRotatingFileHandler(CustomRotatingFileHandler):
-    def __init__(self, filename, when='h', interval=1, backupCount=20, encoding=None, delay=False, utc=False):
-        try:
-            if options.port:
-                filename += '.%s' % options.port
-        except:
-            pass
-        super(UsePortRotatingFileHandler, self).__init__(filename, when, interval, backupCount, encoding, delay,
+        self.delay = delay
+        super(ProcessLogTimedFileHandler, self).__init__(filename, when, interval, backupCount, encoding, delay,
                                                          utc)
 
-
-class LoggerLoader(object):
-    loggers = {}
-
-    @classmethod
-    def load_logger(cls):
-        log_config = LOGGER
-        if 'LOGGER' in settings:
-            log_config.update(settings.LOGGER)
-
-        for k, v in log_config.items():
-            is_open = v.get('OPEN')
-            logger = logging.getLogger(k)
-
-            if is_open:
-                cls.load_handler(logger, v)
-                if not settings.DEBUG:
-                    logger.propagate = 0
-                else:
-                    if options.log_to_stderr is False:
-                        logger.propagate = 0
-                    else:
-                        logger.propagate = 1
-                cls.loggers[k] = logger
-            else:
-                logger.disabled = True
-                warnings.warn("logger %s is not open or not exist in logging config settings." % k)
-
-
-    @classmethod
-    def get_logger(cls, name):
-        if name in cls.loggers:
-            return cls.loggers[name]
+    def doRollover(self):
+        """
+        do a rollover; in this case, a date/time stamp is appended to the filename
+        when the rollover happens.  However, you want the file to be named for the
+        start of the interval, not the current time.  If there is a backup count,
+        then we have to get a list of matching filenames, sort them and remove
+        the one with the oldest suffix.
+        """
+        if self.stream:
+            self.stream.close()
+            self.stream = None
+        # get the time that this sequence started at and make it a TimeTuple
+        currentTime = int(time.time())
+        dstNow = time.localtime(currentTime)[-1]
+        t = self.rolloverAt - self.interval
+        if self.utc:
+            timeTuple = time.gmtime(t)
         else:
-            return logging.getLogger(name)
+            timeTuple = time.localtime(t)
+            dstThen = timeTuple[-1]
+            if dstNow != dstThen:
+                if dstNow:
+                    addend = 3600
+                else:
+                    addend = -3600
+                timeTuple = time.localtime(t + addend)
+        dfn = self.baseFilename + "." + time.strftime(self.suffix, timeTuple)
+        if os.path.exists(dfn):
+            os.remove(dfn)
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        # 分割文件名加上进程号，保证多进程分割文件不会出问题
+        # ==================================================
+        try:
+            if (not glob(dfn + ".*")) and os.path.exists(self.baseFilename):
+                os.rename(self.baseFilename, dfn + ".%d" % os.getpid())
+        except OSError:
+            pass
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
-    @classmethod
-    def load_handler(cls, logger, log_conf):
-        global DEFAULT_FORMAT
-        if settings.DEBUG:
-            DEFAULT_FORMAT = LogFormatter.DEFAULT_FORMAT
-
-        for handl in log_conf['HANDLERS']:
-            module = handl.pop("module", None)
-            level = handl.pop("level", None)
-
-            if module:
-                handler_module = import_object(module)
-                handler = handler_module(**handl)
-                log_formatter = LogFormatter(fmt=log_conf.get("FORMATTER", DEFAULT_FORMAT),
-                                             color=settings.DEBUG)
-                handler.setFormatter(log_formatter)
-                if level:
-                    handler.setLevel(level)
-                logger.addHandler(handler)
-                logger.setLevel(log_conf.get("LEVEL", "INFO"))
+        # Issue 18940: A file may not have been created if delay is True.
+        if self.backupCount > 0:
+            for s in self.getFilesToDelete():
+                os.remove(s)
+        if not self.delay:
+            self.stream = self._open()
+        newRolloverAt = self.computeRollover(currentTime)
+        while newRolloverAt <= currentTime:
+            newRolloverAt = newRolloverAt + self.interval
+        # If DST changes and midnight or weekly rollover, adjust for this.
+        if (self.when == 'MIDNIGHT' or self.when.startswith('W')) and not self.utc:
+            dstAtRollover = time.localtime(newRolloverAt)[-1]
+            if dstNow != dstAtRollover:
+                if not dstNow:  # DST kicks in before next rollover, so we need to deduct an hour
+                    addend = -3600
+                else:  # DST bows out before next rollover, so we need to add an hour
+                    addend = 3600
+                newRolloverAt += addend
+        self.rolloverAt = newRolloverAt
 

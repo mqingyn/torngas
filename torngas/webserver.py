@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import warnings
-import sys
+import logging
+import sys, os
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
-from tornado.options import define, options, parse_command_line
+from tornado.options import options, parse_command_line, add_parse_callback, OptionParser
+from tornado.log import define_logging_options, LogFormatter
 from tornado.util import import_object
 from exception import ConfigError, ArgumentError, UrlError
 from application import Application
 from settings_manager import settings
-from logger import SysLogger
+from logger import enable_pretty_logging, ProcessLogTimedFileHandler
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -23,7 +25,6 @@ class Server(object):
         self.application = None
         self.httpserver = None
         self.ioloop = ioloop
-        self.is_parselogger = False
 
     def _patch_httpserver(self):
         """
@@ -41,7 +42,6 @@ class Server(object):
                 super(TorngasHTTPServer, self).__init__(request_callback,
                                                         xheaders=xheaders,
                                                         **kwargs)
-
 
         httpserver.HTTPServer = TorngasHTTPServer
         sys.modules["tornado.httpserver"] = httpserver
@@ -140,9 +140,6 @@ class Server(object):
             self.load_httpserver(sockets, **kwargs)
 
     def start(self):
-        if not self.is_parselogger:
-            self.parse_logger()
-
         self.print_settings_info()
 
         if not self.ioloop:
@@ -152,43 +149,87 @@ class Server(object):
 
     def print_settings_info(self):
         if settings.DEBUG:
-            print 'tornado version: %s' % tornado.version
-            print 'load middleware:'
-            for middl in settings.MIDDLEWARE_CLASSES:
-                print ' -', str(middl)
-            print 'locale support: %s' % settings.TRANSLATIONS
-            print 'load apps:'
+            print('tornado version: %s' % tornado.version)
+            print('locale support: %s' % settings.TRANSLATIONS)
+            print('load apps:')
             for app in settings.INSTALLED_APPS:
-                print ' -', str(app)
-            print 'IPV4_Only: %s' % settings.IPV4_ONLY
-            print 'template engine: %s' % settings.TEMPLATE_CONFIG.template_engine
-            print 'server started. development server at http://%s:%s/' % (options.address, options.port)
+                print(' - %s' % str(app))
+            print('template engine: %s' % (settings.TEMPLATE_CONFIG.template_engine or 'default'))
+            print('server started. development server at http://%s:%s/' % (options.address, options.port))
 
-    def parse_command(self, args=None, final=True):
+    def parse_command(self, args=None, final=False):
         """
         解析命令行参数，解析logger配置
         :return:
         """
         self.define()
+        add_parse_callback(self.parse_logger_callback)
         parse_command_line(args, final)
-        self.parse_logger()
+        options.run_parse_callbacks()
 
-    def define(self):
+    def parse_logger_callback(self):
+        if options.disable_log:
+            options.logging = None
+        if options.log_file_prefix and options.log_port_prefix:
+            options.log_file_prefix += ".%s" % options.port
+        if options.log_patch:
+            logging.handlers.TimedRotatingFileHandler = ProcessLogTimedFileHandler
+        tornado_logger = logging.getLogger('tornado')
+        enable_pretty_logging(logger=tornado_logger)
+        logdir = options.logging_dir or settings.LOGGING_DIR
+        for log in settings.LOGGING:
+            opt = OptionParser()
+            define_logging_options(opt)
+            self.define(opt)
+            opt.log_rotate_when = log.get('when', 'midnight')
+            opt.log_to_stderr = log.get('log_to_stderr', False)
+            opt.logging = log.get('level', 'INFO')
+            opt.log_file_prefix = os.path.join(logdir, log['filename'])
+            if log.get('backups'):
+                opt.log_file_num_backups = log.get('backups')
+            if opt.log_port_prefix:
+                opt.log_file_prefix += ".%s" % options.port
+            opt.log_rotate_interval = log.get('interval', 1)
+            opt.log_rotate_mode = 'time'
+            logger = logging.getLogger(log['name'])
+            if not settings.DEBUG:
+                logger.propagate = 0
+            else:
+                if not opt.log_to_stderr:
+                    logger.propagate = 0
+                else:
+                    logger.propagate = 1
+            enable_pretty_logging(options=opt, logger=logger)
+            map(lambda h: h.setFormatter(LogFormatter(fmt=log.get("formatter", LogFormatter.DEFAULT_FORMAT),
+                                                      color=settings.DEBUG)), logger.handlers)
+
+    def define(self, options=options):
         """
         定义命令行参数,你可以自定义很多自己的命令行参数，或重写此方法覆盖默认参数
         :return:
         """
-        define("port", default=8000, help="run server on it", type=int)
-        define("settings", help="setting module name", type=str)
-        define("address", default='0.0.0.0', help='listen host,default:0.0.0.0', type=str)
+        try:
+            # 增加timerotating日志配置
+            options.define("log_rotate_when", type=str, default='midnight',
+                           help=("specify the type of TimedRotatingFileHandler interval "
+                                 "other options:('S', 'M', 'H', 'D', 'W0'-'W6')"))
+            options.define("log_rotate_interval", type=int, default=1,
+                           help="The interval value of timed rotating")
 
-    def parse_logger(self):
-        """
-        加载logger配置，如果使用gunicorn，你需要手动调用加载
-        :return:
-        """
-        SysLogger.parse_logger()
-        self.is_parselogger = True
+            options.define("log_rotate_mode", type=str, default='size',
+                           help="The mode of rotating files(time or size)")
+        except:
+            pass
+        options.define("port", default=8000, help="run server on it", type=int)
+        options.define("settings", default='', help="setting module name", type=str)
+        options.define("address", default='0.0.0.0', help='listen host,default:0.0.0.0', type=str)
+        options.define("log_patch", default=True,
+                       help='Use ProcessTimedRotatingFileHandler instead of the default TimedRotatingFileHandler.',
+                       type=bool)
+
+        options.define("log_port_prefix", default=None, help='add port to log file prefix.', type=bool)
+        options.define("logging_dir", default='', help='custom log dir.')
+        options.define("disable_log", default=True, help='disable tornado log function.')
 
 
 def run(application=None, sockets=None, **kwargs):

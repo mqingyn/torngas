@@ -1,10 +1,7 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 import logging
-import tornado.log
 from functools import partial
-from ..settings_manager import settings
-
 ACCESS_LOGNAME = 'torngas.accesslog'
 TRACE_LOGNAME = 'torngas.tracelog'
 INFO_LOGNAME = 'torngas.infolog'
@@ -12,28 +9,9 @@ INFO_LOGNAME = 'torngas.infolog'
 
 class _SysLogger(object):
     def __init__(self):
-        self.root_logger = logging.getLogger('tornado')
         self.access_logger = logging.getLogger(ACCESS_LOGNAME)
         self.trace_logger = logging.getLogger(TRACE_LOGNAME)
         self.info_logger = logging.getLogger(INFO_LOGNAME)
-
-    def parse_logger(self):
-        self.root_logger.setLevel(settings.LOGGER_CONFIG['root_level'])
-
-        if not settings.LOGGER_CONFIG['use_tornadolog']:
-            from loggers import LoggerLoader
-
-            LoggerLoader.load_logger()
-            self.access_logger = LoggerLoader.get_logger(ACCESS_LOGNAME)
-            self.trace_logger = LoggerLoader.get_logger(TRACE_LOGNAME)
-            self.info_logger = LoggerLoader.get_logger(INFO_LOGNAME)
-        else:
-            import tornado.log
-
-            self.access_logger = tornado.log.access_log
-            self.trace_logger = tornado.log.app_log
-            self.info_logger = tornado.log.gen_log
-
 
     @property
     def debug(self):
@@ -72,4 +50,4 @@ class _SysLogger(object):
         return partial(self.trace_logger.exception)
 
 
-SysLogger = _SysLogger()
+SysLogger = syslogger = _SysLogger()

@@ -2,11 +2,14 @@
 
 import time
 import pickle
-
+import warnings
+from base import CacheKeyWarning
 from torngas.cache.backends.base import BaseCache, DEFAULT_TIMEOUT
 from torngas.utils import string_types
 from torngas.utils import safestr
 from torngas.utils import cached_property
+# Memcached does not accept keys longer than this.
+MEMCACHE_MAX_KEY_LENGTH = 250
 
 
 class BaseMemcachedCache(BaseCache):
@@ -25,6 +28,23 @@ class BaseMemcachedCache(BaseCache):
 
         self._lib = library
         self._options = params.get('OPTIONS', None)
+
+    def validate_key(self, key):
+        """
+        Warn about keys that would not be portable to the memcached
+        backend. This encourages (but does not force) writing backend-portable
+        cache code.
+
+        """
+        if len(key) > MEMCACHE_MAX_KEY_LENGTH:
+            warnings.warn('Cache key will cause errors if used with memcached: '
+                          '%s (longer than %s)' % (key, MEMCACHE_MAX_KEY_LENGTH),
+                          CacheKeyWarning)
+        for char in key:
+            if ord(char) < 33 or ord(char) == 127:
+                warnings.warn('Cache key contains characters that will cause '
+                              'errors if used with memcached: %r' % key,
+                              CacheKeyWarning)
 
     @property
     def _cache(self):

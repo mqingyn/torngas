@@ -4,7 +4,6 @@ torngas cache backend base,from django
 from __future__ import unicode_literals
 
 import time
-import warnings
 from torngas.exception import ConfigError
 from tornado.util import import_object
 
@@ -21,8 +20,7 @@ class CacheKeyWarning(RuntimeWarning):
 # the default timeout
 DEFAULT_TIMEOUT = object()
 
-# Memcached does not accept keys longer than this.
-MEMCACHE_MAX_KEY_LENGTH = 250
+
 
 
 def default_key_func(key, key_prefix, version):
@@ -214,21 +212,7 @@ class CacheMixin(object):
         raise NotImplementedError('subclasses of BaseCache must provide a clear() method')
 
     def validate_key(self, key):
-        """
-        Warn about keys that would not be portable to the memcached
-        backend. This encourages (but does not force) writing backend-portable
-        cache code.
-
-        """
-        if len(key) > MEMCACHE_MAX_KEY_LENGTH:
-            warnings.warn('Cache key will cause errors if used with memcached: '
-                          '%s (longer than %s)' % (key, MEMCACHE_MAX_KEY_LENGTH),
-                          CacheKeyWarning)
-        for char in key:
-            if ord(char) < 33 or ord(char) == 127:
-                warnings.warn('Cache key contains characters that will cause '
-                              'errors if used with memcached: %r' % key,
-                              CacheKeyWarning)
+        pass
 
     def incr_version(self, key, delta=1, version=None):
         """Adds delta to the cache version for the supplied key. Returns the
