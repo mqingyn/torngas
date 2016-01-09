@@ -216,7 +216,7 @@ class Server(object):
             options.define("log_rotate_interval", type=int, default=1,
                            help="The interval value of timed rotating")
 
-            options.define("log_rotate_mode", type=str, default='size',
+            options.define("log_rotate_mode", type=str, default='time',
                            help="The mode of rotating files(time or size)")
         except:
             pass

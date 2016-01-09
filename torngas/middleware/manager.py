@@ -47,47 +47,92 @@ from copy import copy
 
 try:
     from tornado.concurrent import is_future
+    from collections import deque
 except ImportError:
     from ..utils import is_future
 
-_INIT_LIST, _CALL_LIST, _REQUEST_LIST, _RENDER_LIST = [], [], [], []
-_RESPONSE_LIST, _ENDCALL_LIST, _EXCEPTION_LIST, = [], [], []
-_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC = 1, 2, 3, 4, 5, 6, 7
-_TYPES = (_TINIT, _TCALL, _TREQ, _TREN, _TRES, _TEND, _TEXC)
+
+class RequestWrapper(object):
+    def __init__(self, request):
+        request.wrapper = self
+        self.request = request
+
+    process_call = property(lambda self: self.request.call_midds)
+    process_request = property(lambda self: self.request.request_midds)
+    process_render = property(lambda self: self.request.render_midds)
+    process_response = property(lambda self: self.request.response_midds)
+    process_endcall = property(lambda self: self.request.end_midds)
+    process_exception = property(lambda self: self.request.exc_midds)
+
+    @process_call.setter
+    def process_call(self, call_list):
+        self.request.call_midds = copy(call_list)
+
+    @process_request.setter
+    def process_request(self, call_list):
+        self.request.request_midds = copy(call_list)
+
+    @process_render.setter
+    def process_render(self, call_list):
+        self.request.render_midds = copy(call_list)
+
+    @process_response.setter
+    def process_response(self, call_list):
+        self.request.response_midds = copy(call_list)
+
+    @process_endcall.setter
+    def process_endcall(self, call_list):
+        self.request.end_midds = copy(call_list)
+
+    @process_exception.setter
+    def process_exception(self, call_list):
+        self.request.exc_midds = copy(call_list)
+
+    def clear(self):
+        self.request.call_midds.clear()
+        self.request.request_midds.clear()
+        self.request.render_midds.clear()
+        self.request.response_midds.clear()
+        self.request.end_midds.clear()
+        self.request.wrapper = None
 
 
 class Manager(object):
-    _call_mapper = {
-        _TCALL: ('call_midds', 'process_call',),
-        _TREQ: ('request_midds', 'process_request',),
-        _TREN: ('render_midds', 'process_render',),
-        _TRES: ('response_midds', 'process_response',),
-        _TEND: ('end_midds', 'process_endcall',),
-        _TEXC: ('exc_midds', 'process_exception',)
-    }
+    def __init__(self):
+        self._INIT_LIST = deque()
+        self._CALL_LIST = deque()
+        self._REQUEST_LIST = deque()
+        self._RENDER_LIST = deque()
+        self._RESPONSE_LIST = deque()
+        self._ENDCALL_LIST = deque()
+        self._EXCEPTION_LIST = deque()
 
     def register(self, name):
         if isinstance(name, (str, unicode,)):
             name = import_object(name)
-        name = name()
+        obj = name()
 
-        if hasattr(name, 'process_init'):
-            _INIT_LIST.append(name)
-        if hasattr(name, 'process_call'):
-            _CALL_LIST.insert(0, name)
-        if hasattr(name, 'process_request'):
-            _REQUEST_LIST.insert(0, name)
-        if hasattr(name, 'process_render'):
-            _RENDER_LIST.append(name)
+        if self._ismd(obj, 'process_init'):
+            self._INIT_LIST.append(obj.process_init)
+        if self._ismd(obj, 'process_call'):
+            self._CALL_LIST.appendleft(obj.process_call)
+        if self._ismd(obj, 'process_request'):
+            self._REQUEST_LIST.appendleft(obj.process_request)
+        if self._ismd(obj, 'process_render'):
+            self._RENDER_LIST.append(obj.process_render)
 
-        if hasattr(name, 'process_response'):
-            _RESPONSE_LIST.append(name)
+        if self._ismd(obj, 'process_response'):
+            self._RESPONSE_LIST.append(obj.process_response)
 
-        if hasattr(name, 'process_endcall'):
-            _ENDCALL_LIST.append(name)
+        if self._ismd(obj, 'process_endcall'):
+            self._ENDCALL_LIST.append(obj.process_endcall)
 
-        if hasattr(name, 'process_exception'):
-            _EXCEPTION_LIST.insert(0, name)
+        if self._ismd(obj, 'process_exception'):
+            self._EXCEPTION_LIST.appendleft(obj.process_exception)
+
+    def _ismd(self, obj, method_name):
+        m = getattr(obj, method_name, None)
+        return m and callable(m)
 
     def register_all(self, names):
         if not names:
@@ -96,15 +141,14 @@ class Manager(object):
         for midd_class in names:
             self.register(midd_class)
 
-    copylist = staticmethod(lambda lb: copy(lb) if lb else [])
-
     def set_request(self, request):
-        request.call_midds = self.copylist(_CALL_LIST)
-        request.request_midds = self.copylist(_REQUEST_LIST)
-        request.render_midds = self.copylist(_RENDER_LIST)
-        request.response_midds = self.copylist(_RESPONSE_LIST)
-        request.end_midds = self.copylist(_ENDCALL_LIST)
-        request.exc_midds = self.copylist(_EXCEPTION_LIST)
+        r = RequestWrapper(request)
+        r.process_call = self._CALL_LIST
+        r.process_request = self._REQUEST_LIST
+        r.process_render = self._RENDER_LIST
+        r.process_response = self._RESPONSE_LIST
+        r.process_endcall = self._ENDCALL_LIST
+        r.process_exception = self._EXCEPTION_LIST
 
     def _get_func(self, request, m, func):
         try:
@@ -118,70 +162,59 @@ class Manager(object):
         except Exception, ex:
             gen_log.error(ex)
 
-    def execute_next(self, request, types, process_object, *args, **kwargs):
-        midd = self._call_mapper.get(types, None)
-
-        if midd and getattr(request, midd[0], None):
-            while 1:
-                method = self._get_func(request, midd[0], midd[1])
-
-                if method and callable(method):
-                    clear = partial(self.clear_all, request)
-                    result = method(process_object, clear, *args, **kwargs)
-                    if result:
-                        break
-                else:
+    def execute_next(self, request, call_list, process_object, *args, **kwargs):
+        while call_list and len(call_list):
+            method = call_list.pop()
+            if method and callable(method):
+                clear = partial(self.clear_all, request)
+                result = method(process_object, clear, *args, **kwargs)
+                if result:
                     break
+            else:
+                break
 
     @gen.coroutine
-    def execute_next_for_async(self, request, types, process_object, *args, **kwargs):
-        midd = self._call_mapper.get(types, None)
+    def execute_next_for_async(self, request, call_list, process_object, *args, **kwargs):
 
-        if midd:
-            while 1:
-                method = self._get_func(request, midd[0], midd[1])
-
-                if method and callable(method):
-                    clear = partial(self.clear_all, request)
-                    result = method(process_object, clear, *args, **kwargs)
-                    if is_future(result):
-                        result = yield result
-                    if result:
-                        break
-                else:
+        while call_list and len(call_list):
+            method = call_list.pop()
+            if method and callable(method):
+                clear = partial(self.clear_all, request)
+                result = method(process_object, clear, *args, **kwargs)
+                if is_future(result):
+                    result = yield result
+                if result:
                     break
+            else:
+                break
 
     def clear_all(self, request):
-        request.call_midds = []
-        request.request_midds = []
-        request.render_midds = []
-        request.response_midds = []
-        request.end_midds = []
+        request.wrapper.clear()
 
     def run_init(self, application):
-        for func in _INIT_LIST:
-            if callable(func.process_init):
-                func.process_init(application)
+        for func in self._INIT_LIST:
+            if callable(func):
+                func(application)
 
     def run_call(self, request):
-        return self.execute_next(request, _TCALL, request)
+        return self.execute_next(request, request.wrapper.process_call, request)
 
     def run_request(self, handler):
         if handler.request.request_midds:
-            return self.execute_next_for_async(handler.request, _TREQ, handler)
+            return self.execute_next_for_async(handler.request, handler.request.wrapper.process_request, handler)
 
     def run_render(self, handler, template=None, **kwargs):
-        return self.execute_next(handler.request, _TREN, handler, template, **kwargs)
+        return self.execute_next(handler.request, handler.request.wrapper.process_render, handler, template, **kwargs)
 
     def run_response(self, handler, chunk):
-        return self.execute_next(handler.request, _TRES, handler, chunk)
+        return self.execute_next(handler.request, handler.request.wrapper.process_response, handler, chunk)
 
     def run_endcall(self, handler):
-        return self.execute_next(handler.request, _TEND, handler)
+        return self.execute_next(handler.request, handler.request.wrapper.process_endcall, handler)
 
     def run_exception(self, handler, typ, value, tb):
-        if _EXCEPTION_LIST:
-            self.execute_next(handler.request, _TEXC, handler, typ, value, tb)
+        if self._EXCEPTION_LIST:
+            self.execute_next(handler.request, handler.request.wrapper.process_exception, handler, typ, value, tb)
             return True
 
     def catch_middleware_exc(self, middle_result):
