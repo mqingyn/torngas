@@ -29,6 +29,10 @@ class UrlError(BaseError):
     """route write error"""
 
 
+class NotCallableError(BaseError):
+    """callable error"""
+
+
 class Http404(HTTPError):
     def __init__(self, log_message='not found', *args, **kwargs):
         super(Http404, self).__init__(404, log_message, *args, **kwargs)
@@ -52,4 +56,3 @@ class HttpBadRequestError(HTTPError):
 class Http500(HTTPError):
     def __init__(self, log_message='server error', *args, **kwargs):
         super(Http500, self).__init__(500, log_message, *args, **kwargs)
-

@@ -127,7 +127,7 @@ LOGGING = (
     {
         'name': 'torngas.accesslog',
         'level': 'INFO',
-        'log_to_stderr': True,
+        'log_to_stderr': False,
         'when': 'midnight',
         'interval': 1,
         'formatter': '%(message)s',

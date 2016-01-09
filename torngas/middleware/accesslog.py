@@ -12,9 +12,9 @@ access_log = logging.getLogger('torngas.accesslog')
 
 class AccessLogMiddleware(object):
     def process_init(self, application):
-        application.settings['log_function'] = lambda _: None
+        application.settings['log_function'] = self.log
 
-    def process_endcall(self, handler, clear):
+    def log(self, handler):
         message = '%s - - [%s] "%s %s %s" %s %s "%s" "%s" %dms' % (
             handler.request.remote_ip,
             datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
