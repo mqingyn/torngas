@@ -3,7 +3,7 @@ A simple app web framework based on tornado.
 
 [![Build Status](https://travis-ci.org/mqingyn/torngas.svg?branch=master)](https://travis-ci.org/mqingyn/torngas)
 
-###version:1.8.0
+###version:1.8.1
 
 Torngas 是基于[Tornado](https://github.com/tornadoweb/tornado)的web mvc框架。Torngas 大量参考和借鉴了Django的设计模式，形成一套基于tornado的Django like应用层开发框架。tornado 建议使用4.0以上版本,注意：torngas不支持基于WSGI的应用。
 
