@@ -182,7 +182,7 @@ class Server(object):
             define_logging_options(opt)
             self.define(opt)
             opt.log_rotate_when = log.get('when', 'midnight')
-            opt.log_to_stderr = log.get('log_to_stderr', False)
+            opt.log_to_stderr = log.get('log_to_stderr', False) if options.log_to_stderr is None else options.log_to_stderr
             opt.logging = log.get('level', 'INFO')
             opt.log_file_prefix = os.path.join(logdir, log['filename'])
             if log.get('backups'):
@@ -192,13 +192,7 @@ class Server(object):
             opt.log_rotate_interval = log.get('interval', 1)
             opt.log_rotate_mode = 'time'
             logger = logging.getLogger(log['name'])
-            if not settings.DEBUG:
-                logger.propagate = 0
-            else:
-                if not opt.log_to_stderr:
-                    logger.propagate = 0
-                else:
-                    logger.propagate = 1
+            logger.propagate = 0
             enable_pretty_logging(options=opt, logger=logger)
             map(lambda h: h.setFormatter(LogFormatter(fmt=log.get("formatter", LogFormatter.DEFAULT_FORMAT),
                                                       color=settings.DEBUG)), logger.handlers)
