@@ -240,8 +240,7 @@ class Model(MetaBaseModel):
     def session(cls):
         slave = Connector.get_session(cls.__connection_name__)['slave']
 
-        slave.using_master = lambda: \
-            Connector.get_session(cls.__connection_name__)['master']
+        slave.using_master = Connector.get_session(cls.__connection_name__)['master']
         return slave
 
 
