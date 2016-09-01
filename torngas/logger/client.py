@@ -13,41 +13,16 @@ class _SysLogger(object):
         self.trace_logger = logging.getLogger(TRACE_LOGNAME)
         self.info_logger = logging.getLogger(INFO_LOGNAME)
 
-    @property
-    def debug(self):
-        """
-        logging debug message
-        """
-
-        return partial(self.info_logger.debug)
-
-    @property
-    def info(self):
-        """
-        logging info message
-        """
-        return partial(self.info_logger.info)
-
-    @property
-    def warning(self):
-        """
-        logging warn message
-        """
-        return partial(self.trace_logger.warning)
-
-    @property
-    def error(self):
-        """
-        logging error message
-        """
-        return partial(self.trace_logger.error)
-
-    @property
-    def exception(self):
-        """
-        logging exception message
-        """
-        return partial(self.trace_logger.exception)
+    # debug logger
+    debug = info_logger.debug
+    # info logger
+    info = info_logger.info
+    # warning logger
+    warning = info_logger.warning
+    # error logger
+    error = general_logger.error
+    # exception logger
+    exception = general_logger.exception
 
 
 SysLogger = syslogger = _SysLogger()
